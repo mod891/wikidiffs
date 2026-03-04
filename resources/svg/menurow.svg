@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="25.033325mm"
+   height="30.522923mm"
+   viewBox="0 0 25.033325 30.522923"
+   version="1.1"
+   id="svg1"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <linearGradient
+       id="linearGradient16">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop15" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop16" />
+    </linearGradient>
+    <radialGradient
+       xlink:href="#linearGradient16"
+       id="radialGradient12-1-5"
+       cx="30.999374"
+       cy="16.334999"
+       fx="30.999374"
+       fy="16.334999"
+       r="15.167917"
+       gradientTransform="matrix(0.8229552,0,0,0.11898112,4.8569872,-15.373352)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       xlink:href="#linearGradient16"
+       id="radialGradient12-7-4"
+       cx="30.999374"
+       cy="16.334999"
+       fx="30.999374"
+       fy="16.334999"
+       r="15.167917"
+       gradientTransform="matrix(0.8229552,0,0,0.11898112,-0.15104081,-22.259309)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       xlink:href="#linearGradient16"
+       id="radialGradient12-0-7"
+       cx="30.999374"
+       cy="16.334999"
+       fx="30.999374"
+       fy="16.334999"
+       r="15.167917"
+       gradientTransform="matrix(0.8229552,0,0,0.11898112,10.082752,-19.610865)"
+       gradientUnits="userSpaceOnUse" />
+    <radialGradient
+       xlink:href="#linearGradient16"
+       id="radialGradient12-4"
+       cx="30.999374"
+       cy="16.334999"
+       fx="30.999374"
+       fy="16.334999"
+       r="15.167917"
+       gradientTransform="matrix(0.8229552,0,0,0.11898112,0.04561219,-35.521342)"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <g
+     id="layer1"
+     transform="translate(-0.24000197,-0.06520082)">
+    <rect
+       style="fill:#d3d7d9;fill-opacity:1;stroke:url(#radialGradient12-4);stroke-width:0.24014"
+       id="rect5-86"
+       width="24.747292"
+       height="3.3445473"
+       x="0.35113186"
+       y="0.23930401" />
+    <rect
+       style="fill:#d3d7d9;fill-opacity:1;stroke:url(#radialGradient12-0-7);stroke-width:0.24014"
+       id="rect5-6-8"
+       width="24.747292"
+       height="3.3445473"
+       x="0.30603832"
+       y="7.230988" />
+    <rect
+       style="fill:#d3d7d9;fill-opacity:1;stroke:url(#radialGradient12-1-5);stroke-width:0.24014"
+       id="rect5-0-8"
+       width="24.747292"
+       height="3.3445473"
+       x="0.42691463"
+       y="21.687946" />
+    <rect
+       style="fill:#d3d7d9;fill-opacity:1;stroke:url(#radialGradient12-7-4);stroke-width:0.24014"
+       id="rect5-8-4"
+       width="24.747292"
+       height="3.3445473"
+       x="0.46000332"
+       y="14.801991" />
+  </g>
+</svg>

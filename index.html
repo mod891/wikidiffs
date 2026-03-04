@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/bg-colors.css">
+    <link rel="stylesheet" href="css/utils.css">
+
+    <title>index</title>
+    
+</head>
+<body>
+    <div class="container">
+        <!-- hacer llamada js async html fragment con su css y js -->
+        <nav>
+            <div style="">
+                <img id="menu-icon" class="icon" src="resources/svg/vrt.svg" alt="" srcset="">
+            </div>
+            <div>
+            <ul id="menu" class="bg-red">
+                
+                <li class="">tab1</li>
+                <li class="">tab2</li>
+                <li class="">tab3</li>
+            </ul>
+            </div>
+        </nav>
+
+        <div id="content">
+            <div class="" style="height: 800px; background-color: gray;">
+                    eee
+            </div>
+        </div>
+
+        <div id="footer">
+            <footer>
+              esto es el footer  
+            </footer>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+        var img = document.getElementById('menu-icon')
+        var menu = document.getElementById('menu')
+        img.addEventListener('click', () => {
+            img.classList.toggle('rota') 
+            menu.classList.toggle('openmenu')
+    
+        })
+    </script>

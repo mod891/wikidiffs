@@ -1,0 +1,13 @@
+.diff-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+
+}
+
+
+/* desktop */
+@media (min-width: 768px) { 
+    .diff-layout {
+        grid-template-columns: 1fr;
+    }
+}

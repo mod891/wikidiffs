@@ -1,0 +1,27 @@
+:root {
+    --red: red;
+    --blue: rgb(54, 54, 255);
+    --green: green;
+    --yellow: yellow;
+    --black: black;
+    --purple: rgb(212, 1, 212);
+    --cyan: cyan;
+    --orange: orange;
+    --white: white;
+    --grey: grey;
+    --green2: rgb(2, 255, 2);
+    --gold: gold;
+}
+
+.bg-red { background-color: var(--red); }
+.bg-blue { background-color: var(--blue); }
+.bg-green { background-color: var(--green); }
+.bg-yellow { background-color: var(--yellow); }
+.bg-black { background-color: var(--black); }
+.bg-purple { background-color: var(--purple); }
+.bg-cyan { background-color: var(--cyan); }
+.bg-orange { background-color: var(--orange); }
+.bg-white { background-color: var(--white); }
+.bg-green2 { background-color: var(--green2); }
+.bg-grey { background-color: var(--grey); }
+.bg-gold { background-color: var(--gold); }
