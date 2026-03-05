@@ -1,49 +1,74 @@
-.container {
-    padding-left: 10%;
-    width: 80%;
-    height: 100%;
+body {
+    margin: 0;
+    padding: 0;
 }
-#menu {
-    display: flex; 
-    flex-direction: row;
+nav {
+    position: sticky;
+    top: 0;
 }
 ul {
     list-style: none; /* rm marker from li's */ 
-    background-color: red;
+    line-height: 2rem; /* para hover resize*/
 }
-
 li {
-    padding: 0px 0px 0px 0px;
+    padding: 1rem 1rem 1rem 1rem;
 }
 li:hover {
-    font-size: 20px;
+    font-size: 1.2rem;  
+}
+a {
+    text-decoration: none;
+}
+#menu {
+    display: flex; 
+    position: relative;
+    flex-direction: row;
+}
+.container {
+    padding-left: 10%;
+    width: 80%; 
+    /* width: 100%; */
+    height: 100%;
 }
 .icon {
     display:none;
 }
-/*
-menu mas ancho desktop, letras +grandes y otro color,
-al hacer hover
 
 /* mobile */
 @media (max-width: 430px) {
+    nav {
+        float:left;
+    }
+    li {
+        padding: 0rem 0rem 0.5rem 0rem; /* top right bottom left 12 3 6 9 */
+    }
+    li:hover {
+        font-size: 1rem; 
+    }
+    ul {
+        padding: 0rem 0rem 0rem 0rem;
+    }
+    #menu {
+        flex-direction: column;
+        position: relative;
+        top:0;
+        left:-6rem;
+        transition: left 1s ease;
+        /* padding-right: 1rem; */
+        float: left;
+    }   
+    .item {
+        background-color: red;
+        padding: 0rem 0.7rem 0rem 0.7rem;
+    }
     .container {
         padding-left: 0%;
         width: 100%;
         height: 100%;
     } 
-    #menu {
-        flex-direction: column;
-        position: relative;
-        left:-400px;
-        top:0;
-         width: fit-content; 
-        transition: left 1s ease;
-        padding-right: 1rem;
-        justify-content: right; 
-    }
+
     .openmenu {
-        left:0px !important;
+        left:0rem !important;
     }
     .icon {
         position: sticky;
@@ -53,21 +78,7 @@ al hacer hover
         height:40px;
         transition: transform 0.7s ease;            
     }
-    ul {
-        
-    }
-    
-    li {
-        padding: 0.5rem 0rem 0.5rem 0rem; /* top right bottom left 12 3 6 9 */
-    }
     .rota {
         transform: rotate(-90deg)
     }
 }
-
-/*
- margin: 0;
-    padding: 0;
-/* text-decoration: none;  ?? */  
- /*   align-items: center;  centrado vertical */
-    
