@@ -1,0 +1,13 @@
+header {
+    margin: 0.4rem 0rem 0.4rem 0.4rem;
+}
+body {
+    margin: 0;
+    padding: 0;
+}
+a { 
+    text-decoration: none; 
+}
+#content > div {
+    padding: 1rem;
+}

@@ -7,4 +7,10 @@
 .w1\/5 {
     width: 20% !important;
 }
-
+h1 {
+    margin:0 auto;
+}
+.hcenter {
+    display: flex;
+    justify-content: center;
+}
