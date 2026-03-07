@@ -1,0 +1,103 @@
+<style>
+.item {
+    padding: 1rem 1.5rem 1rem 1.5rem;
+    transition: transform 0.1s ease;            
+}
+.item:hover {
+    transform: scale(1.2);   
+}
+.menu-links {
+    display: flex; 
+    position: relative;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin: 0;
+    padding: 0;
+}
+.icon {
+    display:none;
+}
+/* mobile */
+@media (max-width: 430px) {
+    nav {
+        position: fixed;
+        top: 0;
+    }
+    .item {
+        padding: 0rem 0rem 0.5rem 0rem; 
+    }
+    .item:hover {
+        transform: none;
+    }
+    .menu-links {
+        flex-direction: column;      
+        transition: left 1s ease;
+        width:fit-content;
+        left:-200px;
+    }
+    .item:first-child {
+        margin-top: 0.4rem;
+    }  
+    .item {
+        background-color: red;
+        border-radius:5%;
+        margin: 0rem 0.9rem 0.9rem 0rem;
+        padding: 0rem 0.7rem 0.3rem 0.7rem;
+        text-align: center;
+        
+    }
+    .openmenu {
+        left:0px;
+    }
+    .icon {
+        margin: 0.5rem 0 0 0.5rem;
+        display:inline;
+        width:40px;
+        height:40px;
+        transition: transform 0.7s ease;           
+    }
+    .rota {
+        transform: rotate(-90deg)
+    }
+     /* #ISSUE1 class */
+    .display-none {
+        display: none;
+    }
+}
+</style>
+
+<div id="menu">            
+    <nav>
+        <div >
+            <img id="menu-icon" class="icon" src="resources/svg/vrt.svg" alt="" srcset="">
+        </div>
+        <div id="items" class="menu-links ">
+            <div class="item"><a href="/public/">Index</a></div>
+            <div class="item"><a href="/public/diffs.html">template1</a></div>
+            <div class="item"><a href="">tab3 asdfasd sadf</a></div>
+        </div>
+    </nav>
+</div>
+
+<script>
+        var img = document.getElementById('menu-icon')
+        var items = document.getElementById('items')
+        // #ISSUE1 : elements under menu overlapping area can't be clicked
+        // #SOL1 : change to display:none, break open animation
+        items.classList.add('display-none') // #ISSUE1
+
+        img.addEventListener('click', () => {
+            img.classList.toggle('rota')
+            items.classList.toggle('openmenu')
+// #ISSUE1 begin block
+            if (items.classList.contains('display-none')) 
+                items.classList.remove('display-none')                
+        })
+        items.addEventListener('transitionend',() => { 
+            console.log(items.classList)
+            if (!items.classList.contains('openmenu')) { 
+                items.classList.add('display-none')
+            }     
+        }) 
+// #ISSUE1 end block
+</script>

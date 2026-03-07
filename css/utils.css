@@ -14,3 +14,9 @@ h1 {
     display: flex;
     justify-content: center;
 }
+.pr1 {
+    padding-right: 1rem;
+}
+.mr05 {
+    margin-right: 0.5rem;
+}

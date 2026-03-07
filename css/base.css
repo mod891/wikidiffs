@@ -8,6 +8,23 @@ body {
 a { 
     text-decoration: none; 
 }
+#container {
+    padding-left: 10%;
+    width: 80%; 
+    height: 100%;
+}
 #content > div {
     padding: 1rem;
+}
+@media (max-width: 430px) {
+        #container {
+        position: relative;
+        padding-left: 0%;
+        width: 100%;
+        height: 100%;
+    }
+    #content > div {
+        padding: 0rem;
+    }
+     
 }
