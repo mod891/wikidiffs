@@ -40,11 +40,9 @@
     }  
     .item {
         background-color: red;
-        border-radius:5%;
         margin: 0rem 0.9rem 0.9rem 0rem;
         padding: 0rem 0.7rem 0.3rem 0.7rem;
         text-align: center;
-        
     }
     .openmenu {
         left:0px;
@@ -68,7 +66,7 @@
 
 <div id="menu">            
     <nav>
-        <div >
+        <div id="svgdiv" >
             <img id="menu-icon" class="icon" src="resources/svg/vrt.svg" alt="" srcset="">
         </div>
         <div id="items" class="menu-links ">
@@ -94,7 +92,6 @@
                 items.classList.remove('display-none')                
         })
         items.addEventListener('transitionend',() => { 
-            console.log(items.classList)
             if (!items.classList.contains('openmenu')) { 
                 items.classList.add('display-none')
             }     

@@ -1,5 +1,5 @@
 async function loadFragment(what) {
-    const fragments = [ 'menu','footer' ]
+    const fragments = [ 'menu','footer','diffs' ]
     if (fragments.includes(what)) { // coincidir con html id
         try {
             var request = await fetch(`/public/components/${what}.html`);
@@ -29,9 +29,10 @@ async function loadFragment(what) {
     }
 }
 
-loadFragment('menu')
-loadFragment('footer')
-
 function mockDiffs() {
     
 }
+
+loadFragment('menu');
+loadFragment('footer');
+

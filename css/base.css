@@ -1,5 +1,5 @@
 header {
-    margin: 0.4rem 0rem 0.4rem 0.4rem;
+    margin: 0.2rem 0rem 0.4rem 0.4rem;
 }
 body {
     margin: 0;
@@ -8,6 +8,7 @@ body {
 a { 
     text-decoration: none; 
 }
+
 #container {
     padding-left: 10%;
     width: 80%; 
