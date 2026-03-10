@@ -24,6 +24,7 @@
 .addel-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    align-items: start;
 }
 .add {
     grid-column: 2;
@@ -79,36 +80,12 @@
 }
 </style>
 <div id="diffs">
-    <div class="wrap-diff-header">
-        <div class="diff-header">
-            <span id="datetime">
-                <label class="mr05">Fecha</label><b id="">01/23/26 17:00</b>
-            </span>
-            <span id="user">
-                <label class="mr05">por</label><b id=""><a href="#">127.0.0.321</a></b> 
-            </span>
-            <span id="article-url">url <a href="#">Article name</a></span>
-        </div>            
-    </div>
-    <div class="lines">
-        <!-- repetir estructura esta -->
-        <div class="lineno">
-            <label class="ml05r">linea <b id="">1</b></label> 
-            <div class="addel-content">
-                <div class="del">
-                    <p>DEL</p> 
-                </div>
-                <div class="add">  
-                    <p>ADD</p>                             
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- JS GENERATE END -->
+<!-- JS generated -->       
 </div>
 <script>
+   
     diffHeaders = document.getElementsByClassName('diff-header')
-        webHeader = document.getElementById('web-header')
+    webHeader = document.getElementById('web-header')
     if (diffHeaders.length > 0) {
         currentDiffHeader = diffHeaders[diffHeaders.length-1]
     }  
