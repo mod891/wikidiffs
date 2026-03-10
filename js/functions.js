@@ -29,6 +29,7 @@ async function loadFragment(what) {
     }
 }
 
+
 async function mockDiffs() {
     try {
         var dataRequest = await fetch(`/public/js/db/data-diff-prettyfier-arr.json`); // remote db query
@@ -42,14 +43,13 @@ async function mockDiffs() {
     }
      // simulate loading...
     if (fragmentRequest.ok && dataRequest.ok) {
-        
         data = await dataRequest.text();
+        html = await fragmentRequest.text();
         datahc = { // make propper db query retrieve hc data with diffs
             user:'dinosaurio',
             datetime:'31/12/1999 23:59',
             article_url:'https//www.kipedia.com/articulo-tope-molon',
         } 
-        html = await fragmentRequest.text();
         
         var template = document.createElement('template');
         template.innerHTML = html;
@@ -71,7 +71,7 @@ async function mockDiffs() {
                 console.log('store next diffs')
                 nextDiffBtn = true;
             }
-
+        
             // for o no for, guardar las otras diffs e ir cargando y actualizando el observer con nuevos datos
             currentDiff = jsonObjects[1];
             
@@ -103,36 +103,95 @@ async function mockDiffs() {
                             <div class="addel-content"></div>`
 
                 fragment.querySelectorAll('.lines')[fragment.querySelectorAll('.lines').length-1].innerHTML += lineno
+                var aux = [];
                 for (let j=0; j<change.change.length; j++) {
                     addels = change.change[j]
                     addelDiv = fragment.querySelectorAll('.addel-content')[fragment.querySelectorAll('.addel-content').length-1]
-                    var text = '';
-                    if (Object.keys(addels.del).length > 0) {
-                        if (addels.del.hasOwnProperty('text')) { 
-                            text = addels.del.text
-                        } else 
-                            text = addels.del
-                        del = `<div class="del"><p>${text}</p></div>`
-                        addelDiv.innerHTML += del
-                    }
-                    if (Object.keys(addels.add).length > 0) {
-                        if (addels.add.hasOwnProperty('text')) {      
-                            text = addels.add.text
-                        } else 
-                            text = addels.add
-                        add = `<div class="add"><p>${text}</p></div>`
-                        addelDiv.innerHTML += add
-                    }
+                    collapsableDiv().forEach(item => aux.push(item))
                 }
             }
             document.getElementById(`diffs-fragment`).innerHTML = fragment.innerHTML;
-            document.head.appendChild(script);           
+            
+            document.head.appendChild(script);
+            if (nextDiffBtn) {
+                console.log('nextDiffBtn',nextDiffBtn)
+                diffsData = jsonObjects;
+                diffTexts = aux;
+            }           
         } 
     }     
+}
+function collapsableDiv() {
+    var objStruct = {
+        id: '',
+        shortText: '',
+        fullText: '',
+    }
+    var objs = [];
+    obj = { ...objStruct}
+    if (Object.keys(addels.del).length > 0) {
+        idCont++;
+        if (addels.del.hasOwnProperty('text')) { 
+            text = addels.del.text
+        } else 
+            text = addels.del
+        obj = { ...objStruct}
+        obj.id = "text"+idCont 
+        if (text.length > 300) {
+            obj.shortText = text.substr(0,300)+"... <a href='#' onClick='changeText(this)'><b>{más}</b></a>";
+            obj.fullText = text+" <a href='#' onClick='changeText(this)'><b>{menos}</b></a>";
+        } else {
+            obj.shortText = text;
+            obj.fullText = null; // !obj.fulltext == True
+        }
+        del = `<div id="text${idCont}" class="del"><p>${obj.shortText} </p></div>`
+        addelDiv.innerHTML += del
+        text=''
+        objs.push(obj)
+    }
+    if (Object.keys(addels.add).length > 0) {
+        idCont++;
+        if (addels.add.hasOwnProperty('text')) {      
+            text = addels.add.text
+        } else 
+            text = addels.add
+        obj = { ...objStruct}
+        obj.id = "text"+idCont
+        if (text.length > 300) {
+            obj.shortText = text.substr(0,300)+"... <a href='#' onClick='changeText(this)'><b>{más}</b></a>";
+            obj.fullText = text+" <a  href='#' onClick='changeText(this)'><b>{menos}</b></a>";
+        } else {
+            obj.shortText = text;
+            obj.fullText = null;
+        }
+        add = `<div id="text${idCont}" class="add"><p>${obj.shortText}</p></div>`
+        addelDiv.innerHTML += add
+        text=''
+        objs.push(obj)
+    }
+    return objs;
+}
+function changeText(obj) {
+    div = obj.parentElement.parentElement
+    if (obj.textContent == '{menos}') {
+        diffTexts.map( (it) =>  {
+            if (it.id == div.id) {
+                div.children[0].innerHTML = it.shortText
+            }
+        })
+    } else {
+        diffTexts.map( (it) =>  {
+            if (it.id == div.id) {
+                div.children[0].innerHTML = it.fullText // ojo, que se puede hacer cross site scripting xss
+            }
+        })         
+    }
 }
 
 loadFragment('menu');
 loadFragment('footer');
-if (window.location.href.includes('diffs.html'))
+if (window.location.href.includes('diffs.html')) {
+    var idCont = 0;
     mockDiffs()
+}
 
