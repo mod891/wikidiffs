@@ -1,0 +1,220 @@
+<style>
+
+#letras {
+    display:grid;
+    grid-template-areas: 
+    "A H O V"
+    "B I P W"
+    "C J Q X"
+    "D K R Y"
+    "E L S Z"
+    "F M T anexo"
+    "G N U discusion"
+    "1 Ñ 2 0";
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+#A { grid-area: A;}
+#B { grid-area: B;}
+#C { grid-area: C;}
+#D { grid-area: D;}
+#E { grid-area: E;}
+#F { grid-area: F;}
+#G { grid-area: G;}
+#H { grid-area: H;}
+#I { grid-area: I;}
+#J { grid-area: J;}
+#K { grid-area: K;}
+#L { grid-area: L;}
+#M { grid-area: M;}
+#N { grid-area: N;}
+#Ñ { grid-area: Ñ;}
+#O { grid-area: O;}
+#P { grid-area: P;}
+#Q { grid-area: Q;}
+#R { grid-area: R;}
+#S { grid-area: S;}
+#T { grid-area: T;}
+#U { grid-area: U;}
+#V { grid-area: V;}
+#W { grid-area: W;}
+#X { grid-area: X;}
+#Y { grid-area: Y;}
+#Z { grid-area: Z;}
+#anexo { grid-area: anexo;}
+#discusion { grid-area: discusion;}
+@media (max-width: 430px) {
+    #letras > div {
+        border: solid 1px black;
+        /* background-color:red; */
+    }
+    #letras {
+        display:grid;
+        grid-template-areas:
+        "A"
+        "B"
+        "C"
+        "D"
+        "E"
+        "F"
+        "G"
+        "H"
+        "I"
+        "J"
+        "K"
+        "L"
+        "M"
+        "N"
+        "Ñ"
+        "O"
+        "P"
+        "Q"
+        "R"
+        "S"
+        "T"
+        "U"
+        "V"
+        "W"
+        "X"
+        "Y"
+        "Z"
+        "anexo"
+        "discusion"; 
+        grid-template-rows: 1fr;
+    }
+
+}
+</style>
+<div id="abcdario">
+    <div id="letras">
+        <div id="A">
+            <a href="#">A</a>
+            <ul></ul>
+        </div>
+        <div id="B">
+            <a href="#">B</a>
+            <ul></ul>
+        </div>
+        <div id="C">
+            <a href="#">C</a>
+            <ul></ul>
+        </div>
+        <div id="D">
+            <a href="#">D</a>
+            <ul></ul>
+        </div>
+        <div id="E">
+            <a href="#">E</a>
+            <ul></ul>
+        </div>
+        <div id="F">
+            <a href="#">F</a>
+            <ul></ul>
+        </div>
+        <div id="G">
+            <a href="#">G</a>
+            <ul></ul>
+        </div>
+        <div id="H">
+            <a href="#">H</a>
+            <ul></ul>
+        </div>
+        <div id="I">
+            <a href="#">I</a>
+            <ul></ul>
+        </div>
+        <div id="J">
+            <a href="#">J</a>
+            <ul></ul>
+        </div>
+        <div id="K">
+            <a href="#">K</a>
+            <ul></ul>
+        </div>
+        <div id="L">
+            <a href="#">L</a>
+            <ul></ul>
+        </div>
+        <div id="M">
+            <a href="#">M</a>
+            <ul></ul>
+        </div>
+        <div id="N">
+            <a href="#">N</a>
+            <ul></ul>
+        </div>
+        <div id="Ñ">
+            <a href="#">Ñ</a>
+            <ul></ul>
+        </div>
+        <div id="O">
+            <a href="#">O</a>
+            <ul></ul>
+        </div>
+        <div id="P">
+            <a href="#">P</a>
+            <ul></ul>
+        </div>
+        <div id="Q">
+            <a href="#">Q</a>
+            <ul></ul>
+        </div>
+        <div id="R">
+            <a href="#">R</a>
+            <ul></ul>
+        </div>
+        <div id="S">
+            <a href="#">S</a>
+            <ul></ul>
+        </div>
+        <div id="T">
+            <a href="#">T</a>
+            <ul></ul>
+        </div>
+        <div id="U">
+            <a href="#">U</a>
+            <ul></ul>
+        </div>
+        <div id="V">
+            <a href="#">V</a>
+            <ul></ul>
+        </div>
+        <div id="W">
+            <a href="#">W</a>
+            <ul></ul>
+        </div>
+        <div id="X">
+            <a href="#">C</a>
+            <ul></ul>
+        </div>
+        <div id="Y">
+            <a href="#">Y</a>
+            <ul></ul>
+        </div>
+        <div id="Z">
+            <a href="#">Z</a>
+            <ul><ul>
+        </div> 
+        <div id="anexo">
+            <a href="#">Anexo</a>
+            <ul><ul>
+        </div>
+        <div id="discusion">
+            <a href="#">Discusiones</a>
+            <ul><ul>
+        </div>
+    </div>
+
+</div>   
+
+<script>
+async function testApi() {
+    //TESTS
+ var test1 = await query('diffsFromUrl','https://es.wikipedia.org/wiki/Tapia_de_la_Ribera')
+ var test2 = await query('urlsStartsWith','A');
+var test3 = await query('anexo')
+var test4 = await query('randUrl')
+// var test5 = await query('urlsByCategory')
+}
+testApi()
+</script>
+

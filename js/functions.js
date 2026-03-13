@@ -1,5 +1,5 @@
 async function loadFragment(what) {
-    const fragments = [ 'menu','footer']
+    const fragments = [ 'menu','footer','abcdario']
     if (fragments.includes(what)) {
         try {
             var request = await fetch(`/public/components/${what}.html`);
@@ -30,8 +30,9 @@ async function loadFragment(what) {
 }
 
 async function mockDiffs() {
+  
     try {
-        var dataRequest = await fetch(`/public/js/db/data-diff-prettyfier-arr.json`); // remote db query
+        var dataRequest = await fetch(`/public/js/db/mock-sample1.json`); // remote db query
     } catch (err) {
         console.log(`mockDiffs::data retrieving Error:`,err);
     }
@@ -43,79 +44,56 @@ async function mockDiffs() {
      // simulate loading...
     if (fragmentRequest.ok && dataRequest.ok) {
         data = await dataRequest.text();
+        jsonObjects = JSON.parse(data);
         html = await fragmentRequest.text();
-        datahc = { // make propper db query retrieve hc data with diffs
-            user:'dinosaurio',
-            datetime:'31/12/1999 23:59',
-            article_url:'https//www.kipedia.com/articulo-tope-molon',
-        } 
-        
         var template = document.createElement('template');
         template.innerHTML = html;
-        var fragment = template.content.querySelector(`#diffs`)  
-        
-
+        var fragment = template.content.querySelector(`#diffs`)         
         var css = template.content.querySelector('style');
         document.head.appendChild(css);
-
         var js = template.content.querySelector('script');
         script = document.createElement('script');
         script.textContent = js.innerHTML;
         script.defer = true;
+        // diffsData = jsonObjects; // en caso de usarse para ir cargando diffs desde el js, muchos diffs
 
-        jsonObjects = JSON.parse(data);
-        var nextDiffBtn = false;
         if (data.length > 0) {
-            if (data.length > 1) 
-                nextDiffBtn = true;
-        
             for (let d=0; d<jsonObjects.length; d++) {
-                // for o no for, guardar las otras diffs e ir cargando y actualizando el observer con nuevos datos
-                skip=[0,1,2,3]
-                if (d in skip)
-                    console.log('iteration',d)
                 currentDiff = jsonObjects[d];
+                articleTitle = currentDiff.articleUrl.split('/').at(-1)
                 diffHeader =`
                 <div class="diff">
                     <div class="wrap-diff-header">
                         <div class="diff-header">
                             <span id="datetime">
-                                <label class="mr05">Fecha</label><b id="datetime-data">${datahc.datetime}</b></span>
+                                <label class="mr05">Fecha</label><b id="datetime-data">${currentDiff.datetime}</b></span>
                             <span id="user">
-                                <label class="mr05">por</label><b id="user-data"><a href="#">${datahc.user}</a></b></span> 
+                                <label class="mr05">por</label><b id="user-data"><a href="#">${currentDiff.user}</a></b></span> 
                             <span id="article-url">
-                                <a id="article-url-data" href="${datahc.article_url}">titulo del articulo</a></span>
+                                <a id="article-url-data" href="${currentDiff.diffUrl}">${articleTitle}</a></span>
                     </div></div></div>
                 <div class="lines"></div>`
                 var template = document.createElement('template');
                 template.innerHTML = diffHeader;
                 fragment.innerHTML = template.innerHTML
 
-                for (let i=0; i<currentDiff.changes.length; i++) {
-                    change = currentDiff.changes[i];
+                changes = JSON.parse(currentDiff.changes) 
+                for (let i=0; i<changes.length; i++) {
+                    change = changes[i];
                     lineno = `<div class="lineno">
                                 <div class="lineno-data">
                                     <label class="ml05r">linea <b>${change.lineno}</b></label>
                                 </div><div class="addel-content"></div>`
-                                
-
                     fragment.querySelectorAll('.lines')[fragment.querySelectorAll('.lines').length-1].innerHTML += lineno
-                    var aux = [];
                     for (let j=0; j<change.change.length; j++) {
                         addels = change.change[j]
                         addelDiv = fragment.querySelectorAll('.addel-content')[fragment.querySelectorAll('.addel-content').length-1]
-                        collapsableDiv().forEach(item => aux.push(item))
+                        collapsableDiv().forEach(item => diffTexts.push(item))
                     }
                 }
                 document.getElementById(`diffs-fragment`).innerHTML += fragment.innerHTML;
-                console.log('append scriptx4!!!!!!!!!!') 
-                document.head.appendChild(script);
-                
-                if (nextDiffBtn) {
-                    diffsData = jsonObjects;
-                    diffTexts.push(...aux)
-                }
-            }           
+            }
+            document.head.appendChild(script);
         } 
     }     
 }
@@ -160,14 +138,20 @@ function changeText(obj) {
     } else {
         diffTexts.map( (it) =>  {
             if (it.id == div.id) 
-                div.children[0].innerHTML = it.fullText // ojo, que se puede hacer cross site scripting xss
+                div.children[0].innerHTML = it.fullText // innerHTML && xss
         })         
     }
 }
+
 
 loadFragment('menu');
 loadFragment('footer');
 if (window.location.href.includes('diffs.html')) {
     var idCont = 0;
+    var diffsData = [];
+    var diffTexts = [];
     mockDiffs()
+} else if (window.location.href.includes('alfabetrium.html')) {
+    loadFragment('abcdario');
 }
+
