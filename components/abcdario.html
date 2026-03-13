@@ -86,122 +86,35 @@
 </style>
 <div id="abcdario">
     <div id="letras">
-        <div id="A">
-            <a href="#">A</a>
-            <ul></ul>
-        </div>
-        <div id="B">
-            <a href="#">B</a>
-            <ul></ul>
-        </div>
-        <div id="C">
-            <a href="#">C</a>
-            <ul></ul>
-        </div>
-        <div id="D">
-            <a href="#">D</a>
-            <ul></ul>
-        </div>
-        <div id="E">
-            <a href="#">E</a>
-            <ul></ul>
-        </div>
-        <div id="F">
-            <a href="#">F</a>
-            <ul></ul>
-        </div>
-        <div id="G">
-            <a href="#">G</a>
-            <ul></ul>
-        </div>
-        <div id="H">
-            <a href="#">H</a>
-            <ul></ul>
-        </div>
-        <div id="I">
-            <a href="#">I</a>
-            <ul></ul>
-        </div>
-        <div id="J">
-            <a href="#">J</a>
-            <ul></ul>
-        </div>
-        <div id="K">
-            <a href="#">K</a>
-            <ul></ul>
-        </div>
-        <div id="L">
-            <a href="#">L</a>
-            <ul></ul>
-        </div>
-        <div id="M">
-            <a href="#">M</a>
-            <ul></ul>
-        </div>
-        <div id="N">
-            <a href="#">N</a>
-            <ul></ul>
-        </div>
-        <div id="Ñ">
-            <a href="#">Ñ</a>
-            <ul></ul>
-        </div>
-        <div id="O">
-            <a href="#">O</a>
-            <ul></ul>
-        </div>
-        <div id="P">
-            <a href="#">P</a>
-            <ul></ul>
-        </div>
-        <div id="Q">
-            <a href="#">Q</a>
-            <ul></ul>
-        </div>
-        <div id="R">
-            <a href="#">R</a>
-            <ul></ul>
-        </div>
-        <div id="S">
-            <a href="#">S</a>
-            <ul></ul>
-        </div>
-        <div id="T">
-            <a href="#">T</a>
-            <ul></ul>
-        </div>
-        <div id="U">
-            <a href="#">U</a>
-            <ul></ul>
-        </div>
-        <div id="V">
-            <a href="#">V</a>
-            <ul></ul>
-        </div>
-        <div id="W">
-            <a href="#">W</a>
-            <ul></ul>
-        </div>
-        <div id="X">
-            <a href="#">C</a>
-            <ul></ul>
-        </div>
-        <div id="Y">
-            <a href="#">Y</a>
-            <ul></ul>
-        </div>
-        <div id="Z">
-            <a href="#">Z</a>
-            <ul><ul>
-        </div> 
-        <div id="anexo">
-            <a href="#">Anexo</a>
-            <ul><ul>
-        </div>
-        <div id="discusion">
-            <a href="#">Discusiones</a>
-            <ul><ul>
-        </div>
+        <div id="A"><a href="#">A</a><ul></ul></div>
+        <div id="B"><a href="#">B</a><ul></ul></div>
+        <div id="C"><a href="#">C</a><ul></ul></div>
+        <div id="D"><a href="#">D</a><ul></ul></div>
+        <div id="E"><a href="#">E</a><ul></ul></div>
+        <div id="F"><a href="#">F</a><ul></ul></div>
+        <div id="G"><a href="#">G</a><ul></ul></div>
+        <div id="H"><a href="#">H</a><ul></ul></div>
+        <div id="I"><a href="#">I</a><ul></ul></div>
+        <div id="J"><a href="#">J</a><ul></ul></div>
+        <div id="K"><a href="#">K</a><ul></ul></div>
+        <div id="L"><a href="#">L</a><ul></ul></div>
+        <div id="M"><a href="#">M</a><ul></ul></div>
+        <div id="N"><a href="#">N</a><ul></ul></div>
+        <div id="Ñ"><a href="#">Ñ</a><ul></ul></div>
+        <div id="O"><a href="#">O</a><ul></ul></div>
+        <div id="P"><a href="#">P</a><ul></ul></div>
+        <div id="Q"><a href="#">Q</a><ul></ul></div>
+        <div id="R"><a href="#">R</a><ul></ul></div>
+        <div id="S"><a href="#">S</a><ul></ul></div>
+        <div id="T"><a href="#">T</a><ul></ul></div>
+        <div id="U"><a href="#">U</a><ul></ul></div>
+        <div id="V"><a href="#">V</a><ul></ul></div>
+        <div id="W"><a href="#">W</a><ul></ul></div>
+        <div id="X"><a href="#">X</a><ul></ul></div>
+        <div id="Y"><a href="#">Y</a><ul></ul></div>
+        <div id="Z"><a href="#">Z</a><ul></ul></div>
+        <div id="anexo"><a href="#">Anexo</a><ul><ul></div>
+        <div id="discusion"><a href="#">Discusiones</a><ul><ul></div>
     </div>
 
 </div>   
@@ -209,12 +122,32 @@
 <script>
 async function testApi() {
     //TESTS
- var test1 = await query('diffsFromUrl','https://es.wikipedia.org/wiki/Tapia_de_la_Ribera')
- var test2 = await query('urlsStartsWith','A');
-var test3 = await query('anexo')
-var test4 = await query('randUrl')
-// var test5 = await query('urlsByCategory')
+//  var test1 = await query('diffsFromUrl','https://es.wikipedia.org/wiki/Tapia_de_la_Ribera')
+//  var test2 = await query('urlsStartsWith','A');
+// var test3 = await query('anexo')
+// var test4 = await query('randUrl')
+// // var test5 = await query('urlsByCategory')
 }
-testApi()
+async function liLinks() {
+    let c = 65;
+    for (let i=c; i<91; i++) {
+        let char = String.fromCharCode(i)
+        var urls = await query('urlsStartsWith',char);
+        ul = document.getElementById(char).childNodes[1]
+        for (let j=0; j<urls.length; j++) {       
+            text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ')
+            html = `<li><a href="${urls[j].articleUrl}">${text}</a></li>`
+            ul.insertAdjacentHTML('beforeend',html)
+        } 
+    }
+    var urls = await query('anexo');
+    ul = document.getElementById('anexo').childNodes[1]
+    for (let j=0; j<urls.length; j++) {       
+        text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ')
+        html = `<li><a href="${urls[j].articleUrl}">${text}</a></li>`
+        ul.insertAdjacentHTML('beforeend',html)
+    }
+}
+liLinks()
 </script>
 

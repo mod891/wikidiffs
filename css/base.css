@@ -8,7 +8,9 @@ body {
 a { 
     text-decoration: none; 
 }
-
+li {
+    list-style: None;
+}
 #container {
     padding-left: 10%;
     width: 80%; 

@@ -7,7 +7,7 @@ limit = 10; // definir un orden de importancia para el front, ej: articulos con 
 // letras paginacion offset
 
 async function query(option,arg={}) {
-    
+    var wreturn = null;
     stmt = {};
     switch (option) {
         case 'urlsStartsWith':
@@ -25,16 +25,21 @@ async function query(option,arg={}) {
         default:
             console.log('hoigan no furula',option)
     }
-    fetch(`http://127.0.0.1:3000/api`,{
+    var request = await fetch(`http://127.0.0.1:3000/api`,{
         method: 'POST',
-        headers: {
-            "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({data:stmt})
-        
-    }).then(res => res.json()).then(data => { 
+    })
+    if (request.ok) {
+        data = await request.json()
+        return data;
+    }
+    /*
+    .then(res => res.json()).then(data => { 
         console.log('data:',data)
-    });
+        return data;
+    });*/
+    //return wreturn;
 }
 function diffsFromUrl(url, limit=0) {
     sql = `select 
@@ -62,6 +67,8 @@ function anexoUrls(limit=0) {
     sql = `select distinct json_extract(hc.obj, '$.article_url') as articleUrl
         from history_contribs hc 
         where articleUrl like '%wiki/Anexo:%'`
+    if (limit != 0 ) 
+        sql += `limit ${limit}`   
     return { sql:sql, args:[] };
 }
 function urlsByCategory(category, limit=0) {
