@@ -69,32 +69,37 @@
         <div id="svgdiv" >
             <img id="menu-icon" class="icon" src="resources/svg/vrt.svg" alt="" srcset="">
         </div>
-        <div id="items" class="menu-links ">
+    <!-- <div id="items" class="menu-links ">
             <div class="item"><a href="/public/">Index</a></div>
             <div class="item"><a href="/public/diffs.html">template1</a></div>
             <div class="item"><a href="/public/alfabetrium.html">A-Z0-9</a></div>
+        </div> -->
+        <div id="items" class="menu-links ">
+            <div class="item"><a href="/public/index.html#index">Index</a></div>
+            <div class="item"><a href="/public/index.html#diffs">template1</a></div>
+            <div class="item"><a href="/public/index.html#alfabetrium">A-Z0-9</a></div>
         </div>
     </nav>
 </div>
 
 <script>
-        var img = document.getElementById('menu-icon')
-        var items = document.getElementById('items')
-        // #ISSUE1 : elements under menu overlapping area can't be clicked
-        // #SOL1 : change to display:none, break open animation
-        items.classList.add('display-none') // #ISSUE1
+    var img = document.getElementById('menu-icon')
+    var items = document.getElementById('items')
+    // #ISSUE1 : elements under menu overlapping area can't be clicked
+    // #SOL1 : change to display:none, break open animation
+    items.classList.add('display-none') // #ISSUE1
 
-        img.addEventListener('click', () => {
-            img.classList.toggle('rota')
-            items.classList.toggle('openmenu')
+    img.addEventListener('click', () => {
+        img.classList.toggle('rota')
+        items.classList.toggle('openmenu')
 // #ISSUE1 begin block
-            if (items.classList.contains('display-none')) 
-                items.classList.remove('display-none')                
-        })
-        items.addEventListener('transitionend',() => { 
-            if (!items.classList.contains('openmenu')) { 
-                items.classList.add('display-none')
-            }     
-        }) 
+        if (items.classList.contains('display-none')) 
+            items.classList.remove('display-none')                
+    })
+    items.addEventListener('transitionend',() => { 
+        if (!items.classList.contains('openmenu')) { 
+            items.classList.add('display-none')
+        }     
+    }) 
 // #ISSUE1 end block
 </script>

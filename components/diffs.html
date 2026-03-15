@@ -1,7 +1,4 @@
 <style>
-
-
-
 .diff-header {
     background-color: aquamarine; /**/
     display: grid;
@@ -79,12 +76,18 @@
     }
 }
 </style>
-<div id="diffs">
-<!-- JS generated -->       
-</div>
+
+<div id="diffs"></div>
+
 <script>
+
+var idCont = 0;
+var diffTexts = [];
+loadDiffs()
+/*
     // [FIX] diffHeaders tipo agenda tlfn
     console.log('diffHeaders')
+    var currentDiffHeader=0;
     diffHeaders = document.getElementsByClassName('diff-header')
     webHeader = document.getElementById('web-header')
     if (diffHeaders.length > 0) {
@@ -98,4 +101,114 @@
                 currentDiffHeader.classList.remove('fixed')                        
         })
     observer.observe(webHeader)
+*/
+
+async function loadDiffs() {
+
+    var articleUrl = diffUrl;
+    var dataRequest = null;
+
+     try {
+        if (articleUrl == "")
+            data = await fetch(`/public/js/db/mock-sample1.json`).then(res => res.json()); // remote db query
+        else
+            data = await query('diffsFromUrl',articleUrl);
+    } catch (err) {
+        console.log(`mockDiffs::data retrieving Error:`,err);
+    }
+    if (data.length > 0) {
+        var fragment = null;
+        for (let d=0; d<data.length; d++) {
+            currentDiff = data[d];
+            articleTitle = currentDiff.articleUrl.split('/').at(-1).replaceAll('_',' ')
+            diffHeader =`
+            <div id="{DIFFID}" class="diff">
+                <div class="wrap-diff-header">
+                    <div class="diff-header">
+                        <span id="datetime">
+                            <label class="mr05">Fecha</label><b id="datetime-data">${currentDiff.datetime}</b></span>
+                        <span id="user">
+                            <label class="mr05">por</label><b id="user-data"><a href="#">${currentDiff.user}</a></b></span> 
+                        <span id="article-url">
+                            <a id="article-url-data" href="${currentDiff.diffUrl}">${articleTitle}</a></span>
+                </div></div>
+                <div class="lines"></div>
+            </div>` 
+                        
+            fragment = document.createElement('template');
+            fragment.innerHTML = diffHeader;
+            changes = JSON.parse(currentDiff.changes) 
+
+            for (let i=0; i<changes.length; i++) {
+                change = changes[i];
+                lineno = `<div class="lineno">
+                            <div class="lineno-data">
+                                <label class="ml05r">linea <b>${change.lineno}</b></label>
+                            </div><div class="addel-content"></div>`
+                
+                fragment.content.querySelectorAll('.lines')[fragment.content.querySelectorAll('.lines').length-1].innerHTML += lineno
+                for (let j=0; j<change.change.length; j++) {
+                    addels = change.change[j]
+                    addelDiv = fragment.content.querySelectorAll('.addel-content')[fragment.content.querySelectorAll('.addel-content').length-1]
+                    collapsableDiv().forEach(item => diffTexts.push(item))
+                }
+            }
+            document.getElementById(`diffs`).insertAdjacentHTML('beforeend',fragment.innerHTML)
+        }
+        document.head.appendChild(script);
+    }        
+}
+function collapsableDiv() {
+    var objStruct = {
+        id: '',
+        shortText: '',
+        fullText: '',
+    };
+    var objs = [];
+    keys = Object.keys(addels)
+    for (i in keys) {
+        if (Object.keys(addels[keys[i]]).length > 0) {
+            obj = { ...objStruct}
+            idCont++;
+            if (addels[keys[i]].hasOwnProperty('text')) 
+                text = escapeHTML(addels[keys[i]].text)
+            else 
+                text = escapeHTML(addels[keys[i]])
+            
+            obj.id = "text"+idCont 
+            if (text.length > 300) {
+                obj.shortText = text.substr(0,300)+"... <a href='#' onClick='changeText(event,this)'><b>{más}</b></a>";
+                obj.fullText = text+" <a href='#' onClick='changeText(event,this)'><b>{menos}</b></a>";
+            } else {
+                obj.shortText = text;
+                obj.fullText = null;
+            }
+            addelDiv.innerHTML += `<div id="text${idCont}" class="${keys[i]}"><p>${obj.shortText} </p></div>`
+            objs.push(obj)
+        }
+    }
+    return objs;
+}
+function escapeHTML(str) {
+    return str.replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+function changeText(event,obj) {
+    event.preventDefault();
+    console.log(event,obj)
+    div = obj.parentElement.parentElement
+    if (obj.textContent == '{menos}') {
+        diffTexts.map( (it) =>  {
+            if (it.id == div.id) 
+                div.children[0].innerHTML = it.shortText            
+        })
+    } else {
+        diffTexts.map( (it) =>  {
+            if (it.id == div.id) 
+                div.children[0].innerHTML = it.fullText
+        })         
+    }
+}
 </script>

@@ -34,12 +34,6 @@ async function query(option,arg={}) {
         data = await request.json()
         return data;
     }
-    /*
-    .then(res => res.json()).then(data => { 
-        console.log('data:',data)
-        return data;
-    });*/
-    //return wreturn;
 }
 function diffsFromUrl(url, limit=0) {
     sql = `select 

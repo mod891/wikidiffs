@@ -1,6 +1,5 @@
 <style>
-
-#letras {
+#abcdario {
     display:grid;
     grid-template-areas: 
     "A H O V"
@@ -43,11 +42,11 @@
 #anexo { grid-area: anexo;}
 #discusion { grid-area: discusion;}
 @media (max-width: 430px) {
-    #letras > div {
+    #abcdario > div {
         border: solid 1px black;
         /* background-color:red; */
     }
-    #letras {
+    #abcdario {
         display:grid;
         grid-template-areas:
         "A"
@@ -81,11 +80,10 @@
         "discusion"; 
         grid-template-rows: 1fr;
     }
-
 }
 </style>
-<div id="abcdario">
-    <div id="letras">
+<div id="alfabetrium">
+    <div id="abcdario">
         <div id="A"><a href="#">A</a><ul></ul></div>
         <div id="B"><a href="#">B</a><ul></ul></div>
         <div id="C"><a href="#">C</a><ul></ul></div>
@@ -116,18 +114,9 @@
         <div id="anexo"><a href="#">Anexo</a><ul><ul></div>
         <div id="discusion"><a href="#">Discusiones</a><ul><ul></div>
     </div>
-
 </div>   
 
 <script>
-async function testApi() {
-    //TESTS
-//  var test1 = await query('diffsFromUrl','https://es.wikipedia.org/wiki/Tapia_de_la_Ribera')
-//  var test2 = await query('urlsStartsWith','A');
-// var test3 = await query('anexo')
-// var test4 = await query('randUrl')
-// // var test5 = await query('urlsByCategory')
-}
 async function liLinks() {
     let c = 65;
     for (let i=c; i<91; i++) {
@@ -136,15 +125,18 @@ async function liLinks() {
         ul = document.getElementById(char).childNodes[1]
         for (let j=0; j<urls.length; j++) {       
             text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ')
-            html = `<li><a href="${urls[j].articleUrl}">${text}</a></li>`
+          html = `<li><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a></li>`
+            //   html = `<li><a href="#diffs">${text}</a></li>`
+
             ul.insertAdjacentHTML('beforeend',html)
         } 
     }
     var urls = await query('anexo');
     ul = document.getElementById('anexo').childNodes[1]
     for (let j=0; j<urls.length; j++) {       
-        text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ')
-        html = `<li><a href="${urls[j].articleUrl}">${text}</a></li>`
+        text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ').replace('Anexo:','')
+        // html = `<li><a href="diffs.html?diff=${urls[j].articleUrl}">${text}</a></li>`
+        html = `<li><a href="#diffs">${text}</a></li>`
         ul.insertAdjacentHTML('beforeend',html)
     }
 }
