@@ -117,29 +117,67 @@
 </div>   
 
 <script>
-async function liLinks() {
+
+if (sessionStorage.getItem('alfabetrium') == null)
+    fetchLiLinks()
+else
+    storageLiLinks()
+
+function storageLiLinks() {
+    obj = JSON.parse(sessionStorage.getItem('alfabetrium'))
+
+    let values = Object.values(obj.char);
+    for (let i=0; i<values.length; i++) { 
+        let id = Object.keys(values[i]);
+        div = document.getElementById(id)
+        a = div.childNodes[0]
+        a.href="#listby?c="+id
+        ul = div.childNodes[1]
+        urls = Object.values(values[i])
+        
+        for (let j=0; j<urls.length; j++)     
+            ul.insertAdjacentHTML('beforeend',urls[j].join('')) //JSON.stringify use array.join(',') 
+    }
+}
+async function fetchLiLinks() {
+    sessionStorageObj = { 
+            char : [],
+    }
     let c = 65;
     for (let i=c; i<91; i++) {
         let char = String.fromCharCode(i)
+        charObj = { [char]: [] }
         var urls = await query('urlsStartsWith',char);
-        ul = document.getElementById(char).childNodes[1]
+        div = document.getElementById(char)
+        a = div.childNodes[0]
+        a.href="#listby?c="+char
+        ul = div.childNodes[1]
+
         for (let j=0; j<urls.length; j++) {       
             text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ')
-          html = `<li><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a></li>`
-            //   html = `<li><a href="#diffs">${text}</a></li>`
-
+            html = `<li><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a></li>`
             ul.insertAdjacentHTML('beforeend',html)
-        } 
+            charObj[char].push(html)
+        }
+        sessionStorageObj.char.push(charObj);
     }
-    var urls = await query('anexo');
-    ul = document.getElementById('anexo').childNodes[1]
-    for (let j=0; j<urls.length; j++) {       
+    
+    urls = await query('anexo');
+    div = document.getElementById('anexo')
+    a = div.childNodes[0]
+    a.href="#listby?c=anexo"
+    ul = div.childNodes[1]
+    charObj = { anexo: [] }
+
+    for (let j=0; j<urls.length; j++) {               
         text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ').replace('Anexo:','')
-        // html = `<li><a href="diffs.html?diff=${urls[j].articleUrl}">${text}</a></li>`
-        html = `<li><a href="#diffs">${text}</a></li>`
+        html = `<li><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a></li>`
         ul.insertAdjacentHTML('beforeend',html)
+        charObj.anexo.push(html)
     }
+    sessionStorageObj.char.push(charObj);
+    sessionStorage.setItem('alfabetrium', JSON.stringify(sessionStorageObj))
 }
-liLinks()
+
 </script>
 

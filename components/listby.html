@@ -1,6 +1,372 @@
 <style>
+
+
+/* BEGIN:SWITCH by CHATGPT */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 25px;
+}
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.slider {
+    position: absolute;
+    cursor: pointer;
+    background-color: #ccc;
+    border-radius: 25px;
+    top:0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: 0.3s;
+}
+.slider:before {
+    content: "";
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 2.5px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+input:checked + .slider {
+    background-color: #4CAF50;
+}
+input:checked + .slider:before {
+    transform: translateX(25px);
+}
+/* END:SWITCH by CHATGPT */
+
+#title {
+    padding-left:10vw;
+}
+
+#filter-inputs {
+    display: flex;
+    flex-direction: row;
+}
+#filter-inputs > div {
+    width: 25%;
+    justify-content: center;
+    padding: 0.2rem;
+    margin-right: 0.5rem;
+    display: flex;
+}
+.filter-icon {
+    padding-top: 10px;
+    width:50px;
+    height:50px;
+}
+.slide-up {
+    transition: transform 0.5s ease;
+    transform: translateY(-0.5px);        
+}
+.slide-down {
+    transition: transform 0.5s ease;
+    transform: translateY(0.0px);        
+}
+.modal {
+    position: fixed;
+    top:0;
+    left:0;
+    width: 100%;
+    height:60%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+.modal > div {
+    background-color: rgb(255, 210, 132);
+}
+.modal-header {
+    border: solid 1px black;
+    display: flex;
+    align-items: flex-start;
+    justify-content:end;
+    width: 350px;
+    background-color: rgb(46, 130, 255);
+}
+
+@media (max-width: 430px) {
+    .filter-icon {
+        padding-top: 20px;
+        width:40px;
+        height:40px;
+    }
+    #title {
+        padding-left:5vw;
+    }
+    .modal {
+        height: 50%;
+    }
+    #filter-inputs {
+        display: grid;
+        grid-template-columns: 50% 50%;
+        gap: 10px;
+        padding-bottom: 0.5rem;
+
+    }
+    #filter-inputs > div {
+        width: auto;
+        justify-content: center;
+        padding-left: 0.5rem;
+        padding-right: 0.8rem;
+        margin-right: 0.5rem;
+    }
+}
 </style>
 <div id="listby">
+    <div>
+        <div id="header">
+            <div class="flexrow justify-around pr1">
+                <div>
+                    <h2 id="title"></h2>
+                </div>
+                <div>
+                    <svg
+                        id="filter-icon" 
+                        class="filter-icon" 
+                        width="1.0509777mm"
+                        height="0.99619913mm"
+                        viewBox="0 0 1.0509777 0.99619913"
+                        version="1.1"
+                        
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlns:svg="http://www.w3.org/2000/svg">
+                        <defs
+                            id="defs1" />
+                        <g
+                            id="layer1"
+                            transform="translate(-0.03901383,-0.0036098)">
+                            <path
+                            style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0417738;stroke-dasharray:none;stroke-opacity:1"
+                            d="m 0.13971859,0.00364595 0.001724,0.9961268"
+                            id="path15-4-9-6-9" />
+                            <path
+                            style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0417738;stroke-dasharray:none;stroke-opacity:1"
+                            d="m 0.41943004,0.003646 0.001724,0.99612675"
+                            id="path15-4-9-6-9-1" />
+                            <path
+                            style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0417738;stroke-dasharray:none;stroke-opacity:1"
+                            d="m 0.69914148,0.00364604 0.001724,0.99612671"
+                            id="path15-4-9-6-9-1-7" />
+                            <path
+                            style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0417738;stroke-dasharray:none;stroke-opacity:1"
+                            d="m 0.97885433,0.00364604 0.00172,0.99612675"
+                            id="path15-4-9-6-9-1-5" />
+                            <rect
+                            style="fill:#e60000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.126646;stroke-dasharray:none;stroke-opacity:1"
+                            id="filter-4"
+                            class=""
+                            width="0.074832343"
+                            height="0.05056271"
+                            x="0.95183623"
+                            y="0.78871787"
+                            ry="0.0038471627" />
+                            <rect
+                            style="fill:#e60000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.126646;stroke-dasharray:none;stroke-opacity:1"
+                            id="filter-3"
+                            class=""
+                            width="0.074832343"
+                            height="0.05056271"
+                            x="0.65756077"
+                            y="0.78293473"
+                            ry="0.0038471627" />
+                            <rect
+                            style="fill:#e60000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.126646;stroke-dasharray:none;stroke-opacity:1"
+                            id="filter-2"
+                            class=""
+                            width="0.074832343"
+                            height="0.05056271"
+                            x="0.38356236"
+                            y="0.78225619"
+                            ry="0.0038471627" />
+                            <rect
+                            style="fill:#e60000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.126646;stroke-dasharray:none;stroke-opacity:1"
+                            id="filter-1"
+                            class=""
+                            width="0.075522095"
+                            height="0.05056271"
+                            x="0.10233683"
+                            y="0.7791568"
+                            ry="0.0038471627" />
+                        </g>
+                    </svg>
+                </div>
+            </div>
+            <div>
+                <div id="filter-inputs"></div>       
+            </div>    
+        </div>
+        <div id="listby-content">
+
+        </div>
+    </div>
+    <div id="filters-modal" class="modal">
+        <div class="">
+            <div id="" class="modal-header">
+                <span  id="close-modal" class="font20px cursor pr1">&times;</span>
+            </div>
+
+            <div class="dflex mt05">
+                <div class="w50 pl1">
+                    <b>Filtrar por texto</b>
+                </div>
+
+                <div class="w50 jc-end">
+                    <label class="switch">
+                        <input id="switch-1" type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="dflex mt05">
+                <div class="w50 pl1">
+                    <b>Por fecha </b>
+                </div>
+                <div class="w50 jc-end">
+                    <label class="switch">
+                    <input id="switch-2" type="checkbox">
+                    <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="dflex mt05">
+                <div class="w50 pl1">
+                    <b>Por categoría</b>
+                </div>
+                <div class="w50 jc-end">
+                    <label class="switch">
+                        <input id="switch-3" type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="dflex mtb05">
+                <div class="w50 pl1">
+                    <b>undefined criterio</b>
+                </div>
+                <div class="w50 jc-end">
+                    <label class="switch">
+                        <input id="switch-4" type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>  
 <script>
+
+var data = null;
+init()
+
+function init() {
+    
+    document.getElementById('title').innerText =` Páginas editadas por ${char}`;
+    var filtersIcon = document.getElementById('filter-icon');
+    var filtersModal = document.getElementById('filters-modal');
+    var closeFiltersModal = document.getElementById('close-modal');
+    var switchs = document.querySelectorAll('input[type="checkbox"]');
+    switchs.forEach(e => {
+        e.addEventListener('click',() => {showHideInputFilter(e)});
+    });
+
+    filtersIcon.addEventListener('click', () => {
+        filtersModal.style.display = "flex";
+    })
+    closeFiltersModal.addEventListener('click', () => {
+        filtersModal.style.display = "none";
+    })
+
+    var storage = false;
+    storageObj = JSON.parse(sessionStorage.getItem('listby'))
+    if (storageObj != null)     
+        for (let i=0; i<storageObj.char.length; i++) { 
+            if (Object.keys(storageObj.char[i])[0] == char) {
+                storage = true;
+                data = storageObj.char[i];
+            }
+        }
+    storage == true?  storageUrls() : fetchUrls();       
+}
+function storageUrls() {
+    console.log('storageUrls:',storageObj)
+    console.log('filtrable data:',data)
+}
+async function fetchUrls() {
+   var urls = await query('urlsStartsWith',char,0);
+    storageObj = JSON.parse(sessionStorage.getItem('listby'));
+    console.log('storage urls:',storageObj);
+    if (storageObj == null) {
+        charObj = { [char]: [] };
+        storageObj = {char:[]};
+        storageObj.char.push({ [char]: urls });
+        sessionStorage.setItem('listby',JSON.stringify(storageObj));
+    }
+    else {
+        storageObj.char.push({ [char]: urls });
+        sessionStorage.setItem('listby',JSON.stringify(storageObj));
+    }
+
+    console.log('filtrable data:',data)
+}
+function showHideInputFilter(input) {
+    var div = document.getElementById('filter-inputs');
+    var id = input.id.split('-')[1];
+    var rect = document.getElementById(`filter-${id}`);
+    
+    if (id == "1") {        // texto
+        elem = `<div class="bg-cyan"><input id="filter-switch-1" type="text" placeholder="text"></div>`;
+
+    } else if (id == "2") { // fecha // solo por año? 
+        elem = `<div class="bg-green2"><input id="filter-switch-2" type="date" placeholder="text"></div>`;
+
+    } else if (id == "3") { // categoria
+        elem = `<div class="bg-gold"><select id="filter-switch-3"><option>Categoria</option></select></div>`;
+
+    } else { // undefined
+        elem = `<div class="bg-yellow"><span id="filter-switch-4">undefined</span></div>`;
+    }
+
+    if (input.checked) {
+        div.innerHTML += elem // + evt listener change val input
+        if (rect.classList.contains('slide-down'))
+            rect.classList.remove('slide-down');
+        rect.classList.add('slide-up')
+
+    } else {
+        rect.classList.add('slide-down')
+        rect.classList.remove('slide-up')
+        document.getElementById(`filter-switch-${id}`).parentElement.remove()// + clear filter in data display
+    }
+}
+/*
+ Filters:
+    by text in a.href | a.text
+    by date : init →→→→
+    by date (range) : [ ini : end ]
+    by >Category
+                order by +ediciones +mas visitados
+    order by:
+        date: asc|desc
+        nº editions: asc|desc+
+        
+        category: [IA TODO]
+*/
+
+    // for (let j=0; j<urls.length; j++) {       
+    //     text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ')
+    //     html = `<li><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a></li>`
+    // }
+
 </script>                     

@@ -1,14 +1,9 @@
-.w1\/2 {
-    width: 50% !important ;    
-}
-.w1\/3 {
-    width: 33% !important;
-}
-.w1\/5 {
-    width: 20% !important;
-}
+
 h1 {
     margin:0 auto;
+}
+.bold {
+    font-weight: bold;
 }
 .hcenter {
     display: flex;
@@ -22,4 +17,49 @@ h1 {
 }
 .ml05r {
     margin-left: 0.5rem;
+}
+.cursor {
+    cursor:pointer;
+}
+.font30px {
+    font-size:30px;
+}
+.font20px {
+    font-size:20px;
+}
+.dflex {
+    display: flex;
+}
+.flexrow {
+    display: flex;
+    flex-direction: row;
+}
+.justify-between {
+    justify-content:space-around;
+}
+.justify-around {
+    justify-content:space-around;
+}
+.w50 {
+    width: 50%;
+}
+.jc-end {
+    display: inline-grid;
+    justify-content: end;
+    padding-right: 20px;
+}
+.mt05 {
+    margin-top: 0.5rem;
+}
+.mtb05 {
+    margin: 0.5rem 0 0.5rem 0;
+}
+.pl05 {
+    padding-left: 0.5rem;
+}
+.pl1 {
+    padding-left: 1rem;
+}
+.pr1 {
+    padding-right: 1rem;
 }

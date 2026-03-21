@@ -1,20 +1,23 @@
 
-local = {
+const local = {
     endpoint: 'http://127.0.0.1:3000/api',
     token: null
 }
-limit = 10; // definir un orden de importancia para el front, ej: articulos con + ediciones
+// definir un orden de importancia para el front, ej: articulos con + ediciones
 // letras paginacion offset
 
-async function query(option,arg={}) {
-    var wreturn = null;
-    stmt = {};
+async function query(option,...args) {
+    var limit = 10; 
+    var stmt = {};
+    if (args.length == 2)
+        limit = args[1]
+
     switch (option) {
         case 'urlsStartsWith':
-            stmt = urlsStartsWith(arg,limit);   
+            stmt = urlsStartsWith(args[0],limit);   
         break;
         case 'diffsFromUrl':
-            stmt = diffsFromUrl(arg,limit);
+            stmt = diffsFromUrl(args[0],limit);
         break;
         case 'anexo':
             stmt = anexoUrls(limit);
@@ -66,7 +69,6 @@ function anexoUrls(limit=0) {
     return { sql:sql, args:[] };
 }
 function urlsByCategory(category, limit=0) {
-// myself catalogador , cargar todas los nombres de url y segun la palabra buscada ir catalogandolos
     sql = `select distinct json_extract(hc.obj, '$.article_url') as articleUrl
         from history_contribs hc 
         where articleUrl     

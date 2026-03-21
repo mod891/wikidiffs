@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1.0509777mm"
+   height="0.99619913mm"
+   viewBox="0 0 1.0509777 0.99619913"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="translate(-0.03901383,-0.0036098)">
+    <path
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0417738;stroke-dasharray:none;stroke-opacity:1"
+       d="m 0.13971859,0.00364595 0.001724,0.9961268"
+       id="path15-4-9-6-9" />
+    <path
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0417738;stroke-dasharray:none;stroke-opacity:1"
+       d="m 0.41943004,0.003646 0.001724,0.99612675"
+       id="path15-4-9-6-9-1" />
+    <path
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0417738;stroke-dasharray:none;stroke-opacity:1"
+       d="m 0.69914148,0.00364604 0.001724,0.99612671"
+       id="path15-4-9-6-9-1-7" />
+    <path
+       style="fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.0417738;stroke-dasharray:none;stroke-opacity:1"
+       d="m 0.97885433,0.00364604 0.00172,0.99612675"
+       id="path15-4-9-6-9-1-5" />
+    <rect
+       style="fill:#e60000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.126646;stroke-dasharray:none;stroke-opacity:1"
+       id="filtro4"
+       width="0.074832343"
+       height="0.05056271"
+       x="0.95183623"
+       y="0.78871787"
+       ry="0.0038471627" />
+    <rect
+       style="fill:#e60000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.126646;stroke-dasharray:none;stroke-opacity:1"
+       id="filtro3"
+       width="0.074832343"
+       height="0.05056271"
+       x="0.65756077"
+       y="0.78293473"
+       ry="0.0038471627" />
+    <rect
+       style="fill:#e60000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.126646;stroke-dasharray:none;stroke-opacity:1"
+       id="filtro2"
+       width="0.074832343"
+       height="0.05056271"
+       x="0.38356236"
+       y="0.78225619"
+       ry="0.0038471627" />
+    <rect
+       style="fill:#e60000;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.126646;stroke-dasharray:none;stroke-opacity:1"
+       id="filtro1"
+       width="0.075522095"
+       height="0.05056271"
+       x="0.10233683"
+       y="0.7791568"
+       ry="0.0038471627" />
+  </g>
+</svg>

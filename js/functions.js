@@ -1,5 +1,5 @@
 async function loadFragment(what) {
-    console.log('what:',what)
+    // console.log('what:',what)
     const fragments = [ 'menu','footer','index','alfabetrium','diffs','listby']
     if (fragments.includes(what)) {
         try {
@@ -12,7 +12,8 @@ async function loadFragment(what) {
             var template = document.createElement('template');
             template.innerHTML = html;
             var css = template.content.querySelector('style');
-            var js = template.content.querySelector('script');
+            var js = template.content.querySelectorAll('script');
+            js = js.length > 1? js[1] : js[0]; // issue live server svg support
             var fragment = template.content.querySelector(`#${what}`)
             if (['menu','footer'].includes(what)) 
                 document.getElementById(`${what}-fragment`).innerHTML = fragment.outerHTML;
@@ -43,15 +44,20 @@ async function loadFragment(what) {
 
 loadFragment('menu');
 loadFragment('footer');
-route('index')
+route('listby')
 
 var diffUrl = ""
-
+var char = 'A'
 function route(url) {
+
     if (url instanceof URL) {
         if (url.href.includes('?diff=')) {
             diffUrl = url.href.split('?diff=')[1]
             url.hash = '#diffs'
+        }
+        else if (url.href.includes('?c=')) {
+            char = url.href.split('?c=')[1]
+            url.hash = '#listby'
         }
         loadFragment(url.hash.replace('#',''))
         history.replaceState(null,'',location.pathname)
