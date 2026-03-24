@@ -9,15 +9,7 @@ h1 {
     display: flex;
     justify-content: center;
 }
-.pr1 {
-    padding-right: 1rem;
-}
-.mr05 {
-    margin-right: 0.5rem;
-}
-.ml05r {
-    margin-left: 0.5rem;
-}
+
 .cursor {
     cursor:pointer;
 }
@@ -43,6 +35,9 @@ h1 {
 .w50 {
     width: 50%;
 }
+.w70 {
+    width: 70%;
+}
 .jc-end {
     display: inline-grid;
     justify-content: end;
@@ -62,4 +57,19 @@ h1 {
 }
 .pr1 {
     padding-right: 1rem;
+}
+.pr1 {
+    padding-right: 1rem;
+}
+.mr05 {
+    margin-right: 0.5rem;
+}
+.mr1 {
+    margin-right: 1rem;
+}
+.ml05 {
+    margin-left: 0.5rem;
+}
+.ml1 {
+    margin-left: 1rem;
 }

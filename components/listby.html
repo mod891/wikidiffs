@@ -1,6 +1,5 @@
 <style>
 
-
 /* BEGIN:SWITCH by CHATGPT */
 .switch {
     position: relative;
@@ -52,11 +51,16 @@ input:checked + .slider:before {
     flex-direction: row;
 }
 #filter-inputs > div {
-    width: 25%;
-    justify-content: center;
+    width: 24%;
+    justify-content: space-around;
     padding: 0.2rem;
     margin-right: 0.5rem;
     display: flex;
+}
+#links {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    justify-content: left;
 }
 .filter-icon {
     padding-top: 10px;
@@ -107,17 +111,22 @@ input:checked + .slider:before {
     }
     #filter-inputs {
         display: grid;
-        grid-template-columns: 50% 50%;
+        grid-template-columns: 100%;
         gap: 10px;
         padding-bottom: 0.5rem;
 
     }
     #filter-inputs > div {
         width: auto;
-        justify-content: center;
+        justify-content: space-around;
         padding-left: 0.5rem;
         padding-right: 0.8rem;
         margin-right: 0.5rem;
+    }
+    #links {
+        display: grid;
+        grid-template-columns: 1fr;
+        justify-content: left;
     }
 }
 </style>
@@ -270,8 +279,7 @@ input:checked + .slider:before {
 var data = null;
 init()
 
-function init() {
-    
+async function init() {
     document.getElementById('title').innerText =` Páginas editadas por ${char}`;
     var filtersIcon = document.getElementById('filter-icon');
     var filtersModal = document.getElementById('filters-modal');
@@ -280,7 +288,6 @@ function init() {
     switchs.forEach(e => {
         e.addEventListener('click',() => {showHideInputFilter(e)});
     });
-
     filtersIcon.addEventListener('click', () => {
         filtersModal.style.display = "flex";
     })
@@ -289,57 +296,117 @@ function init() {
     })
 
     var storage = false;
-    storageObj = JSON.parse(sessionStorage.getItem('listby'))
-    if (storageObj != null)     
+    var storageObj = JSON.parse(sessionStorage.getItem('listby'))
+    if (storageObj != null) {    
         for (let i=0; i<storageObj.char.length; i++) { 
             if (Object.keys(storageObj.char[i])[0] == char) {
                 storage = true;
                 data = storageObj.char[i];
             }
         }
-    storage == true?  storageUrls() : fetchUrls();       
+    }
+    if (storage == false)
+        await fetchUrls();
+    liLinks();       
 }
-function storageUrls() {
-    console.log('storageUrls:',storageObj)
-    console.log('filtrable data:',data)
+
+function liLinks() {
+    var div = document.getElementById('listby-content');
+    var urls = Object.values(data[char]);
+    var ul = document.createElement('ul');
+    ul.id = 'links';
+    for (let i=0; i<urls.length; i++) {
+        text = decodeURIComponent(urls[i].articleUrl.split('/').at(-1)).replaceAll('_',' ')
+        var li = `<li data-articleurl="${decodeURIComponent(urls[i].articleUrl.split('/').at(-1))}"
+                    data-text="${text}"
+                    data-neditions=${urls[i].total}
+                    data-dates=${JSON.stringify(urls[i].dates)}
+                    data-category="undefined" >
+                        <a href="#diffs?diff=${urls[i].articleUrl}">${text}</a>
+                        <label class="ml1">${urls[i].total} edits</label></li>`;
+        // ${urls[i].total} edits → icon pencil, slot pill edit, pill category
+        ul.insertAdjacentHTML('beforeend',li);
+    }
+    div.appendChild(document.createElement('div'))
+    div.lastChild.appendChild(ul)
 }
+
 async function fetchUrls() {
-   var urls = await query('urlsStartsWith',char,0);
-    storageObj = JSON.parse(sessionStorage.getItem('listby'));
-    console.log('storage urls:',storageObj);
-    if (storageObj == null) {
-        charObj = { [char]: [] };
-        storageObj = {char:[]};
-        storageObj.char.push({ [char]: urls });
+    var urls = await query('urlsStartsWith',char,0);
+
+    
+    var ini = new Date('2-2-2222')
+    var end = new Date('1-1-1111')
+  
+    for (let i=0; i<urls.length; i++) {
+        dates = JSON.parse(urls[i].dates);
+        urls[i].dates = dates;
+        urls[i].total = dates.length;
+        for (let j=0; j<dates.length; j++) {
+            let minMaxDate = new Date(dates[j].split('/')[2]+'-'+dates[j].split('/')[1]+'-'+dates[j].split('/')[0]);
+            if (minMaxDate < ini) 
+                ini = minMaxDate;
+            if (minMaxDate > end) 
+                end = minMaxDate;
+        }
+    }
+    var storageObj = JSON.parse(sessionStorage.getItem('listby'));
+    var config = { minmaxdate: { ini: ini.toISOString().split('T')[0], end: end.toISOString().split('T')[0] } }
+    if (storageObj == null) { 
+        storageObj = { char:[] };
+        storageObj.char.push({ [char]: urls, config: config });
         sessionStorage.setItem('listby',JSON.stringify(storageObj));
     }
     else {
-        storageObj.char.push({ [char]: urls });
+        storageObj.char.push({ [char]: urls, config: config });
         sessionStorage.setItem('listby',JSON.stringify(storageObj));
     }
-
-    console.log('filtrable data:',data)
+    data = { [char]: urls, config: config };
 }
+
 function showHideInputFilter(input) {
     var div = document.getElementById('filter-inputs');
     var id = input.id.split('-')[1];
     var rect = document.getElementById(`filter-${id}`);
     
-    if (id == "1") {        // texto
-        elem = `<div class="bg-cyan"><input id="filter-switch-1" type="text" placeholder="text"></div>`;
+    if (id == "1") { // text
+        elem = `<div id="filter-switch-1" class="bg-cyan">
+                    <label class="ml05">Buscar:</label>
+                    <input id="search" type="text" class="mr05 ml05 w70" placeholder="text">
+                </div>`;
 
-    } else if (id == "2") { // fecha // solo por año? 
-        elem = `<div class="bg-green2"><input id="filter-switch-2" type="date" placeholder="text"></div>`;
+    } else if (id == "2") { // date 
+        elem = `<div id="filter-switch-2" class="bg-green2">
+                    <label class="ml05">Inicio:</label>
+                    <input  id="begin" type="date" class="mr05 ml05"
+                        min="${data.config.minmaxdate.ini}" 
+                        max="${data.config.minmaxdate.end}">
+                    <label class="">Fin:</label>
+                    <input  id="end" type="date" class="mr05 ml05"
+                        min="${data.config.minmaxdate.ini}"
+                        max="${data.config.minmaxdate.end}">
+                </div>`;
 
-    } else if (id == "3") { // categoria
-        elem = `<div class="bg-gold"><select id="filter-switch-3"><option>Categoria</option></select></div>`;
-
+    } else if (id == "3") { // category
+        elem = `<div id="filter-switch-3" class="bg-gold">
+                    <label class="">Categoría:</label>
+                    <select id="category" class="w50" ><option>Categoria</option><option>Categoria1</option></select>
+                </div>`;
+        
     } else { // undefined
-        elem = `<div class="bg-yellow"><span id="filter-switch-4">undefined</span></div>`;
+        elem = `<div id="filter-switch-4" class="bg-yellow"><span >undefined</span></div>`;
     }
 
     if (input.checked) {
-        div.innerHTML += elem // + evt listener change val input
+        div.insertAdjacentHTML('beforeend',elem)
+        let inputs = div.querySelector(`#filter-switch-${id}`).querySelectorAll('input,select')
+        inputs.forEach(elem => {
+            if (elem.type == 'date' || elem.type == 'select-one')
+                elem.addEventListener('change',filterData)
+            else
+                elem.addEventListener('input',filterData)
+        })
+
         if (rect.classList.contains('slide-down'))
             rect.classList.remove('slide-down');
         rect.classList.add('slide-up')
@@ -347,26 +414,74 @@ function showHideInputFilter(input) {
     } else {
         rect.classList.add('slide-down')
         rect.classList.remove('slide-up')
-        document.getElementById(`filter-switch-${id}`).parentElement.remove()// + clear filter in data display
+        document.getElementById(`filter-switch-${id}`).remove()// + clear filter in data display
     }
 }
+
+function filterData(e) {
+
+    applySearchFilter = false;
+    applyDateFilter = false;
+    applyCategoryFilter = false;
+
+    var searchInput = document.getElementById('search')
+    var begin = document.getElementById('begin')
+    var end = document.getElementById('end')
+    var categorySelect = document.getElementById('category')
+
+    if (searchInput != null)
+        if (searchInput.value != '')
+            applySearchFilter = true;
+    if (begin != null)
+        if (begin.value != '' || end.value != '')
+            applyDateFilter = true;
+    if (categorySelect != null)
+        if (categorySelect.value != 'Categoria')
+            applyCategoryFilter = true;
+
+    document.querySelectorAll('li').forEach(li => {
+        let display = true;
+        if (applySearchFilter) {
+            if (!li.dataset.text.toUpperCase().includes(searchInput.value.toUpperCase()) ||
+            !li.dataset.articleurl.toUpperCase().includes(searchInput.value.toUpperCase()) )
+                display = false;
+        }
+        if (applyDateFilter) {
+            let dates = JSON.parse(li.dataset.dates);           
+            for (let i=0; i<dates.length; i++) {
+                let date = new Date(dates[i].split('/')[2]+'-'+dates[i].split('/')[1]+'-'+dates[i].split('/')[0]);
+
+                if (e.target.id == 'begin' && e.target.value != "" && end.value == "" && display == true) {     // [begin,inf)
+                    if (date < new Date(e.target.value))
+                        display = false;
+                }
+                else if (e.target.id == 'end' && e.target.value != "" && begin.value == "" && display == true) {    // (-inf,end] 
+                    if (date > new Date(e.target.value))
+                        display = false;
+                }
+                else if (begin.value != "" && end.value != "" && display == true) {   // [begin,end]
+                    if (date <= new Date(begin.value) || date >= new Date(end.value))
+                        display = false;    
+                }   
+            }
+        }
+        if (applyCategoryFilter) {
+            console.log('applyCategoryFilter')
+            // appy 
+        }
+            
+        li.style.display = display? "block" : "none";
+    });  
+          
+}
+
 /*
- Filters:
-    by text in a.href | a.text
-    by date : init →→→→
-    by date (range) : [ ini : end ]
-    by >Category
-                order by +ediciones +mas visitados
+
     order by:
-        date: asc|desc
+        category
         nº editions: asc|desc+
         
-        category: [IA TODO]
+        category: [TODO]
 */
-
-    // for (let j=0; j<urls.length; j++) {       
-    //     text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ')
-    //     html = `<li><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a></li>`
-    // }
 
 </script>                     

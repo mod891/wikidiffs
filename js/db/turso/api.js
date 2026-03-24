@@ -53,9 +53,11 @@ function diffsFromUrl(url, limit=0) {
     return { sql:sql, args:[url] };
 }
 function urlsStartsWith(char, limit=0) {
-    sql = `select distinct json_extract(hc.obj, '$.article_url') as articleUrl
+    sql = `select distinct json_extract(hc.obj, '$.article_url') as articleUrl,
+        '[' || group_concat('"' || json_extract(hc.obj, '$.date_edition') || '"' ) || ']' as dates
         from history_contribs hc 
-        where articleUrl like ? and articleUrl not like '%wiki/Anexo:%'` 
+        where articleUrl like ? and articleUrl not like '%wiki/Anexo:%'
+        group by json_extract(hc.obj, '$.article_url')`
     if (limit != 0 ) 
         sql += `limit ${limit}`   
     return { sql:sql, args:[`%wiki/${char}%`] };
