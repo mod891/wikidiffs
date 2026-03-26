@@ -1,5 +1,6 @@
 async function loadFragment(what) {
-    // console.log('what:',what)
+    what = what.replace('#','').replace(/\?.*/,'');
+    console.log('what:',what)
     const fragments = [ 'menu','footer','index','alfabetrium','diffs','listby']
     if (fragments.includes(what)) {
         try {
@@ -41,34 +42,21 @@ async function loadFragment(what) {
         console.log('ERR: choose wisely')
     }
 }
-
-loadFragment('menu');
-loadFragment('footer');
-route('listby')
-
-var diffUrl = ""
-var char = 'A'
-function route(url) {
-
-    if (url instanceof URL) {
-        if (url.href.includes('?diff=')) {
-            diffUrl = url.href.split('?diff=')[1]
-            url.hash = '#diffs'
-        }
-        else if (url.href.includes('?c=')) {
-            char = url.href.split('?c=')[1]
-            url.hash = '#listby'
-        }
-        loadFragment(url.hash.replace('#',''))
-        history.replaceState(null,'',location.pathname)
-    }
-    else
-        loadFragment(url)
+function init() {
+    loadFragment('menu');
+    loadFragment('footer');
+    route(new URL(window.location.href+'#index'))
 }
-
+function route(url) {
+    getVal = ""
+    if (url.hash.split('?').length > 1) 
+        getVal = url.hash.split('?')[1].split('=')[1]
+    loadFragment(url.hash)
+}
 window.addEventListener('hashchange', () => {
-    route(new URL(window.location))
+    url = new URL(window.location)
+    route(url)
 })
-// window.addEventListener('popstate', (event) => {
-//     console.log('← → desactivado')
-// })
+
+var getVal = ""
+init()
