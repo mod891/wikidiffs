@@ -22,6 +22,10 @@ h1 {
 .dflex {
     display: flex;
 }
+.dfcenter {
+    display: flex;
+    justify-content: center;
+}
 .flexrow {
     display: flex;
     flex-direction: row;
@@ -48,6 +52,9 @@ h1 {
 }
 .mtb05 {
     margin: 0.5rem 0 0.5rem 0;
+}
+.pl03 {
+    padding-left: 0.3rem;
 }
 .pl05 {
     padding-left: 0.5rem;

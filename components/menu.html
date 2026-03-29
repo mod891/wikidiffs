@@ -1,7 +1,9 @@
 <style>
 .item {
     padding: 1rem 1.5rem 1rem 1.5rem;
-    transition: transform 0.1s ease;            
+    transition: transform 0.1s ease;
+    clip-path:polygon(15% 21%, 100% 0%, 85% 100%, 0% 100%);
+    background-color: red;
 }
 .item:hover {
     transform: scale(1.2);   
@@ -22,27 +24,32 @@
     nav {
         position: fixed;
         top: 0;
+        z-index: 3000;
     }
     .item {
         padding: 0rem 0rem 0.5rem 0rem; 
+        clip-path: polygon(8% 0%, 100% 0%, 90% 100%, 0% 90%);   
+
+        background-color: red;
+        margin: 0rem 0.9rem 0.9rem 0rem;
+        padding: 0rem 0.7rem 0.3rem 0.7rem;
+        text-align: center;
     }
     .item:hover {
         transform: none;
+    }
+    .item:first-child {
+        margin-top: 0.4rem;
+    }  
+    .item > a {
+        display: block;
+        width: 100%;
     }
     .menu-links {
         flex-direction: column;      
         transition: left 1s ease;
         width:fit-content;
         left:-200px;
-    }
-    .item:first-child {
-        margin-top: 0.4rem;
-    }  
-    .item {
-        background-color: red;
-        margin: 0rem 0.9rem 0.9rem 0rem;
-        padding: 0rem 0.7rem 0.3rem 0.7rem;
-        text-align: center;
     }
     .openmenu {
         left:0px;
@@ -69,15 +76,12 @@
         <div id="svgdiv" >
             <img id="menu-icon" class="icon" src="resources/svg/vrt.svg" alt="" srcset="">
         </div>
-    <!-- <div id="items" class="menu-links ">
-            <div class="item"><a href="/public/">Index</a></div>
-            <div class="item"><a href="/public/diffs.html">template1</a></div>
-            <div class="item"><a href="/public/alfabetrium.html">A-Z0-9</a></div>
-        </div> -->
         <div id="items" class="menu-links ">
-            <div class="item"><a href="/public/#index">Index</a></div>
-            <div class="item"><a href="/public/#diffs">template1</a></div>
-            <div class="item"><a href="/public/#alfabetrium">A-Z0-9</a></div>
+            <div class="item"><a href="/public/#index"><b>Inicio</b></a></div>
+            <div class="item"><a href="/public/#diffs?var=random" onclick="route(window.location)"><b>Página aleatoria</b></a></div>
+            <div class="item"><a href="/public/#alfabetrium"><b>Alfabéticamente</b></a></div>
+            <div class="item"><a href="/public/#categorys"><b>Por categorías</b></a></div>
+            <div class="item"><a href="/public/#users"><b>Usuarios</b></a></div>
         </div>
     </nav>
 </div>
@@ -102,4 +106,13 @@
         }     
     }) 
 // #ISSUE1 end block
+
+    menuLinks = document.querySelectorAll('a');
+    menuLinks.forEach(element => {
+        if (!element.href.includes('random')) {
+            element.addEventListener('click', () => {
+                img.click()
+            })
+        }
+    });
 </script>

@@ -1,3 +1,6 @@
+var getVal = ""
+init()
+
 async function loadFragment(what) {
     what = what.replace('#','').replace(/\?.*/,'');
     console.log('what:',what)
@@ -45,18 +48,15 @@ async function loadFragment(what) {
 function init() {
     loadFragment('menu');
     loadFragment('footer');
-    route(new URL(window.location.href+'#index'))
+    route()
 }
-function route(url) {
+function route() {
     getVal = ""
+    url = new URL(window.location)
     if (url.hash.split('?').length > 1) 
         getVal = url.hash.split('?')[1].split('=')[1]
     loadFragment(url.hash)
 }
 window.addEventListener('hashchange', () => {
-    url = new URL(window.location)
-    route(url)
+    route()
 })
-
-var getVal = ""
-init()

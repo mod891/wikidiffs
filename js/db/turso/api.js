@@ -39,7 +39,7 @@ async function query(option,...args) {
     }
 }
 function diffsFromUrl(url, limit=0) {
-    sql = `select 
+    sql = `select df.id as id,
         json_extract(hc.obj, '$.article_url') as articleUrl,
         json_extract(hc.obj, '$.diff_url') as diffUrl,
         json_extract(hc.obj,'$.date_edition') || ' ' || json_extract(hc.obj,'$.time_edition') as datetime,

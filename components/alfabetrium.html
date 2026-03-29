@@ -12,6 +12,10 @@
     "1 Ñ 2 0";
     grid-template-columns: 1fr 1fr 1fr 1fr;
 }
+.listin {
+    background-color: var(--bluez);
+    width: 80%;
+}
 #A { grid-area: A;}
 #B { grid-area: B;}
 #C { grid-area: C;}
@@ -42,12 +46,10 @@
 #anexo { grid-area: anexo;}
 #discusion { grid-area: discusion;}
 @media (max-width: 430px) {
-    #abcdario > div {
-        border: solid 1px black;
-        /* background-color:red; */
-    }
+
     #abcdario {
         display:grid;
+        grid-template-columns: 1fr;
         grid-template-areas:
         "A"
         "B"
@@ -78,41 +80,46 @@
         "Z"
         "anexo"
         "discusion"; 
-        grid-template-rows: 1fr;
+    }
+    .listin {
+        position: sticky;
+        top:0;
+        background-color: var(--bluez);
+        width: 100%;
     }
 }
 </style>
 <div id="alfabetrium">
     <div id="abcdario">
-        <div id="A"><a href="#">A</a><ul></ul></div>
-        <div id="B"><a href="#">B</a><ul></ul></div>
-        <div id="C"><a href="#">C</a><ul></ul></div>
-        <div id="D"><a href="#">D</a><ul></ul></div>
-        <div id="E"><a href="#">E</a><ul></ul></div>
-        <div id="F"><a href="#">F</a><ul></ul></div>
-        <div id="G"><a href="#">G</a><ul></ul></div>
-        <div id="H"><a href="#">H</a><ul></ul></div>
-        <div id="I"><a href="#">I</a><ul></ul></div>
-        <div id="J"><a href="#">J</a><ul></ul></div>
-        <div id="K"><a href="#">K</a><ul></ul></div>
-        <div id="L"><a href="#">L</a><ul></ul></div>
-        <div id="M"><a href="#">M</a><ul></ul></div>
-        <div id="N"><a href="#">N</a><ul></ul></div>
-        <div id="Ñ"><a href="#">Ñ</a><ul></ul></div>
-        <div id="O"><a href="#">O</a><ul></ul></div>
-        <div id="P"><a href="#">P</a><ul></ul></div>
-        <div id="Q"><a href="#">Q</a><ul></ul></div>
-        <div id="R"><a href="#">R</a><ul></ul></div>
-        <div id="S"><a href="#">S</a><ul></ul></div>
-        <div id="T"><a href="#">T</a><ul></ul></div>
-        <div id="U"><a href="#">U</a><ul></ul></div>
-        <div id="V"><a href="#">V</a><ul></ul></div>
-        <div id="W"><a href="#">W</a><ul></ul></div>
-        <div id="X"><a href="#">X</a><ul></ul></div>
-        <div id="Y"><a href="#">Y</a><ul></ul></div>
-        <div id="Z"><a href="#">Z</a><ul></ul></div>
-        <div id="anexo"><a href="#">Anexo</a><ul><ul></div>
-        <div id="discusion"><a href="#">Discusiones</a><ul><ul></div>
+        <div id="A"><a href="#" class="listin dfcenter"><b>A</b></a><ul></ul></div>
+        <div id="B"><a href="#" class="listin dfcenter"><b>B</b></a><ul></ul></div>
+        <div id="C"><a href="#" class="listin dfcenter"><b>C</b></a><ul></ul></div>
+        <div id="D"><a href="#" class="listin dfcenter"><b>D</b></a><ul></ul></div>
+        <div id="E"><a href="#" class="listin dfcenter"><b>E</b></a><ul></ul></div>
+        <div id="F"><a href="#" class="listin dfcenter"><b>F</b></a><ul></ul></div>
+        <div id="G"><a href="#" class="listin dfcenter"><b>G</b></a><ul></ul></div>
+        <div id="H"><a href="#" class="listin dfcenter"><b>H</b></a><ul></ul></div>
+        <div id="I"><a href="#" class="listin dfcenter"><b>I</b></a><ul></ul></div>
+        <div id="J"><a href="#" class="listin dfcenter"><b>J</b></a><ul></ul></div>
+        <div id="K"><a href="#" class="listin dfcenter"><b>K</b></a><ul></ul></div>
+        <div id="L"><a href="#" class="listin dfcenter"><b>L</b></a><ul></ul></div>
+        <div id="M"><a href="#" class="listin dfcenter"><b>M</b></a><ul></ul></div>
+        <div id="N"><a href="#" class="listin dfcenter"><b>N</b></a><ul></ul></div>
+        <div id="Ñ"><a href="#" class="listin dfcenter"><b>Ñ</b></a><ul></ul></div>
+        <div id="O"><a href="#" class="listin dfcenter"><b>O</b></a><ul></ul></div>
+        <div id="P"><a href="#" class="listin dfcenter"><b>P</b></a><ul></ul></div>
+        <div id="Q"><a href="#" class="listin dfcenter"><b>Q</b></a><ul></ul></div>
+        <div id="R"><a href="#" class="listin dfcenter"><b>R</b></a><ul></ul></div>
+        <div id="S"><a href="#" class="listin dfcenter"><b>S</b></a><ul></ul></div>
+        <div id="T"><a href="#" class="listin dfcenter"><b>T</b></a><ul></ul></div>
+        <div id="U"><a href="#" class="listin dfcenter"><b>U</b></a><ul></ul></div>
+        <div id="V"><a href="#" class="listin dfcenter"><b>V</b></a><ul></ul></div>
+        <div id="W"><a href="#" class="listin dfcenter"><b>W</b></a><ul></ul></div>
+        <div id="X"><a href="#" class="listin dfcenter"><b>X</b></a><ul></ul></div>
+        <div id="Y"><a href="#" class="listin dfcenter"><b>Y</b></a><ul></ul></div>
+        <div id="Z"><a href="#" class="listin dfcenter"><b>Z</b></a><ul></ul></div>
+        <div id="anexo"><a href="#" class="listin dfcenter">Anexo</a><ul><ul></div>
+        <div id="discusion"><a href="#" class="listin dfcenter">Discusiones</a><ul><ul></div>
     </div>
 </div>   
 

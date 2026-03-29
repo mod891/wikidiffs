@@ -280,7 +280,7 @@ var data = null;
 init()
 
 async function init() {
-    document.getElementById('title').innerText =` Páginas editadas por ${getVal}`;
+    document.getElementById('title').innerText =` Que empiezan por ${getVal}`;
     var filtersIcon = document.getElementById('filter-icon');
     var filtersModal = document.getElementById('filters-modal');
     var closeFiltersModal = document.getElementById('close-modal');
@@ -377,11 +377,11 @@ function showHideInputFilter(input) {
 
     } else if (id == "2") { // date 
         elem = `<div id="filter-switch-2" class="bg-green2">
-                    <label class="ml05">Inicio:</label>
+                    <label class="ml05 pl03">Inicio</label>
                     <input  id="begin" type="date" class="mr05 ml05"
                         min="${data.config.minmaxdate.ini}" 
                         max="${data.config.minmaxdate.end}">
-                    <label class="">Fin:</label>
+                    <label class="">Fin</label>
                     <input  id="end" type="date" class="mr05 ml05"
                         min="${data.config.minmaxdate.ini}"
                         max="${data.config.minmaxdate.end}">
@@ -389,7 +389,7 @@ function showHideInputFilter(input) {
 
     } else if (id == "3") { // category
         elem = `<div id="filter-switch-3" class="bg-gold">
-                    <label class="">Categoría:</label>
+                    <label class="">Categoría</label>
                     <select id="category" class="w50" ><option>Categoria</option><option>Categoria1</option></select>
                 </div>`;
         

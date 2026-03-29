@@ -1,15 +1,20 @@
 <style>
+.wrap-diff-header {
+    position: sticky;
+    top:0;
+    z-index: 10;
+}
 .diff-header {
-    background-color: aquamarine; /**/
+    background-color: rgb(127, 234, 255); /**/
     display: grid;
     grid-template-areas: 
-    "0 A B C";
-    grid-template-columns: 1fr 1fr 1fr 2fr;                
-}            
+    "A B C D";
+    grid-template-columns: 1fr 1fr 1fr 0.5fr;                
+}
 #datetime { grid-area: A; }
 #user { grid-area: B; }
 #article-url { grid-area: C; }
-
+#external-url { grid-area: D; }
 .lineno {
     margin-top: 0.5rem;
     padding: 0.1rem 0rem 0.2rem 0.2rem;
@@ -36,21 +41,33 @@
     margin: 0rem 0 0 0;
     padding: 0 0 0 0.5rem;
     border: solid 1px rgb(242, 242, 242);
-    background-color: rgb(253, 145, 145); /*TODO pick right colors*/
+    background-color: rgb(253, 145, 145); 
 }
-
+.wadd {
+    background-color:var(--greegit);
+}
+.wdel {
+    background-color: var(--redgit);
+}
 @media (max-width: 430px) {
-    .wrap-diff-header {
-        padding-top: 2rem;
-    }
     .diff-header {
         width: 100%;
         display: grid;
         grid-template-areas: 
         "0 A B"
-        "0 C C"; 
+        "C C D"; 
         grid-template-columns: 0.1fr 1.3fr 1fr;
         padding-bottom: 0.6rem;
+    }
+    #datetime {
+        margin-left: 30px;
+    }
+    #article-url {
+        margin-left: 50px;
+    }
+    #external-url {
+        display:flex;
+        justify-content: space-around;
     }
     .lineno {    
         padding: 0.1rem 0rem 0.2rem 0rem;
@@ -71,9 +88,9 @@
         top: 0 !important;
     }
     
-    .wrap-diff-header:first-child {
+    /* .wrap-diff-header:first-child {
         padding-left:60px;
-    }
+    } */
 }
 </style>
 
@@ -83,37 +100,23 @@
 
 var idCont = 0;
 var diffTexts = [];
-loadDiffs()
-/*
-    // [FIX] diffHeaders tipo agenda tlfn
-    console.log('diffHeaders')
-    var currentDiffHeader=0;
-    diffHeaders = document.getElementsByClassName('diff-header')
-    webHeader = document.getElementById('web-header')
-    if (diffHeaders.length > 0) {
-        currentDiffHeader = diffHeaders[diffHeaders.length-1]
-    }  
-    const observer = new IntersectionObserver(
-        ([entry]) => {
-            if (!entry.isIntersecting) 
-                currentDiffHeader.classList.add('fixed');
-            else 
-                currentDiffHeader.classList.remove('fixed')                        
-        })
-    observer.observe(webHeader)
-*/
+
+init() 
+
+async function init() {
+    await loadDiffs()
+}
 
 async function loadDiffs() {
-
-    // var articleUrl = diffUrl;
     var articleUrl = getVal;
-
-    var dataRequest = null;
-
+    var data = null;
      try {
         if (articleUrl == "")
             data = await fetch(`/public/js/db/mock-sample1.json`).then(res => res.json()); // remote db query
-        else
+        else if (articleUrl == "random") {
+            data = await query('randUrl');
+            data = await query('diffsFromUrl',data[0].articleUrl);
+        } else 
             data = await query('diffsFromUrl',articleUrl);
     } catch (err) {
         console.log(`mockDiffs::data retrieving Error:`,err);
@@ -122,17 +125,20 @@ async function loadDiffs() {
         var fragment = null;
         for (let d=0; d<data.length; d++) {
             currentDiff = data[d];
-            articleTitle = currentDiff.articleUrl.split('/').at(-1).replaceAll('_',' ')
+            articleTitle = decodeURIComponent(currentDiff.articleUrl.split('/').at(-1).replaceAll('_',' '))
+            diffs = currentDiff.articleUrl.split('&diff')[0];
             diffHeader =`
-            <div id="{DIFFID}" class="diff">
+            <div id="${currentDiff.id}" class="diff">
                 <div class="wrap-diff-header">
-                    <div class="diff-header">
+                    <div id="diff-header-${d}" class="diff-header">
                         <span id="datetime">
-                            <label class="mr05">Fecha</label><b id="datetime-data">${currentDiff.datetime}</b></span>
+                            <label class="mr05"></label><b id="datetime-data">${currentDiff.datetime}</b></span>
                         <span id="user">
                             <label class="mr05">por</label><b id="user-data"><a href="#">${currentDiff.user}</a></b></span> 
                         <span id="article-url">
-                            <a id="article-url-data" href="${currentDiff.diffUrl}">${articleTitle}</a></span>
+                            <a id="article-url-data" href="#diffs?diff=${diffs}">${articleTitle}</a></span>
+                        <span id="external-url">
+                            <a id="external-url-data" href="${currentDiff.diffUrl}" target="_blank">link externo</a></span>
                 </div></div>
                 <div class="lines"></div>
             </div>` 

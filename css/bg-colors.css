@@ -1,6 +1,7 @@
 :root {
     --red: red;
     --blue: rgb(54, 54, 255);
+    --bluez: rgb(0, 179, 255);
     --green: green;
     --yellow: yellow;
     --black: black;
@@ -10,7 +11,9 @@
     --white: white;
     --grey: grey;
     --green2: rgb(2, 255, 2);
-    --gold: gold;
+    --gold: gold; 
+    --redgit: rgb(163,0,0,1);
+    --greengit: rgb(62,123,4,1);
 }
 
 .bg-red { background-color: var(--red); }
