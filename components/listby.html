@@ -97,7 +97,7 @@ input:checked + .slider:before {
     background-color: rgb(46, 130, 255);
 }
 
-@media (max-width: 430px) {
+@media (max-width: 900px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
     .filter-icon {
         padding-top: 20px;
         width:40px;
@@ -333,8 +333,6 @@ function liLinks() {
 
 async function fetchUrls() {
     var urls = await query('urlsStartsWith',getVal,0);
-
-    
     var ini = new Date('2-2-2222')
     var end = new Date('1-1-1111')
   
@@ -414,7 +412,15 @@ function showHideInputFilter(input) {
     } else {
         rect.classList.add('slide-down')
         rect.classList.remove('slide-up')
-        document.getElementById(`filter-switch-${id}`).remove()// + clear filter in data display!!!!
+        let inputs = div.querySelector(`#filter-switch-${id}`).querySelectorAll('input,select')
+        inputs.forEach(elem => {
+            if (elem.type == 'date' || elem.type == 'select-one')
+                elem.removeEventListener('change',filterData)
+            else
+                elem.removeEventListener('input',filterData)
+        })
+        document.getElementById(`filter-switch-${id}`).remove()
+        filterData()
     }
 }
 

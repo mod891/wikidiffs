@@ -1,7 +1,7 @@
 <style>
 .item {
     padding: 1rem 1.5rem 1rem 1.5rem;
-    transition: transform 0.1s ease;
+    transition: transform 0.3s ease;
     clip-path:polygon(15% 21%, 100% 0%, 85% 100%, 0% 100%);
     background-color: red;
 }
@@ -20,7 +20,7 @@
     display:none;
 }
 /* mobile */
-@media (max-width: 430px) {
+@media (max-width: 900px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
     nav {
         position: fixed;
         top: 0;
@@ -78,7 +78,7 @@
         </div>
         <div id="items" class="menu-links ">
             <div class="item"><a href="/public/#index"><b>Inicio</b></a></div>
-            <div class="item"><a href="/public/#diffs?var=random" onclick="route(window.location)"><b>Página aleatoria</b></a></div>
+            <div class="item"><a href="/public/#diffs?var=random" onclick="route()"><b>Página aleatoria</b></a></div>
             <div class="item"><a href="/public/#alfabetrium"><b>Alfabéticamente</b></a></div>
             <div class="item"><a href="/public/#categorys"><b>Por categorías</b></a></div>
             <div class="item"><a href="/public/#users"><b>Usuarios</b></a></div>

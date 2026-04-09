@@ -3,8 +3,6 @@ const local = {
     endpoint: 'http://127.0.0.1:3000/api',
     token: null
 }
-// definir un orden de importancia para el front, ej: articulos con + ediciones
-// letras paginacion offset
 
 async function query(option,...args) {
     var limit = 10; 
@@ -24,11 +22,14 @@ async function query(option,...args) {
         break;
         case 'randUrl':
             stmt = randUrl();
-        break;   
+        break;
+        case 'urlFromId':
+            stmt = urlFromId(args[0]);
+        break;     
         default:
-            console.log('hoigan no furula',option)
+            console.log('hoiga esto no furula',option)
     }
-    var request = await fetch(`http://127.0.0.1:3000/api`,{
+    var request = await fetch(local.endpoint,{
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({data:stmt})
@@ -51,6 +52,12 @@ function diffsFromUrl(url, limit=0) {
     if (limit != 0 ) 
         sql += `limit ${limit}`
     return { sql:sql, args:[url] };
+}
+function urlFromId(id) {
+    sql = `select json_extract(hc.obj, '$.article_url') as articleUrl
+        from history_contribs hc
+        where hc.id = ?`
+    return { sql:sql, args:[id] };
 }
 function urlsStartsWith(char, limit=0) {
     sql = `select distinct json_extract(hc.obj, '$.article_url') as articleUrl,

@@ -45,11 +45,14 @@
 }
 .wadd {
     background-color:var(--greegit);
+    box-shadow: 2px 2px 5px #111111;
 }
 .wdel {
     background-color: var(--redgit);
+    box-shadow: 2px 2px 5px #111111;
 }
-@media (max-width: 430px) {
+
+@media (max-width: 900px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
     .diff-header {
         width: 100%;
         display: grid;
@@ -87,10 +90,7 @@
         position:fixed;
         top: 0 !important;
     }
-    
-    /* .wrap-diff-header:first-child {
-        padding-left:60px;
-    } */
+  
 }
 </style>
 
@@ -101,25 +101,21 @@
 var idCont = 0;
 var diffTexts = [];
 
-init() 
-
-async function init() {
-    await loadDiffs()
-}
+loadDiffs()
 
 async function loadDiffs() {
     var articleUrl = getVal;
     var data = null;
      try {
         if (articleUrl == "")
-            data = await fetch(`/public/js/db/mock-sample1.json`).then(res => res.json()); // remote db query
-        else if (articleUrl == "random") {
-            data = await query('randUrl');
-            data = await query('diffsFromUrl',data[0].articleUrl);
-        } else 
-            data = await query('diffsFromUrl',articleUrl);
+            data = await fetch(`/public/js/db/mock-sample1.json`).then(res => res.json()); // mock sample
+        else if (articleUrl == "random") 
+            articleUrl = (await query('randUrl'))[0].articleUrl;
+        else if (articleUrl.match(/[0-9]{9}/) != null) 
+            articleUrl = (await query('urlFromId',articleUrl))[0].articleUrl;
+        data = await query('diffsFromUrl',articleUrl);            
     } catch (err) {
-        console.log(`mockDiffs::data retrieving Error:`,err);
+        console.log(`loadDiffs::data retrieving Error:`,err);
     }
     if (data.length > 0) {
         var fragment = null;
@@ -132,7 +128,7 @@ async function loadDiffs() {
                 <div class="wrap-diff-header">
                     <div id="diff-header-${d}" class="diff-header">
                         <span id="datetime">
-                            <label class="mr05"></label><b id="datetime-data">${currentDiff.datetime}</b></span>
+                            <label class="d-mr2 mr05"></label><b id="datetime-data">${currentDiff.datetime}</b></span>
                         <span id="user">
                             <label class="mr05">por</label><b id="user-data"><a href="#">${currentDiff.user}</a></b></span> 
                         <span id="article-url">
@@ -175,6 +171,7 @@ function collapsableDiv() {
     var objs = [];
     keys = Object.keys(addels)
     for (i in keys) {
+        let len = 300;
         if (Object.keys(addels[keys[i]]).length > 0) {
             obj = { ...objStruct}
             idCont++;
@@ -184,14 +181,20 @@ function collapsableDiv() {
                 text = escapeHTML(addels[keys[i]])
             
             obj.id = "text"+idCont 
-            if (text.length > 300) {
-                obj.shortText = text.substr(0,300)+"... <a href='#' onClick='changeText(event,this)'><b>{más}</b></a>";
-                obj.fullText = text+" <a href='#' onClick='changeText(event,this)'><b>{menos}</b></a>";
+            if (text.length > len) {
+                posIni = text.lastIndexOf('$$$BEGIN$$$',len)
+                posEnd = text.lastIndexOf('$$$END$$$',len)
+                if (posEnd < posIni) {
+                    //  console.log('posEnd < posIni',posEnd ,'<',posIni)
+                    len = text.indexOf('$$$END$$$',len)+'$$$END$$$'.length
+                }
+                obj.shortText = escapeBeginEnd(text.substr(0, len)) + "... <a href='#' onClick='changeText(event,this)'><b>{más}</b></a>";
+                obj.fullText = escapeBeginEnd(text)+" <a href='#' onClick='changeText(event,this)'><b>{menos}</b></a>";
             } else {
-                obj.shortText = text;
+                obj.shortText = escapeBeginEnd(text);
                 obj.fullText = null;
             }
-            addelDiv.innerHTML += `<div id="text${idCont}" class="${keys[i]}"><p>${obj.shortText} </p></div>`
+            addelDiv.innerHTML += `<div id="${obj.id}" class="${keys[i]}"><p>${obj.shortText} </p></div>`
             objs.push(obj)
         }
     }
@@ -199,14 +202,20 @@ function collapsableDiv() {
 }
 function escapeHTML(str) {
     return str.replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+        .replace(/</g, "&lt;")
+        .replace(/"/g, "&quot;")
+}
+function escapeBeginEnd(str,addel) {
+    let cls = addel == 'add'? 'wdel' : 'wadd'
+    return str
+         .replace(/\$\$\$BEGIN\$\$\$/g, `<b class=${cls}>`)
+         .replace(/\$\$\$END\$\$\$/g, `</b>`)
 }
 function changeText(event,obj) {
+    console.log('changeText',obj)
     event.preventDefault();
-    console.log(event,obj)
-    div = obj.parentElement.parentElement
+    div = obj.closest('div')
     if (obj.textContent == '{menos}') {
         diffTexts.map( (it) =>  {
             if (it.id == div.id) 

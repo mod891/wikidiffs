@@ -19,7 +19,8 @@ li {
 #content > div {
     padding: 1rem;
 }
-@media (max-width: 430px) {
+
+@media (max-width: 900px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
         #container {
         position: relative;
         padding-left: 0%;
