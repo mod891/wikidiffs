@@ -1,4 +1,5 @@
-var getVal = ""
+var getVal = "";
+var idTimeout = "";
 init()
 
 async function loadFragment(what) {
@@ -45,18 +46,45 @@ async function loadFragment(what) {
         console.log('ERR: choose wisely')
     }
 }
-function init() {
-    loadFragment('menu');
-    loadFragment('footer');
+async function init() {
+    await loadFragment('menu');
+    await loadFragment('footer');
+    const scrollTopBtn = document.getElementById('scrollBtn');
+
+    scrollTopBtn.addEventListener('click', ()=> {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        })
+    })
+    window.addEventListener('scroll', () => {
+    if (window.scrollY > 200) 
+        scrollTopBtn.classList.add('show');
+     else 
+        scrollTopBtn.classList.remove('show');
+    })
     route()
 }
+
 function route() {
     getVal = ""
-    url = new URL(window.location)
+    url = new URL(window.location);
+    if (url.hash.length == 0)
+        url.hash = "#index"
     if (url.hash.split('?').length > 1) 
-        getVal = url.hash.split('?')[1].split('=')[1]
-    loadFragment(url.hash)
+        getVal = url.hash.split('?')[1].split('=')[1];
+    loadFragment(url.hash);
 }
 window.addEventListener('hashchange', () => {
-    route()
+    route();
 })
+
+function info(event) {
+    clearTimeout(idTimeout);
+    let { left, top } = event.target.closest('li').getBoundingClientRect();
+    var toast = document.getElementById('toast');
+    toast.style.opacity = 1
+    toast.style.top = (top + window.scrollY)+'px';
+    toast.style.left = (left + window.scrollX)+'px';
+    idTimeout = setTimeout(() => {toast.style.opacity = 0},5000);
+}

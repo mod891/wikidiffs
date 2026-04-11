@@ -62,6 +62,9 @@ input:checked + .slider:before {
     grid-template-columns: 1fr 1fr 1fr;
     justify-content: left;
 }
+.link {
+    margin-right:2rem;
+}
 .filter-icon {
     padding-top: 10px;
     width:50px;
@@ -96,12 +99,14 @@ input:checked + .slider:before {
     width: 350px;
     background-color: rgb(46, 130, 255);
 }
-
-@media (max-width: 900px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
+@media (max-width: 950px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
     .filter-icon {
         padding-top: 20px;
         width:40px;
         height:40px;
+    }
+    .link {
+        margin-right: 1rem;
     }
     #title {
         padding-left:5vw;
@@ -114,7 +119,6 @@ input:checked + .slider:before {
         grid-template-columns: 100%;
         gap: 10px;
         padding-bottom: 0.5rem;
-
     }
     #filter-inputs > div {
         width: auto;
@@ -322,9 +326,20 @@ function liLinks() {
                     data-neditions=${urls[i].total}
                     data-dates=${JSON.stringify(urls[i].dates)}
                     data-category="undefined" >
-                        <a href="#diffs?diff=${urls[i].articleUrl}">${text}</a>
-                        <label class="ml1">${urls[i].total} edits</label></li>`;
+                        <div class="link d-mr-2">
+                            <a href="#diffs?diff=${urls[i].articleUrl}">${text}</a>
+                            <label class="n-editions">${urls[i].total}</label>
+                            <label class="bg-cyan info d-mr2" onclick="info(event)"><b>?</b></label>
+                        </div>
+                    </li>`;
         // ${urls[i].total} edits → icon pencil, slot pill edit, pill category
+/*
+<li class="d-mr1-5"><div class="link"><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a>
+                <label title="nº de ediciones" class="n-editions">N </label>
+                <label class="bg-cyan info" onclick="info(event)"><b>?</b></label>
+                </div></li>`
+*/
+
         ul.insertAdjacentHTML('beforeend',li);
     }
     div.appendChild(document.createElement('div'))

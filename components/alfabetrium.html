@@ -14,8 +14,10 @@
 }
 .listin {
     background-color: var(--bluez);
-    width: 80%;
+    width: auto;
+    margin-right: 1.5rem;
 }
+
 #A { grid-area: A;}
 #B { grid-area: B;}
 #C { grid-area: C;}
@@ -46,7 +48,7 @@
 #anexo { grid-area: anexo;}
 #discusion { grid-area: discusion;}
 
-@media (max-width: 900px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
+@media (max-width: 950px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
 
     #abcdario {
         display:grid;
@@ -88,6 +90,7 @@
         background-color: var(--bluez);
         width: 100%;
     }
+    
 }
 </style>
 <div id="alfabetrium">
@@ -163,7 +166,10 @@ async function fetchLiLinks() {
 
         for (let j=0; j<urls.length; j++) {       
             text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ')
-            html = `<li><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a></li>`
+            html = `<li class="d-mr1-5"><div class="link"><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a>
+                <label title="nº de ediciones" class="n-editions">N </label>
+                <label class="bg-cyan info" onclick="info(event)"><b>?</b></label>
+                </div></li>`
             ul.insertAdjacentHTML('beforeend',html)
             charObj[char].push(html)
         }
@@ -179,7 +185,10 @@ async function fetchLiLinks() {
 
     for (let j=0; j<urls.length; j++) {               
         text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ').replace('Anexo:','')
-        html = `<li><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a></li>`
+        html = `<li class="d-mr1-5"><div class="link"><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a>
+            <label title="nº de ediciones" class="n-editions">N </label>
+            <label class="bg-cyan info" onclick="info(event)"><b>?</b></label>
+            </div></li>`
         ul.insertAdjacentHTML('beforeend',html)
         charObj.anexo.push(html)
     }

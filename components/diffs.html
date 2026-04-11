@@ -52,7 +52,7 @@
     box-shadow: 2px 2px 5px #111111;
 }
 
-@media (max-width: 900px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
+@media (max-width: 950px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
     .diff-header {
         width: 100%;
         display: grid;
@@ -63,10 +63,10 @@
         padding-bottom: 0.6rem;
     }
     #datetime {
-        margin-left: 30px;
+        margin-left: 40px;
     }
     #article-url {
-        margin-left: 50px;
+        margin-left: 60px;
     }
     #external-url {
         display:flex;
@@ -185,7 +185,6 @@ function collapsableDiv() {
                 posIni = text.lastIndexOf('$$$BEGIN$$$',len)
                 posEnd = text.lastIndexOf('$$$END$$$',len)
                 if (posEnd < posIni) {
-                    //  console.log('posEnd < posIni',posEnd ,'<',posIni)
                     len = text.indexOf('$$$END$$$',len)+'$$$END$$$'.length
                 }
                 obj.shortText = escapeBeginEnd(text.substr(0, len)) + "... <a href='#' onClick='changeText(event,this)'><b>{más}</b></a>";
