@@ -9,6 +9,9 @@ h1 {
     display: flex;
     justify-content: center;
 }
+.hauto {
+    height: auto;
+}
 .cursor {
     cursor:pointer;
 }
@@ -33,10 +36,13 @@ h1 {
     flex-direction: row;
 }
 .justify-between {
-    justify-content:space-around;
+    justify-content:space-between;
 }
 .justify-around {
     justify-content:space-around;
+}
+.justify-center {
+    justify-content:center;
 }
 .w50 {
     width: 50%;

@@ -9,13 +9,13 @@
     --cyan: cyan;
     --orange: orange;
     --white: white;
-    --grey: grey;
+    --grey: rgb(242, 242, 242);
+    --grey2: grey;
     --green2: rgb(2, 255, 2);
     --gold: gold; 
     --redgit: rgb(163,0,0,1);
     --greengit: rgb(62,123,4,1);
 }
-
 .bg-red { background-color: var(--red); }
 .bg-blue { background-color: var(--blue); }
 .bg-green { background-color: var(--green); }

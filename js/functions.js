@@ -5,7 +5,7 @@ init()
 async function loadFragment(what) {
     what = what.replace('#','').replace(/\?.*/,'');
     console.log('what:',what)
-    const fragments = [ 'menu','footer','index','alfabetrium','diffs','listby']
+    const fragments = [ 'menu','footer','index','alfabetrium','diffs','listby','users']
     if (fragments.includes(what)) {
         try {
             var request = await fetch(`/public/components/${what}.html`);

@@ -1,0 +1,150 @@
+<style>
+
+.link {
+    margin-right:2rem;
+}
+.grid-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    align-items: center;    
+}
+#title {
+    text-align: center;
+}
+.grid-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    margin-left: 1rem;
+}
+.users {
+    align-content: center;
+    grid-column: 2;
+}
+.filter {
+    align-content: center;
+    grid-column: 3;
+}
+.filter input {    
+    text-align: center;
+}
+
+@media (max-width: 950px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
+
+    .grid-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr ;
+        align-items: center;    
+    }
+    .grid-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+    .users {
+        align-content: center;
+        grid-column: 2;
+    }
+    .filter {
+        align-content: center;
+        grid-column: 2;
+        margin-bottom: 1rem;
+        transform: translateY(-10px);
+    }
+    .link {
+        margin-right: 1rem;
+    }
+    #header {
+        position: sticky;
+        top: 0;
+    }
+}
+</style>
+<div id="users">
+    <div>
+        <div id="header" class="bg-grey">
+            <div class="grid-header">
+                <div class="users">
+                    <h3 id="title"></h3>
+                </div>
+                <div class="filter">
+                    <input type="text" name="" placeholder="filtrar" id="search">
+                </div>
+            </div>
+        </div>
+        <div id="users-content">
+
+        </div>
+    </div>
+</div>  
+<script>
+
+var data = null;
+var nUsers = document.getElementById('title')
+init()
+
+async function init() {
+    document.getElementById('search').addEventListener('input',filterData)
+
+    var storage = false;
+    var storageObj = JSON.parse(sessionStorage.getItem('users'))
+    if (storageObj != null) {
+        data = storageObj['users'];
+        storage = true;
+    }
+    if (storage == false)
+        await fetchUsers();
+    liLinks();       
+}
+
+function liLinks() {
+    var div = document.getElementById('users-content');
+    var users = data;
+    nUsers.innerText =`${users.length} Usuarios`;
+
+    var ul = document.createElement('ul');
+    ul.classList = 'grid-content';
+    for (let i=0; i<users.length; i++) {
+        let atext = users[i].length > 12? users[i].substr(0,12)+'...' : users[i];
+        var li = `<li data-prevuser="${users[i]}"><a href="#diffs?diff=user::${users[i]}">${atext}</a></li>`;        
+        ul.insertAdjacentHTML('beforeend',li);
+    }
+    div.appendChild(document.createElement('div'))
+    div.lastChild.appendChild(ul)
+}
+
+async function fetchUsers() {
+    var rawData = await query('prevUsers');
+    var users = [];
+    for (i in rawData) {
+        rawData[i].prevUser
+        let user = rawData[i].prevUser;
+        if (user.split('&').length > 1)
+            user = user.split('&')[0];
+        users.push(user);
+    }
+    var storageObj = { users };
+    sessionStorage.setItem('users',JSON.stringify(storageObj));
+    data = users;   
+}
+
+function filterData(e) {
+    let nVisibles = data.length;
+    applySearchFilter = false;
+    var searchInput = document.getElementById('search')
+  
+    if (searchInput != null)
+        if (searchInput.value != '')
+            applySearchFilter = true;
+   
+    document.querySelectorAll('li').forEach(li => {
+        let display = true;
+        if (applySearchFilter) {
+            if (!li.dataset.prevuser.toUpperCase().includes(searchInput.value.toUpperCase()) ) {
+                display = false;
+                nVisibles--;
+            }
+        }
+        li.style.display = display? "block" : "none";
+    });
+    nUsers.innerText= nVisibles + " usuarios";
+}
+</script>                     

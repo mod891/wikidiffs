@@ -106,6 +106,7 @@ loadDiffs()
 async function loadDiffs() {
     var articleUrl = getVal;
     var data = null;
+    var dbquery = 'diffsFromUrl';
      try {
         if (articleUrl == "")
             data = await fetch(`/public/js/db/mock-sample1.json`).then(res => res.json()); // mock sample
@@ -113,7 +114,11 @@ async function loadDiffs() {
             articleUrl = (await query('randUrl'))[0].articleUrl;
         else if (articleUrl.match(/[0-9]{9}/) != null) 
             articleUrl = (await query('urlFromId',articleUrl))[0].articleUrl;
-        data = await query('diffsFromUrl',articleUrl);            
+        else if (articleUrl.split('user::').length > 1) {
+            articleUrl = articleUrl.split('user::')[1];
+            dbquery = 'diffsFromUser';
+        }
+        data = await query(dbquery,articleUrl);            
     } catch (err) {
         console.log(`loadDiffs::data retrieving Error:`,err);
     }
