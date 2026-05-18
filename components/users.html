@@ -1,8 +1,16 @@
 <style>
 
 .link {
-    margin-right:2rem;
+    margin-right:auto;
+    display: flex;
+    align-items: center;
 }
+ .link > a {
+    margin-right: auto;
+    max-width: 70%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+} 
 .grid-header {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -16,6 +24,11 @@
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     margin-left: 1rem;
 }
+.grid-content > li {
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 85%;
+} 
 .users {
     align-content: center;
     grid-column: 2;
@@ -99,12 +112,15 @@ function liLinks() {
     var div = document.getElementById('users-content');
     var users = data;
     nUsers.innerText =`${users.length} Usuarios`;
-
     var ul = document.createElement('ul');
     ul.classList = 'grid-content';
     for (let i=0; i<users.length; i++) {
-        let atext = users[i].length > 12? users[i].substr(0,12)+'...' : users[i];
-        var li = `<li data-prevuser="${users[i]}"><a href="#diffs?diff=user::${users[i]}">${atext}</a></li>`;        
+        var li = `<li data-prevuser="${users[i].user}">
+                    <div class="link">
+                        <a href="#diffs?diff=user::${users[i].user}">${users[i].user}</a>
+                        <label title="nº de ediciones" class="n-editions">${users[i].nedits}</label>
+                    </div>
+                </li>`;        
         ul.insertAdjacentHTML('beforeend',li);
     }
     div.appendChild(document.createElement('div'))
@@ -115,11 +131,14 @@ async function fetchUsers() {
     var rawData = await query('prevUsers');
     var users = [];
     for (i in rawData) {
-        rawData[i].prevUser
+        
         let user = rawData[i].prevUser;
         if (user.split('&').length > 1)
             user = user.split('&')[0];
-        users.push(user);
+        users.push({
+            user:user,
+            nedits:rawData[i].nedits
+        });
     }
     var storageObj = { users };
     sessionStorage.setItem('users',JSON.stringify(storageObj));

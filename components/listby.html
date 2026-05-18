@@ -139,7 +139,7 @@ input:checked + .slider:before {
         <div id="header">
             <div class="flexrow justify-around pr1">
                 <div>
-                    <h2 id="title"></h2>
+                    <h3 id="title"></h3>
                 </div>
                 <div>
                     <svg
@@ -281,10 +281,11 @@ input:checked + .slider:before {
 <script>
 
 var data = null;
+var title = document.getElementById('title');
+var titleText = ""
 init()
-
 async function init() {
-    document.getElementById('title').innerText =` Que empiezan por ${getVal}`;
+    
     var filtersIcon = document.getElementById('filter-icon');
     var filtersModal = document.getElementById('filters-modal');
     var closeFiltersModal = document.getElementById('close-modal');
@@ -317,6 +318,12 @@ async function init() {
 function liLinks() {
     var div = document.getElementById('listby-content');
     var urls = Object.values(data[getVal]);
+    titleText = ` Que empiezan por ${getVal}`;
+    if (getVal == 'discusion')
+        titleText = ' Discusiones';
+    else if (getVal == 'anexo') 
+        titleText = ' Anexos';
+    title.innerText = `${urls.length} ${titleText}`;
     var ul = document.createElement('ul');
     ul.id = 'links';
     for (let i=0; i<urls.length; i++) {
@@ -339,7 +346,14 @@ function liLinks() {
 }
 
 async function fetchUrls() {
-    var urls = await query('urlsStartsWith',getVal,0);
+    var urls = [];
+    if (getVal == 'discusion') 
+        urls = await query('discusion');
+    else if (getVal == 'anexo')
+        urls = await query('anexo');
+    else
+        urls = await query('urlsStartsWith',getVal,0);
+
     var ini = new Date('2-2-2222')
     var end = new Date('1-1-1111')
   
@@ -432,7 +446,8 @@ function showHideInputFilter(input) {
 }
 
 function filterData(e) {
-
+    let nVisibles = document.querySelectorAll('li').length;
+    console.log('nVisibles:',nVisibles)
     applySearchFilter = false;
     applyDateFilter = false;
     applyCategoryFilter = false;
@@ -456,8 +471,10 @@ function filterData(e) {
         let display = true;
         if (applySearchFilter) {
             if (!li.dataset.text.toUpperCase().includes(searchInput.value.toUpperCase()) ||
-            !li.dataset.articleurl.toUpperCase().includes(searchInput.value.toUpperCase()) )
+            !li.dataset.articleurl.toUpperCase().includes(searchInput.value.toUpperCase()) ) {
                 display = false;
+                nVisibles--;
+            }
         }
         if (applyDateFilter) {
             let dates = JSON.parse(li.dataset.dates);           
@@ -465,16 +482,22 @@ function filterData(e) {
                 let date = new Date(dates[i].split('/')[2]+'-'+dates[i].split('/')[1]+'-'+dates[i].split('/')[0]);
 
                 if (e.target.id == 'begin' && e.target.value != "" && end.value == "" && display == true) {     // [begin,inf)
-                    if (date < new Date(e.target.value))
+                    if (date < new Date(e.target.value)) {
                         display = false;
+                        nVisibles--;
+                    }
                 }
                 else if (e.target.id == 'end' && e.target.value != "" && begin.value == "" && display == true) {    // (-inf,end] 
-                    if (date > new Date(e.target.value))
+                    if (date > new Date(e.target.value)) {
                         display = false;
+                        nVisibles--;
+                    }
                 }
                 else if (begin.value != "" && end.value != "" && display == true) {   // [begin,end]
-                    if (date <= new Date(begin.value) || date >= new Date(end.value))
-                        display = false;    
+                    if (date <= new Date(begin.value) || date >= new Date(end.value)) {
+                        display = false;
+                        nVisibles--;
+                    }
                 }   
             }
         }
@@ -485,16 +508,7 @@ function filterData(e) {
             
         li.style.display = display? "block" : "none";
     });  
-          
+    title.innerText= nVisibles + titleText;      
 }
-
-/*
-
-    order by:
-        category
-        nº editions: asc|desc+
-        
-        category: [TODO]
-*/
 
 </script>                     

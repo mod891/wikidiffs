@@ -13,9 +13,15 @@
     --grey2: grey;
     --green2: rgb(2, 255, 2);
     --gold: gold; 
+    --reddiff: rgb(253, 145, 145);
+    --greendiff: rgb(199, 255, 186);
     --redgit: rgb(163,0,0,1);
     --greengit: rgb(62,123,4,1);
 }
+
+
+.bg-reddiff { background-color: var(--reddiff); }
+.bg-greendiff { background-color: var(--greendiff); }
 .bg-red { background-color: var(--red); }
 .bg-blue { background-color: var(--blue); }
 .bg-green { background-color: var(--green); }

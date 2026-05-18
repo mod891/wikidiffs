@@ -16,6 +16,7 @@
     background-color: var(--bluez);
     width: auto;
     margin-right: 1.5rem;
+    box-shadow: 2px 2px 5px var(--black);
 }
 
 #A { grid-area: A;}
@@ -158,7 +159,7 @@ async function fetchLiLinks() {
     for (let i=c; i<91; i++) {
         let char = String.fromCharCode(i)
         charObj = { [char]: [] }
-        var urls = await query('urlsStartsWith',char);
+        var urls = await query('urlsStartsWith',char,10);
         div = document.getElementById(char)
         a = div.childNodes[0]
         a.href="#listby?c="+char
@@ -167,7 +168,7 @@ async function fetchLiLinks() {
         for (let j=0; j<urls.length; j++) {       
             text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ')
             html = `<li class="d-mr1-5"><div class="link"><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a>
-                <label title="nº de ediciones" class="n-editions">N </label>
+                <label title="nº de ediciones" class="n-editions">${urls[j].nedits}</label>
                 <label class="bg-cyan info" onclick="info(event)"><b>?</b></label>
                 </div></li>`
             ul.insertAdjacentHTML('beforeend',html)
@@ -176,7 +177,7 @@ async function fetchLiLinks() {
         sessionStorageObj.char.push(charObj);
     }
     
-    urls = await query('anexo');
+    urls = await query('anexo',0,10);
     div = document.getElementById('anexo')
     a = div.childNodes[0]
     a.href="#listby?c=anexo"
@@ -186,13 +187,32 @@ async function fetchLiLinks() {
     for (let j=0; j<urls.length; j++) {               
         text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ').replace('Anexo:','')
         html = `<li class="d-mr1-5"><div class="link"><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a>
-            <label title="nº de ediciones" class="n-editions">N </label>
+            <label title="nº de ediciones" class="n-editions">${urls[j].nedits}</label>
             <label class="bg-cyan info" onclick="info(event)"><b>?</b></label>
             </div></li>`
         ul.insertAdjacentHTML('beforeend',html)
         charObj.anexo.push(html)
     }
     sessionStorageObj.char.push(charObj);
+
+    urls = await query('discusion',0,10);
+    div = document.getElementById('discusion')
+    a = div.childNodes[0]
+    a.href="#listby?c=discusion"
+    ul = div.childNodes[1]
+    charObj = { discusion: [] }
+
+    for (let j=0; j<urls.length; j++) {               
+        text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ').replace('Anexo:','')
+        html = `<li class="d-mr1-5"><div class="link"><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a>
+            <label title="nº de ediciones" class="n-editions">${urls[j].nedits}</label>
+            <label class="bg-cyan info" onclick="info(event)"><b>?</b></label>
+            </div></li>`
+        ul.insertAdjacentHTML('beforeend',html)
+        charObj.discusion.push(html)
+    }
+    sessionStorageObj.char.push(charObj);
+
     sessionStorage.setItem('alfabetrium', JSON.stringify(sessionStorageObj))
 }
 
