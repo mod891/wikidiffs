@@ -1,0 +1,75 @@
+<style>
+ /*#categories {
+    display: flex; 
+    flex-direction: row;
+    justify-content: center; 
+}*/
+#category-list  {
+    display: flex; 
+    flex-direction: row;
+    justify-content: left;
+}
+#category-list > div {
+    width: 20vw;
+}
+#category-list > div:nth-child(-n+4) {
+        margin-top: 2rem;
+}
+.listin {
+    background-color: var(--bluez);
+    width: auto;
+    margin-right: 1.5rem;
+    box-shadow: 2px 2px 5px var(--black);
+}
+
+@media (max-width: 950px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
+  .listin {
+        position: sticky;
+        top:0;
+        background-color: var(--bluez);
+        width: 100%;
+    }
+    #category-list  {
+        display: flex; 
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    #category-list > div {
+        width: 80vw;
+    }
+    #category-list > div:nth-child(n) {
+       margin-top:0;
+}
+}
+</style>
+
+<div id="categories">
+    <div id="category-list">
+    </div>
+</div>
+<script>
+
+categories = JSON.parse(sessionStorage.getItem('categories'));
+init()
+
+function init() {
+    if (categories == null) 
+        fetchSharedData();     
+    loadCategories();     
+}
+
+function loadCategories() {
+
+    var categoryListDiv = document.getElementById('category-list');
+    let html = '';
+    for (i in categories) {
+        html = `<div id="${categories[i]}">
+                    <a href="#listby?c=category:${categories[i]}" class="listin dfcenter"><b>${categories[i]}</b></a>
+                    <ul></ul>
+                </div>`
+        categoryListDiv.insertAdjacentHTML('beforeend',html);
+    }
+}
+
+</script>

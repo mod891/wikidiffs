@@ -76,7 +76,8 @@ header {
     padding: 0.5rem;
     margin: 1rem;
     opacity: 0;
-    transition: opacity 0.5s;  
+    transition: opacity bottom left 0.5s;  
+    z-index: 1000;
 }
 @media (max-width: 950px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
     ul {

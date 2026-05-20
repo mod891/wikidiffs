@@ -5,7 +5,7 @@ init()
 async function loadFragment(what) {
     what = what.replace('#','').replace(/\?.*/,'');
     console.log('what:',what)
-    const fragments = [ 'menu','footer','index','alfabetrium','diffs','listby','users']
+    const fragments = [ 'menu','footer','index','alfabetrium','diffs','listby','users','categories'];
     if (fragments.includes(what)) {
         try {
             var request = await fetch(`/public/components/${what}.html`);
@@ -27,9 +27,8 @@ async function loadFragment(what) {
             
             oldCssJs = document.querySelectorAll('[id$="-css"],[id$="-js"]')
             if (oldCssJs.length > 2) {
-                for (let i=2; i<oldCssJs.length; i++) {
+                for (let i=2; i<oldCssJs.length; i++)
                     oldCssJs[i].remove()
-                }
             }
             if (css) {
                 css.id = `${what}-css`
@@ -46,9 +45,18 @@ async function loadFragment(what) {
         console.log('ERR: choose wisely')
     }
 }
+async function fetchSharedData() {
+    let categories = JSON.parse(sessionStorage.getItem('categories'));
+    if (categories == null) {
+        let querydata = await query('categories');
+        categories = querydata.map(i => i.category);                
+        sessionStorage.setItem('categories',JSON.stringify(categories));
+    }
+}
 async function init() {
     await loadFragment('menu');
     await loadFragment('footer');
+    await fetchSharedData();
     const scrollTopBtn = document.getElementById('scrollBtn');
 
     scrollTopBtn.addEventListener('click', ()=> {
@@ -80,11 +88,21 @@ window.addEventListener('hashchange', () => {
 })
 
 function info(event) {
+    let elem = 'li';
     clearTimeout(idTimeout);
-    let { left, top } = event.target.closest('li').getBoundingClientRect();
+    console.log(Array.from(event.target.classList).includes('fixed-corner'));
+    if (Array.from(event.target.classList).includes('fixed-corner'))
+        elem = 'span.bg-reddiff';
+    console.log('closest:',event.target.closest(elem))
+    let { left, top } = event.target.closest(elem).getBoundingClientRect();
+
     var toast = document.getElementById('toast');
     toast.style.opacity = 1
     toast.style.top = (top + window.scrollY)+'px';
     toast.style.left = (left + window.scrollX)+'px';
-    idTimeout = setTimeout(() => {toast.style.opacity = 0},5000);
+    idTimeout = setTimeout(() => {
+        toast.style.opacity = 0
+        toast.style.top = 0;
+        toast.style.left = 0;
+    },5000);
 }

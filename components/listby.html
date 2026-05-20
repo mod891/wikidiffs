@@ -139,7 +139,7 @@ input:checked + .slider:before {
         <div id="header">
             <div class="flexrow justify-around pr1">
                 <div>
-                    <h3 id="title"></h3>
+                    <h3 class="mr05" id="title"></h3>
                 </div>
                 <div>
                     <svg
@@ -252,7 +252,7 @@ input:checked + .slider:before {
                 </div>
             </div>
             
-            <div class="dflex mt05">
+            <div id="category-filter-div" class="dflex mt05">
                 <div class="w50 pl1">
                     <b>Por categoría</b>
                 </div>
@@ -279,13 +279,19 @@ input:checked + .slider:before {
     </div>
 </div>  
 <script>
-
-var data = null;
+var urlData = null;
 var title = document.getElementById('title');
-var titleText = ""
+var titleText = "";
+var categories = null;
+var category = null;
+if (getVal.split('category:').length > 1) {
+    category = getVal.split('category:')[1];
+    document.getElementById('category-filter-div').remove()
+}
 init()
+
 async function init() {
-    
+    var storage = false;
     var filtersIcon = document.getElementById('filter-icon');
     var filtersModal = document.getElementById('filters-modal');
     var closeFiltersModal = document.getElementById('close-modal');
@@ -300,42 +306,55 @@ async function init() {
         filtersModal.style.display = "none";
     })
 
-    var storage = false;
+
     var storageObj = JSON.parse(sessionStorage.getItem('listby'))
-    if (storageObj != null) {    
+    if (storageObj != null) {  
         for (let i=0; i<storageObj.char.length; i++) { 
             if (Object.keys(storageObj.char[i])[0] == getVal) {
                 storage = true;
-                data = storageObj.char[i];
+                urlData = storageObj.char[i];
             }
         }
     }
     if (storage == false)
         await fetchUrls();
+
+    categories = JSON.parse(sessionStorage.getItem('categories'));
+    if (categories == null) {
+        fetchSharedData();
+        categories = JSON.parse(sessionStorage.getItem('categories'));
+    }
     liLinks();       
 }
 
 function liLinks() {
     var div = document.getElementById('listby-content');
-    var urls = Object.values(data[getVal]);
-    titleText = ` Que empiezan por ${getVal}`;
-    if (getVal == 'discusion')
-        titleText = ' Discusiones';
-    else if (getVal == 'anexo') 
-        titleText = ' Anexos';
-    title.innerText = `${urls.length} ${titleText}`;
+    var urls = [];
+    if (category == null) {
+        urls = Object.values(urlData[getVal]);
+        titleText = `  que empiezan por ${getVal}`;
+        if (getVal == 'discusion')
+            titleText = ' Discusiones';
+        else if (getVal == 'anexo') 
+            titleText = ' Anexos';
+        title.innerText = `${urls.length} ${titleText}`;
+    } else {
+        urls = Object.values(urlData[category]);
+        titleText = ` páginas de categoría: ${category}`;
+        title.innerText = `${urls.length} ${titleText}`;
+    }
     var ul = document.createElement('ul');
     ul.id = 'links';
     for (let i=0; i<urls.length; i++) {
         text = decodeURIComponent(urls[i].articleUrl.split('/').at(-1)).replaceAll('_',' ')
         var li = `<li data-articleurl="${decodeURIComponent(urls[i].articleUrl.split('/').at(-1))}"
                     data-text="${text}"
-                    data-neditions=${urls[i].total}
+                    data-neditions=${urls[i].nedits}
                     data-dates=${JSON.stringify(urls[i].dates)}
-                    data-category="undefined" >
+                    data-category="${urls[i].category}" >
                         <div class="link d-mr-2">
                             <a href="#diffs?diff=${urls[i].articleUrl}">${text}</a>
-                            <label class="n-editions">${urls[i].total}</label>
+                            <label class="n-editions">${urls[i].nedits}</label>
                             <label class="bg-cyan info d-mr2" onclick="info(event)"><b>?</b></label>
                         </div>
                     </li>`;
@@ -347,10 +366,13 @@ function liLinks() {
 
 async function fetchUrls() {
     var urls = [];
+
     if (getVal == 'discusion') 
         urls = await query('discusion');
     else if (getVal == 'anexo')
         urls = await query('anexo');
+    else if (category != null) 
+        urls = await query('urlsByCategory',category);
     else
         urls = await query('urlsStartsWith',getVal,0);
 
@@ -360,7 +382,6 @@ async function fetchUrls() {
     for (let i=0; i<urls.length; i++) {
         dates = JSON.parse(urls[i].dates);
         urls[i].dates = dates;
-        urls[i].total = dates.length;
         for (let j=0; j<dates.length; j++) {
             let minMaxDate = new Date(dates[j].split('/')[2]+'-'+dates[j].split('/')[1]+'-'+dates[j].split('/')[0]);
             if (minMaxDate < ini) 
@@ -371,23 +392,26 @@ async function fetchUrls() {
     }
     var storageObj = JSON.parse(sessionStorage.getItem('listby'));
     var config = { minmaxdate: { ini: ini.toISOString().split('T')[0], end: end.toISOString().split('T')[0] } }
+    var computed = category == null? getVal : category;
     if (storageObj == null) { 
         storageObj = { char:[] };
-        storageObj.char.push({ [getVal]: urls, config: config });
+        storageObj.char.push({ [computed]: urls, config: config });
         sessionStorage.setItem('listby',JSON.stringify(storageObj));
     }
     else {
-        storageObj.char.push({ [getVal]: urls, config: config });
+        storageObj.char.push({ [computed]: urls, config: config });
         sessionStorage.setItem('listby',JSON.stringify(storageObj));
     }
-    data = { [getVal]: urls, config: config };
+    urlData = { [computed]: urls, config: config };
 }
 
 function showHideInputFilter(input) {
+
     var div = document.getElementById('filter-inputs');
     var id = input.id.split('-')[1];
     var rect = document.getElementById(`filter-${id}`);
-    
+    let lis = Array.from(document.querySelectorAll('li'));
+
     if (id == "1") { // text
         elem = `<div id="filter-switch-1" class="bg-cyan">
                     <label class="ml05">Buscar:</label>
@@ -398,19 +422,23 @@ function showHideInputFilter(input) {
         elem = `<div id="filter-switch-2" class="bg-green2">
                     <label class="ml05 pl03">Inicio</label>
                     <input  id="begin" type="date" class="mr05 ml05"
-                        min="${data.config.minmaxdate.ini}" 
-                        max="${data.config.minmaxdate.end}">
+                        min="${urlData.config.minmaxdate.ini}" 
+                        max="${urlData.config.minmaxdate.end}">
                     <label class="">Fin</label>
                     <input  id="end" type="date" class="mr05 ml05"
-                        min="${data.config.minmaxdate.ini}"
-                        max="${data.config.minmaxdate.end}">
+                        min="${urlData.config.minmaxdate.ini}"
+                        max="${urlData.config.minmaxdate.end}">
                 </div>`;
 
     } else if (id == "3") { // category
         elem = `<div id="filter-switch-3" class="bg-gold">
                     <label class="">Categoría</label>
-                    <select id="category" class="w50" ><option>Categoria</option><option>Categoria1</option></select>
-                </div>`;
+                    <select id="category" class="w50" ><option>Seleccionar</option>`
+                for (i in categories) {
+                    if (lis.some(li => li.dataset.category == categories[i]) )
+                        elem += `<option value="${categories[i]}">${categories[i]}</option>`;
+                }
+             elem += `</select></div>`;
         
     } else { // undefined
         elem = `<div id="filter-switch-4" class="bg-yellow"><span >undefined</span></div>`;
@@ -446,8 +474,8 @@ function showHideInputFilter(input) {
 }
 
 function filterData(e) {
-    let nVisibles = document.querySelectorAll('li').length;
-    console.log('nVisibles:',nVisibles)
+    let lis = document.querySelectorAll('li');
+    let nVisibles = lis.length;
     applySearchFilter = false;
     applyDateFilter = false;
     applyCategoryFilter = false;
@@ -464,10 +492,10 @@ function filterData(e) {
         if (begin.value != '' || end.value != '')
             applyDateFilter = true;
     if (categorySelect != null)
-        if (categorySelect.value != 'Categoria')
+        if (categorySelect.value != 'Seleccionar')
             applyCategoryFilter = true;
 
-    document.querySelectorAll('li').forEach(li => {
+    lis.forEach(li => {
         let display = true;
         if (applySearchFilter) {
             if (!li.dataset.text.toUpperCase().includes(searchInput.value.toUpperCase()) ||
@@ -502,8 +530,10 @@ function filterData(e) {
             }
         }
         if (applyCategoryFilter) {
-            console.log('applyCategoryFilter')
-            // appy 
+            if ( !li.dataset.category.includes(categorySelect.value) ) {
+                    display = false;
+                    nVisibles--;
+            }
         }
             
         li.style.display = display? "block" : "none";

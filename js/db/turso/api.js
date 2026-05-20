@@ -11,9 +11,6 @@ async function query(option,...args) {
         limit = args[1]
     
     switch (option) {
-        case 'urlsStartsWith':
-            stmt = urlsStartsWith(args[0],limit);   
-        break;
         case 'diffsFromUrl':
             stmt = diffsFromUrl(args[0],limit);
         break;
@@ -23,22 +20,34 @@ async function query(option,...args) {
         case 'diffsFromPreviousUser':
             stmt = diffsFromPreviousUser(args[0],limit);
         break;
+        case 'urlsStartsWith':
+            stmt = urlsStartsWith(args[0],limit);   
+        break;
         case 'anexo':
             stmt = anexoUrls(limit);
         break;
         case 'discusion':
             stmt = discusionUrls(limit);
         break;
+        case 'urlsByCategory':
+            stmt = categoryUrls(args[0],limit);
+        break;
+        
         case 'randUrl':
             stmt = randUrl();
         break;
         case 'urlFromId':
             stmt = urlFromId(args[0]);
         break;
+        case 'descriptionUrl': // pointer: loading -> hasta que response.text OK
+            stmt = descriptionUrl(args[0]);
+        break;
         case 'prevUsers':
             stmt = prevUsers();
         break;
-        
+        case 'categories':
+            stmt = categorias();
+        break;
         default:
             console.log('hoiga esto no furula',option)
     }
@@ -79,7 +88,7 @@ function diffsFromUser(user, limit=0) {
         json_extract(df.obj, '$.changes') as changes
         from diffs df join history_contribs hc 
         on df.id = hc.id
-        where json_extract(hc.obj, '$.user')=?`
+        where json_extract(hc.obj, '$.user')=? `;
     if (limit != 0 ) 
         sql += `limit ${limit}`
     return { sql:sql, args:[user] };
@@ -95,7 +104,7 @@ function diffsFromPreviousUser(prevUser, limit=0) {
         json_extract(df.obj, '$.changes') as changes
         from diffs df join history_contribs hc 
         on df.id = hc.id
-        where json_extract(df.obj, '$.prev_username')=?`
+        where json_extract(df.obj, '$.prev_username')=? `;
     if (limit != 0 ) 
         sql += `limit ${limit}`
     return { sql:sql, args:[prevUser] };
@@ -103,32 +112,41 @@ function diffsFromPreviousUser(prevUser, limit=0) {
 function urlFromId(id) {
     sql = `select json_extract(hc.obj, '$.article_url') as articleUrl
         from history_contribs hc
-        where hc.id = ?`
+        where hc.id = ? `;
     return { sql:sql, args:[id] };
 }
 function urlsStartsWith(char, limit=10) {
     sql = `select distinct json_extract(hc.obj, '$.article_url') as articleUrl,
+        json_extract(hc.obj, '$.category') as category,
         '[' || group_concat('"' || json_extract(hc.obj, '$.date_edition') || '"' ) || ']' as dates,
         count(json_extract(hc.obj, '$.date_edition')) as nedits
         from history_contribs hc 
         where articleUrl like ? and articleUrl not like '%wiki/Anexo:%'
-        group by json_extract(hc.obj, '$.article_url')
-    	order by nedits desc `
+        group by articleUrl
+    	order by nedits desc `;
     if (limit != 0 ) 
         sql += `limit ${limit}`   
     return { sql:sql, args:[`%wiki/${char}%`] };
 }
 function anexoUrls(limit=10) {
     sql = `select distinct json_extract(hc.obj, '$.article_url') as articleUrl,
+        json_extract(hc.obj, '$.category') as category,
         '[' || group_concat('"' || json_extract(hc.obj, '$.date_edition') || '"' ) || ']' as dates,
         count(json_extract(hc.obj, '$.date_edition')) as nedits
         from history_contribs hc 
         where articleUrl like '%wiki/Anexo:%' and articleUrl not like '%Discusi%C3%B3n%'
-        group by json_extract(hc.obj, '$.article_url')
-    	order by nedits desc `
-    if (limit != 0 ) // and no discussion
+        group by articleUrl
+    	order by nedits desc `;
+    if (limit != 0 ) 
         sql += `limit ${limit}`   
     return { sql:sql, args:[] };
+}
+function descriptionUrl(url) {
+    sql = `select json_extract(hc.obj, '$.brief_description') as description 
+        from history_contribs hc
+        where json_extract(hc.obj, '$.article_url') = ? 
+        limit 1`;
+        return { sql:sql, args:[url] };
 }
 function discusionUrls(limit=10) {
     sql = `select distinct json_extract(hc.obj, '$.article_url') as articleUrl,
@@ -136,22 +154,27 @@ function discusionUrls(limit=10) {
         count(json_extract(hc.obj, '$.date_edition')) as nedits
         from history_contribs hc 
         where articleUrl like '%Discusi%C3%B3n:%' 
-        group by json_extract(hc.obj, '$.article_url')
-    	order by nedits desc `
+        group by articleUrl
+    	order by nedits desc `;
     if (limit != 0 ) 
         sql += `limit ${limit}`   
     return { sql:sql, args:[] };
 }
-function urlsByCategory(category, limit=0) {
-    sql = `select distinct json_extract(hc.obj, '$.article_url') as articleUrl
+function categoryUrls(category, limit=10) {
+    sql = `select distinct json_extract(hc.obj, '$.article_url') as articleUrl,
+        '[' || group_concat('"' || json_extract(hc.obj, '$.date_edition') || '"' ) || ']' as dates,
+        count(json_extract(hc.obj, '$.date_edition')) as nedits
         from history_contribs hc 
-        where articleUrl     
-        where articleUrl in (category)`
-    return { sql:sql, args:[] };
+        where json_extract(hc.obj, '$.category') = ?
+        group by articleUrl
+        order by nedits desc `;
+    if (limit != 0 ) 
+        sql += `limit ${limit}` 
+    return { sql:sql, args:[category] };
 }
 function randUrl() {
     sql = `select json_extract(obj, '$.article_url') as articleUrl
-        from history_contribs limit 1 offset (select abs(random()) % count(*) from diffs)`
+        from history_contribs limit 1 offset (select abs(random()) % count(*) from diffs)`;
     return { sql:sql, args:[] };
 }
 function prevUsers() {
@@ -161,6 +184,12 @@ function prevUsers() {
         on df.id = hc.id 
         where prevUser not like '90.167%'
         group by prevUser
-        order by nedits desc`
+        order by nedits desc `;
     return { sql:sql, args:[] };
 }
+function categorias() {
+    sql = `select distinct json_extract(obj, '$.category') as category
+        from history_contribs`;
+    return { sql:sql, args:[] };
+}
+

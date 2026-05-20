@@ -32,6 +32,12 @@
     width: 30px;
     height: 30px;
 }
+.fixed-corner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-top: 0.3rem;
+}
 .tl {
     display: flex;
 }
@@ -81,10 +87,12 @@
         "0 B C"
         "0 tl tl";
         grid-template-columns: 60px 1fr 1fr;
-        padding-bottom: 0.6rem;
         justify-items: left;               
     }
-    #datetime { margin-left: 0rem; }
+    #datetime { 
+        margin-left: 0rem; 
+        margin: 0.1rem 0 0.7rem 0;
+    }
 
     #article-url { all:unset; }
     #external-url {
@@ -96,20 +104,19 @@
         display: grid;
         grid-template-columns: 2fr 0.2fr;
     }
-    
     #user {
         white-space: nowrap;
         overflow: hidden;
         max-width: 170px;
         text-overflow: ellipsis;
-        padding:0.2rem;
+        padding:0.2rem;  
     }
     #prev-user {
         white-space: nowrap;
         overflow: hidden;
         max-width: 170px;
         text-overflow: ellipsis;
-        padding:0.2rem;
+        padding:0.1rem;
     }
     .lineno {    
         padding: 0.1rem 0rem 0.2rem 0rem;
@@ -177,28 +184,32 @@ async function loadDiffs() {
                             <label class="">Editado el </label>
                             <b id="date-data">${currentDiff.date}</b>
                             <label class="">a las </label>
-                            <b id="time-data">${currentDiff.time}</b></span>
+                            <b id="time-data">${currentDiff.time}</b>
+                        </span>
                         <span id="prev-user" class="bg-reddiff">
-                            <b id="prevuser-data"><a href="#diffs?diff=user::${currentDiff.prevUser}">${currentDiff.prevUser}</a></b></span> 
+                            <b id="prevuser-data"><a href="#diffs?diff=user::${currentDiff.prevUser}">${currentDiff.prevUser}</a></b>
+                            <label class="bg-cyan info bold fixed-corner" onclick="info(event)">?</label>
+                        </span> 
                         <span id="user" class="bg-greendiff">
-                            <b id="user-data"><a href="#diffs?diff=user::${currentDiff.user}">${currentDiff.user}</a></b></span>
-                            <div class='tl'>                        
+                            <b id="user-data"><a href="#diffs?diff=user::${currentDiff.user}">${currentDiff.user}</a></b>
+                        </span>
+                        <div class='tl'>                        
                             <span id="article-url">
                                 <a id="article-url-data" href="#diffs?diff=${diffs}">${articleTitle}</a></span>
                             <span id="external-url">
                                 <a id="external-url-data" href="${currentDiff.diffUrl}" target="_blank">
-                                    <img class="ico-extern-url" src="resources/svg/extern-link2.svg" alt="" srcset="">
-                                </a></span>
-                            </div>
+                                    <img class="ico-extern-url" src="resources/svg/extern-link2.svg" alt="" title="Link externo" srcset="">
+                                </a>
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <div class="lines"></div>
-            </div>` 
+            </div>`
 
             fragment = document.createElement('template');
             fragment.innerHTML = diffHeader;
-            changes = JSON.parse(currentDiff.changes) 
-
+            changes = JSON.parse(currentDiff.changes)
             for (let i=0; i<changes.length; i++) {
                 change = changes[i];
                 lineno = `<div class="lineno">
