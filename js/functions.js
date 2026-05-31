@@ -1,11 +1,13 @@
 var getVal = "";
 var idTimeout = "";
+var categories = "";
+
 init()
 
 async function loadFragment(what) {
     what = what.replace('#','').replace(/\?.*/,'');
     console.log('what:',what)
-    const fragments = [ 'menu','footer','index','alfabetrium','diffs','listby','users','categories'];
+    const fragments = [ 'menu','footer','index','alfabetrium','diffs','listby','users','categories','notes'];
     if (fragments.includes(what)) {
         try {
             var request = await fetch(`/public/components/${what}.html`);
@@ -20,7 +22,7 @@ async function loadFragment(what) {
             var js = template.content.querySelectorAll('script');
             js = js.length > 1? js[1] : js[0]; // issue live server svg support
             var fragment = template.content.querySelector(`#${what}`)
-            if (['menu','footer'].includes(what)) 
+            if (['menu','footer'].includes(what))
                 document.getElementById(`${what}-fragment`).innerHTML = fragment.outerHTML;
             else
                 document.getElementById(`app`).innerHTML = fragment.outerHTML;
@@ -37,7 +39,7 @@ async function loadFragment(what) {
             if (js) {
                 script = document.createElement('script');
                 script.id = `${what}-js`
-                script.textContent = js.innerHTML;
+                script.textContent = js.innerHTML;//js.innerHTML;
                 document.head.appendChild(script);
             }
         }
@@ -46,7 +48,7 @@ async function loadFragment(what) {
     }
 }
 async function fetchSharedData() {
-    let categories = JSON.parse(sessionStorage.getItem('categories'));
+    categories = JSON.parse(sessionStorage.getItem('categories'));
     if (categories == null) {
         let querydata = await query('categories');
         categories = querydata.map(i => i.category);                
@@ -97,6 +99,7 @@ function info(event) {
     let { left, top } = event.target.closest(elem).getBoundingClientRect();
 
     var toast = document.getElementById('toast');
+    toast.innerText = "brief_description of some link selected in the article_url";
     toast.style.opacity = 1
     toast.style.top = (top + window.scrollY)+'px';
     toast.style.left = (left + window.scrollX)+'px';
@@ -104,5 +107,6 @@ function info(event) {
         toast.style.opacity = 0
         toast.style.top = 0;
         toast.style.left = 0;
+        toast.innerText = "";
     },5000);
 }

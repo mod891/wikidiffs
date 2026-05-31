@@ -32,11 +32,21 @@
     width: 30px;
     height: 30px;
 }
+.ico-marker {
+    width: 30px;
+    height: 25px;
+}
 .fixed-corner {
     position: absolute;
     top: 0;
     right: 0;
     margin-top: 0.3rem;
+}
+.fixed-marker {
+    position: absolute;
+    top: 5px;
+    right: 40px;
+    
 }
 .tl {
     display: flex;
@@ -158,7 +168,7 @@ async function loadDiffs() {
         else if (articleUrl == "random") 
             articleUrl = (await query('randUrl'))[0].articleUrl;
         else if (articleUrl.match(/[0-9]{9}/) != null) 
-            articleUrl = (await query('urlFromId',articleUrl))[0].articleUrl;
+            dbquery = 'diffFromId';            //articleUrl = (await query('urlFromId',articleUrl))[0].articleUrl;
         else if (articleUrl.split('user::').length > 1) {
             articleUrl = articleUrl.split('user::')[1];
             if (articleUrl.match('90.167.*') != null)
@@ -170,12 +180,21 @@ async function loadDiffs() {
     } catch (err) {
         console.log(`loadDiffs::data retrieving Error:`,err);
     }
+    
     if (data.length > 0) {
         var fragment = null;
+        let svgMarker = null;
+        let notes = JSON.parse(localStorage.getItem('notes'));
         for (let d=0; d<data.length; d++) {
             currentDiff = data[d];
             articleTitle = decodeURIComponent(currentDiff.articleUrl.split('/').at(-1).replaceAll('_',' '))
             diffs = currentDiff.articleUrl.split('&diff')[0];
+            if (notes != null) {
+                if (notes.ids.filter(i => i == currentDiff.id).length > 0)
+                    svgMarker = "marker-saved.svg";
+                else
+                    svgMarker = "marker.svg";
+            }
             diffHeader =`
             <div id="${currentDiff.id}" class="diff">
                 <div class="wrap-diff-header">
@@ -188,6 +207,9 @@ async function loadDiffs() {
                         </span>
                         <span id="prev-user" class="bg-reddiff">
                             <b id="prevuser-data"><a href="#diffs?diff=user::${currentDiff.prevUser}">${currentDiff.prevUser}</a></b>
+                            <div class="bold fixed-marker" >
+                                <img class="ico-marker" onclick="marker(event,this)" src="resources/svg/${svgMarker}">
+                            </div>
                             <label class="bg-cyan info bold fixed-corner" onclick="info(event)">?</label>
                         </span> 
                         <span id="user" class="bg-greendiff">
@@ -294,6 +316,32 @@ function changeText(event,obj) {
             if (it.id == div.id) 
                 div.children[0].innerHTML = it.fullText
         })         
+    }
+}
+function marker(event,elem) {
+    let notes = JSON.parse(localStorage.getItem('notes'));
+    let id = event.target.closest('.diff').id
+    let del = false;
+    if (elem.src.includes('saved')) {
+        elem.src = "resources/svg/marker.svg";
+        del = true;
+    } else 
+        elem.src = "resources/svg/marker-saved.svg";
+    
+    if (notes != null) {
+        if (!del)
+            notes.ids.push(id);
+        else
+            notes.ids = notes.ids.filter(i => i != id);
+        localStorage.setItem('notes',JSON.stringify(notes));
+    } else {
+        objStorage = {
+            ids: [],
+            notes: []
+        };
+        if (!del) 
+            objStorage.ids.push(id);
+        localStorage.setItem('notes',JSON.stringify(objStorage));
     }
 }
 </script>

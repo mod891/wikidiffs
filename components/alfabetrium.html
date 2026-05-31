@@ -178,7 +178,7 @@ async function fetchLiLinks() {
         sessionStorageObj.char.push(charObj);
     }
     
-    urls = await query('anexo',0,10);
+    urls = await query('anexo',10);
     div = document.getElementById('anexo')
     a = div.childNodes[0]
     a.href="#listby?c=anexo"

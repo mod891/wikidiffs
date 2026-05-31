@@ -40,7 +40,11 @@
     }
     #category-list > div:nth-child(n) {
        margin-top:0;
-}
+    }
+    #category-list > div:first-child {
+        margin-top: 1rem;
+    }
+
 }
 </style>
 
@@ -50,17 +54,15 @@
 </div>
 <script>
 
-categories = JSON.parse(sessionStorage.getItem('categories'));
 init()
 
-function init() {
+async function init() {
     if (categories == null) 
-        fetchSharedData();     
+        await fetchSharedData();     
     loadCategories();     
 }
 
 function loadCategories() {
-
     var categoryListDiv = document.getElementById('category-list');
     let html = '';
     for (i in categories) {
