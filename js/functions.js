@@ -6,7 +6,7 @@ init()
 
 async function loadFragment(what) {
     what = what.replace('#','').replace(/\?.*/,'');
-    console.log('what:',what)
+    // console.log('what:',what)
     const fragments = [ 'menu','footer','index','alfabetrium','diffs','listby','users','categories','notes'];
     if (fragments.includes(what)) {
         try {
@@ -39,7 +39,7 @@ async function loadFragment(what) {
             if (js) {
                 script = document.createElement('script');
                 script.id = `${what}-js`
-                script.textContent = js.innerHTML;//js.innerHTML;
+                script.textContent = js.innerHTML;
                 document.head.appendChild(script);
             }
         }
@@ -89,16 +89,22 @@ window.addEventListener('hashchange', () => {
     route();
 })
 
-function info(event) {
+function info(event,ms=5000,...args) {
+    var toast = document.getElementById('toast');
+    var left = 0, top = 0;
     let elem = 'li';
     clearTimeout(idTimeout);
-    console.log(Array.from(event.target.classList).includes('fixed-corner'));
-    if (Array.from(event.target.classList).includes('fixed-corner'))
-        elem = 'span.bg-reddiff';
-    console.log('closest:',event.target.closest(elem))
-    let { left, top } = event.target.closest(elem).getBoundingClientRect();
-
-    var toast = document.getElementById('toast');
+    console.log(args)
+    // console.log(Array.from(event.target.classList).includes('fixed-corner'));
+    // console.log('closest:',event.target.closest(elem))
+    //  { left, top } = event.target.closest(elem).getBoundingClientRect();
+    if (args.length == 0) {
+        if (Array.from(event.target.classList).includes('fixed-corner'))
+            elem = 'span.bg-reddiff';
+        left = event.target.closest(elem).getBoundingClientRect().left;
+        top = event.target.closest(elem).getBoundingClientRect().top;
+    }
+    
     toast.innerText = "brief_description of some link selected in the article_url";
     toast.style.opacity = 1
     toast.style.top = (top + window.scrollY)+'px';
@@ -108,5 +114,5 @@ function info(event) {
         toast.style.top = 0;
         toast.style.left = 0;
         toast.innerText = "";
-    },5000);
+    },ms);
 }

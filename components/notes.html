@@ -1,12 +1,188 @@
 <style>
+    textarea {
+        width: 80%;
+    }
+    select {
+        text-align: center;
+        margin:1rem 0rem 1rem 0rem;
+    }
+    #aSelected {
+        display: block;
+        min-height: 30px;
+        min-width: 200px;
+    }
+    .ico-btn {
+        margin:0.5rem 0rem 0.5rem 0.5rem;
+        width: 40px;
+        transition: filter 0.5s;
+        filter: drop-shadow(2px 1px 1px black);
+    }
+    .disable {
+        filter: opacity(50%) grayscale(100%);
+    }
+    
 </style>
 
-<div id="notes"></div>
+<div id="notes">
+    <div class="drow-mcol justify-evenly m-align-center pt2 pb3">
+        <div class="">
+            <div>
+                <div><select id="diffSelect" class=""><option>No hay Diffs guardadas</option></select></div>
+                <div><label><a id="aSelected" href=""> </a></label></div>
+            </div>
+        </div>
+        <div class="">
+            <div>
+                <div class="dflex">
+                    <select id="notesSelect" class="w80 m-ml1">
+                        <option>No hay notas guardadas</option>
+                    </select>
+                </div>
+                <div class="dflex flexrow m-justify-center">
+                    <textarea id="noteArea" rows="10" cols="50"></textarea>
+                    <div class="dflex flexcol">
+                        <img id="newNote" class="ico-btn" src="resources/svg/add.svg"/>                       
+                        <img id="removeSelectedNote" class="ico-btn" src="resources/svg/remove.svg"/>
+                        <img id="saveNote" class="ico-btn" src="resources/svg/save.svg"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
 
-            window.addEventListener('resize',() => {
-                console.log('x',window.innerWidth,'y',window.innerHeight)
-            })
+    var addNoteBtn = document.getElementById('newNote');
+    var removeNoteBtn = document.getElementById('removeSelectedNote');
+    var saveNoteBtn = document.getElementById('saveNote');
+    var selectDiffs = document.getElementById('diffSelect');
+    var aSelected = document.getElementById('aSelected');
+    var selectNotes = document.getElementById('notesSelect');
+    var textarea = document.getElementById('noteArea');
+    var notes = null;
+
+    init()
+
+    function init() {
+
+        removeNoteBtn.classList.add('disable')
+        saveNoteBtn.classList.add('disable')
+        notes = JSON.parse(localStorage.getItem('notes'));
+        if (notes != null) {
+            optionsChanged();
+        }
+        selectDiffs.addEventListener('change',diffSelectChanged);
+        selectNotes.addEventListener('change',notesSelectChanged);
+
+        textarea.addEventListener('input',(evt) => {
+            console.log('input',evt.target.value)
+            if (evt.target.value.replaceAll(" ","").replaceAll("\n","").length == 0) {
+                if (!saveNoteBtn.classList.contains('disable'))
+                    saveNoteBtn.classList.add('disable')
+            } else {
+                if (saveNoteBtn.classList.contains('disable'))
+                    saveNoteBtn.classList.remove('disable')
+            }
+        });
+        addNoteBtn.addEventListener('click',() => {
+            textarea.value="";
+            textarea.focus();
+        });
+        saveNoteBtn.addEventListener('click',(evt) => {
+            if (evt.target.classList.contains('disable'))
+                evt.preventDefault()
+            else {
+                // if (JSON.parse(localStorage.getItem('notes')) == null)
+                //     notes = null;
+                let date=new Date()
+                let day = Number.parseInt(date.getDay()) < 10? '0'+date.getDay() : date.getDay();
+                let month = Number.parseInt(date.getMonth()+1);
+                month = month < 10? '0'+month : month;
+                let dateTime = day +'/'+month+'/'+date.getFullYear()+' '+date.getHours()+':'+date.getMinutes()
+                let defaultObj = {n:1, title:`1 - ${dateTime}`,  text:textarea.value};
+                if (notes == null) {
+                    notes = { diffs: [], notes: [] }
+                    notes.notes.push(defaultObj);
+                } else {
+                    if (notes.notes.length == 0)
+                        notes.notes.push(defaultObj);
+                    else {
+                        notes.notes.sort((a,b) => a.n < b.n);
+                        notes.notes.push({
+                            n:notes.notes[notes.notes.length-1].n + 1,
+                            title:`${notes.notes[notes.notes.length-1].n + 1} - ${dateTime}`,
+                            text:textarea.value,
+                        });
+                    }
+                }
+                optionsChanged(1)
+            }
+        });
+    }
+
+                /*
+                    updt GUI: 
+                    notes → localstorage
+                    notes ← localstorage
+                    
+              
+                console.log('saved at',dateTime)
+
+  */
+    function diffSelectChanged(evt) {
+        if (evt.target.value == '0') {
+            aSelected.href = '';
+            aSelected.innerText = '';
+        } else {
+            aSelected.href = `#diffs?diff=${evt.target.value}`;
+            aSelected.innerText = `#diffs?diff=${evt.target.value}`;
+        }
+        console.log('diffSelectChanged',evt.target,evt.target.value);
+    }
+    function notesSelectChanged(evt) {
+        console.log('notesSelectChanged',evt);
+    }
+    function optionsChanged(opt=0) {
+        // 0 → init | 1 → rm | 2 → add
+        let fragment = document.createElement('template');
+        let html, urlformated;
+
+        if (opt == 0) {
+            if (notes.diffs.length > 0) {
+
+
+                selectDiffs.remove(0);
+                html += '<option value="0">Seleccionar</option>';
+                for (let i=0; i<notes.diffs.length; i++) {
+                    urlformated = decodeURIComponent(notes.diffs[i].url.split('wiki/')[1].replace('_',' ')).slice(0,30);
+                    html += `<option value=${notes.diffs[i].id}>${notes.diffs[i].id} - ${urlformated}</option>`;               
+                }            
+                fragment.innerHTML = html;
+                selectDiffs.insertAdjacentHTML('beforeend',fragment.innerHTML)
+            }
+
+
+            if (notes.diffs.notes > 0) {
+            
+                console.log(notes)
+            }
+        }
+        else if (opt == 1) {
+            // if (notes.diffs.notes > 0) {
+            localStorage.setItem('notes',JSON.stringify(notes));
+            html = `<option value=${notes.notes[notes.notes.length-1].n}>${notes.notes[notes.notes.length-1].title}</option>`;
+            fragment.innerHTML = html;
+            selectNotes.insertAdjacentHTML('beforeend',fragment.innerHTML)
+        }
+        // case inicializar -> add todas opt
+
+        // case new && save note -> add 1 new opt
+        // case rm note -> rm 1 opt
+
+    }
+    window.addEventListener('resize',() => {
+        console.log('x',window.innerWidth,'y',window.innerHeight)
+    })
 
 </script>

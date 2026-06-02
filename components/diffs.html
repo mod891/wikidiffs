@@ -183,14 +183,14 @@ async function loadDiffs() {
     
     if (data.length > 0) {
         var fragment = null;
-        let svgMarker = null;
+        let svgMarker = "marker.svg";
         let notes = JSON.parse(localStorage.getItem('notes'));
         for (let d=0; d<data.length; d++) {
             currentDiff = data[d];
             articleTitle = decodeURIComponent(currentDiff.articleUrl.split('/').at(-1).replaceAll('_',' '))
             diffs = currentDiff.articleUrl.split('&diff')[0];
             if (notes != null) {
-                if (notes.ids.filter(i => i == currentDiff.id).length > 0)
+                if (notes.diffs.filter(i => i.id == currentDiff.id).length > 0)
                     svgMarker = "marker-saved.svg";
                 else
                     svgMarker = "marker.svg";
@@ -303,7 +303,6 @@ function escapeBeginEnd(str,addel) {
          .replace(/\$\$\$END\$\$\$/g, `</b>`)
 }
 function changeText(event,obj) {
-    console.log('changeText',obj)
     event.preventDefault();
     div = obj.closest('div')
     if (obj.textContent == '{menos}') {
@@ -320,7 +319,8 @@ function changeText(event,obj) {
 }
 function marker(event,elem) {
     let notes = JSON.parse(localStorage.getItem('notes'));
-    let id = event.target.closest('.diff').id
+    let id = event.target.closest('.diff').id;
+    let url = event.target.closest('.diff').querySelector('#article-url-data').href.split('=')[1]      
     let del = false;
     if (elem.src.includes('saved')) {
         elem.src = "resources/svg/marker.svg";
@@ -330,18 +330,18 @@ function marker(event,elem) {
     
     if (notes != null) {
         if (!del)
-            notes.ids.push(id);
+            notes.diffs.push({id:id,url:url});
         else
-            notes.ids = notes.ids.filter(i => i != id);
+            notes.diffs = notes.diffs.filter(i => i.id != id);
         localStorage.setItem('notes',JSON.stringify(notes));
     } else {
         objStorage = {
-            ids: [],
+            diffs: [],
             notes: []
         };
         if (!del) 
-            objStorage.ids.push(id);
+            objStorage.diffs.push({id:id,url:url});
         localStorage.setItem('notes',JSON.stringify(objStorage));
     }
-}
+} // toast variable -> title negrita articulo + brief
 </script>

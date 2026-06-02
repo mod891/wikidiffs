@@ -15,25 +15,35 @@ h1 {
 .cursor {
     cursor:pointer;
 }
-.font30px {
-    font-size:30px;
-}
 .font20px {
     font-size:20px;
 }
-.dflex {
-    display: flex;
+.font30px {
+    font-size:30px;
 }
-.d-dflex {
+
+.flexrow {
+    flex-direction: row;
+}
+.flexcol {
+    flex-direction: column;
+}
+
+.drow-mcol {
+    display: flex;
+    flex-direction: row;
+}
+.dcol-mrow {
+    display: flex;
+    flex-direction: column;
+}
+
+.dflex {
     display: flex;
 }
 .dfcenter {
     display: flex;
     justify-content: center;
-}
-.flexrow {
-    display: flex;
-    flex-direction: row;
 }
 .justify-between {
     justify-content:space-between;
@@ -44,11 +54,23 @@ h1 {
 .justify-center {
     justify-content:center;
 }
+.justify-evenly {
+    justify-content:space-evenly;
+}
 .w50 {
     width: 50%;
 }
 .w70 {
     width: 70%;
+}
+.w80 {
+    width: 80%;
+}
+.w90 {
+    width: 90%;
+}
+.w100 {
+    width: 100%;
 }
 .jc-end {
     display: inline-grid;
@@ -58,8 +80,20 @@ h1 {
 .mt05 {
     margin-top: 0.5rem;
 }
+.mt2 {
+    margin-top: 2rem;
+}
+.ml05 {
+    margin-left: 0.5rem;
+}
+.ml1 {
+    margin-left: 1rem;
+}
 .mtb05 {
     margin: 0.5rem 0 0.5rem 0;
+}
+.pt2 {
+    padding-top: 2rem;
 }
 .pl03 {
     padding-left: 0.3rem;
@@ -76,6 +110,9 @@ h1 {
 .pr1 {
     padding-right: 1rem;
 }
+.pb3 {
+    padding-bottom: 3rem;
+}
 .mr05 {
     margin-right: 0.5rem;
 }
@@ -91,12 +128,7 @@ h1 {
 .d-mr2 {
     margin-right: 2rem;
 }
-.ml05 {
-    margin-left: 0.5rem;
-}
-.ml1 {
-    margin-left: 1rem;
-}
+
 .info {
     border-radius: 50%;
     padding:0 0.5rem 0 0.5rem;
@@ -105,17 +137,55 @@ h1 {
     cursor:zoom-in;
 }
 
+
+/* d-esktop styles */
+.d-dflex {
+    display: flex;
+}
+.d-flexrow {
+    flex-direction: row;
+}
+.d-flexcol {
+    flex-direction: column;
+}
+.d-mr1-5 {
+    margin-right: 1.5rem;
+}
+
+
 @media (max-width: 950px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
     .d-dflex {
         all:unset;
     }
-    .d-mr2 {
-        margin-right: 0rem;
+    .drow-mcol {
+        flex-direction: column;
+    }
+    .dcol-mrow {
+        flex-direction: row;
+    }
+
+    /* m-obile styles */
+    .m-ml1 {
+        margin-left: 1rem;
     }
     .m-mr1 {
         margin-right: 1rem;
     }
-    .d-mr1-5 {
-        margin-right: 0rem;
+    .m-align-center {
+        align-items:center;
     }
+    .m-justify-center {
+        justify-content: center;
+    }
+    /* d-esktop styles */
+    .d-mr1-5 {
+        all: unset;
+    }
+    .d-mr2 {
+        all: unset;
+    }
+    .d-flexrow {
+        all: unset;
+    }
+
 }

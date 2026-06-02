@@ -60,7 +60,7 @@ function diffsQuery(whereType, arg, limit=0) {
     else if (whereType == 'diffsFromUser')
          where = ` where json_extract(hc.obj, '$.user') = ? `;
     else if (whereType == 'diffsFromPreviousUser')
-         where = ` where json_extract(df.obj, '$.prev_username')=? `;
+         where = ` where json_extract(df.obj, '$.prev_username') = ? `;
 
     var sql = `select df.id as id,
         json_extract(hc.obj, '$.article_url') as articleUrl,
