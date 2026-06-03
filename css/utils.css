@@ -163,7 +163,6 @@ h1 {
     .dcol-mrow {
         flex-direction: row;
     }
-
     /* m-obile styles */
     .m-ml1 {
         margin-left: 1rem;
@@ -177,15 +176,15 @@ h1 {
     .m-justify-center {
         justify-content: center;
     }
-    /* d-esktop styles */
+    /* unset d-esktop styles */
     .d-mr1-5 {
-        all: unset;
+        margin-right: 0rem;
     }
     .d-mr2 {
-        all: unset;
+        margin-right: 0rem;
     }
     .d-flexrow {
-        all: unset;
+        flex-direction:unset;
     }
 
 }

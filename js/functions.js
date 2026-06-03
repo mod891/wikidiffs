@@ -91,21 +91,26 @@ window.addEventListener('hashchange', () => {
 
 function info(event,ms=5000,...args) {
     var toast = document.getElementById('toast');
-    var left = 0, top = 0;
+    var left = 0, top = 0, defaultBg='bg-yellow';
+    var text = "brief_description of some link selected in the article_url";
     let elem = 'li';
     clearTimeout(idTimeout);
-    console.log(args)
-    // console.log(Array.from(event.target.classList).includes('fixed-corner'));
-    // console.log('closest:',event.target.closest(elem))
-    //  { left, top } = event.target.closest(elem).getBoundingClientRect();
+    // await query('urlInfo',url)
     if (args.length == 0) {
         if (Array.from(event.target.classList).includes('fixed-corner'))
             elem = 'span.bg-reddiff';
         left = event.target.closest(elem).getBoundingClientRect().left;
         top = event.target.closest(elem).getBoundingClientRect().top;
+    } else {
+        elem = args[0].elem;
+        left = elem.getBoundingClientRect().left -250;
+        top = elem.getBoundingClientRect().top + 20;
+        text = args[0].text;
+        if (args[0].classes.length > 0) 
+            defaultBg = args[0].classes[0];
     }
-    
-    toast.innerText = "brief_description of some link selected in the article_url";
+    toast.classList.add(defaultBg);
+    toast.innerText = text;
     toast.style.opacity = 1
     toast.style.top = (top + window.scrollY)+'px';
     toast.style.left = (left + window.scrollX)+'px';
@@ -116,3 +121,4 @@ function info(event,ms=5000,...args) {
         toast.innerText = "";
     },ms);
 }
+
