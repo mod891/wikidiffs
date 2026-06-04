@@ -6,7 +6,6 @@ h1 {
     font-weight: bold;
 }
 .hcenter {
-    display: flex;
     justify-content: center;
 }
 .hauto {
@@ -152,10 +151,11 @@ h1 {
     margin-right: 1.5rem;
 }
 
-
-@media (max-width: 950px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
+@media (max-width: 1400px) and (orientation: landscape), 
+        (max-width: 1400px) and (orientation:portrait) { 
+/* @media (max-width: 950px) and (orientation: landscape), (max-width: 630px) and (orientation:portrait) { */
     .d-dflex {
-        all:unset;
+        display:unset;
     }
     .drow-mcol {
         flex-direction: column;

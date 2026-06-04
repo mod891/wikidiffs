@@ -90,8 +90,8 @@
     background-color: var(--redgit);
     box-shadow: 2px 2px 5px var(--black);
 }
-
-@media (max-width: 950px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
+@media (max-width: 1400px) and (orientation: landscape), 
+        (max-width: 1400px) and (orientation:portrait) { 
     .diff-header {
         width: 100%;
         display: grid;
@@ -104,10 +104,13 @@
     }
     #datetime { 
         margin-left: 0rem; 
-        margin: 0.1rem 0 0.7rem 0;
+        margin: 0.1rem 0 0.7rem 1rem;
     }
 
-    #article-url { all:unset; }
+    #article-url {
+        all:unset; 
+        margin-left: 1rem;
+    }
     #external-url {
         all:unset;
         margin:0rem 1rem 0rem 1rem;
@@ -130,6 +133,7 @@
         max-width: 170px;
         text-overflow: ellipsis;
         padding:0.1rem;
+        margin-left:1rem;
     }
     .lineno {    
         padding: 0.1rem 0rem 0.2rem 0rem;

@@ -91,7 +91,7 @@ window.addEventListener('hashchange', () => {
 
 function info(event,ms=5000,...args) {
     var toast = document.getElementById('toast');
-    var left = 0, top = 0, defaultBg='bg-yellow';
+    let left = 0, top = 0,x=0, y=0, defaultBg='bg-yellow';
     var text = "brief_description of some link selected in the article_url";
     let elem = 'li';
     clearTimeout(idTimeout);
@@ -103,12 +103,20 @@ function info(event,ms=5000,...args) {
         top = event.target.closest(elem).getBoundingClientRect().top;
     } else {
         elem = args[0].elem;
-        left = elem.getBoundingClientRect().left -250;
-        top = elem.getBoundingClientRect().top + 20;
+        if (args[0].hasOwnProperty('x'))
+            x = args[0].x
+        if (args[0].hasOwnProperty('y'))
+            y = args[0].y
+        left = elem.getBoundingClientRect().left + y;
+        top = elem.getBoundingClientRect().top + x;
         text = args[0].text;
-        if (args[0].classes.length > 0) 
-            defaultBg = args[0].classes[0];
+        if (args[0].hasOwnProperty('classes')) {
+            if (args[0].classes.length > 0) 
+                defaultBg = args[0].classes[0];
+        }
     }
+    if (toast.classList.contains(defaultBg))
+        toast.classList.remove(defaultBg);
     toast.classList.add(defaultBg);
     toast.innerText = text;
     toast.style.opacity = 1
@@ -119,6 +127,7 @@ function info(event,ms=5000,...args) {
         toast.style.top = 0;
         toast.style.left = 0;
         toast.innerText = "";
+        toast.classList.remove(defaultBg);
     },ms);
 }
 

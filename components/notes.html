@@ -33,7 +33,7 @@
     <div class="drow-mcol justify-evenly m-align-center pt2 pb3">
         <div class="">
             <div class="chpza">
-                <div class="hcenter">
+                <div class="dflex hcenter">
                     <h3 class="xaxisl30">Diferencias</h3>
                 </div>
                 <div><select id="diffSelect" class="w80"><option value="nodata">No hay Diffs guardadas</option></select></div>
@@ -42,7 +42,7 @@
         </div>
         <div class="">
             <div>
-                <div class="hcenter">
+                <div class="dflex hcenter">
                     <h3 class="xaxisl30">Notas</h3>
                 </div>
                 <div class="dflex">
@@ -168,7 +168,7 @@
             aSelected.innerHTML = `
             <div class="w80 dflex justify-between">
                 <a class="ml1" href="#diffs?diff=${evt.target.value}">#diffs?diff=${evt.target.value}</a>
-                <label class="bg-cyan bold info" onclick="info(null,5000,{elem:this, text:'url message 20 word aprox', classes:[]})">?</label>
+                <label class="bg-cyan bold info" onclick="info(null,4000,{elem:this, x:20, y:-250, text:'url message 20 word aprox'})">?</label>
             </div>`;
         }
     }

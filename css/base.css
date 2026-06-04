@@ -39,18 +39,18 @@ li {
     width: 80%; 
     height: 100%;
 }
-#content > div {
-    padding: 1rem;
+#logo {
+    height: 120px;
 }
 #weblogo {
     padding-left:2rem;
     padding-right:2rem;
 }
-#logo {
-    height: 120px;
+#content {
+    margin-top:2rem;
 }
-header {
-    display: flex; 
+#content > div {
+    padding: 1rem;
 }
 #menu-fragment {
     display: flex;
@@ -79,7 +79,8 @@ header {
     transition: opacity bottom left 0.5s;  
     z-index: 1000;
 }
-@media (max-width: 950px) and (orientation: landscape), (max-width: 430px) and (orientation:portrait) {
+
+@media (max-width: 950px) and (orientation: landscape), (max-width: 630px) and (orientation:portrait) {
     ul {
         padding-left: 1rem;
     }
@@ -92,17 +93,20 @@ header {
     #content > div {
         padding: 0rem;
     }
-    #logo {
-        height: 90px;
-        transform: translateX(0);
-    }
     header {
         all:unset;
-    } 
+    }
     #menu-fragment {
-        all:unset;
+        all: unset;
     }
     #scrollBtn {
         right: 20px;
+    }
+    #weblogo {
+        padding-left:4rem;
+    }
+    #logo {
+        height: 90px;
+        transform: translateX(0);
     }
 }
