@@ -6,7 +6,6 @@ init()
 
 async function loadFragment(what) {
     what = what.replace('#','').replace(/\?.*/,'');
-    // console.log('what:',what)
     const fragments = [ 'menu','footer','index','alfabetrium','diffs','listby','users','categories','notes'];
     if (fragments.includes(what)) {
         try {
@@ -47,6 +46,7 @@ async function loadFragment(what) {
         console.log('ERR: choose wisely')
     }
 }
+
 async function fetchSharedData() {
     categories = JSON.parse(sessionStorage.getItem('categories'));
     if (categories == null) {
@@ -55,6 +55,7 @@ async function fetchSharedData() {
         sessionStorage.setItem('categories',JSON.stringify(categories));
     }
 }
+
 async function init() {
     await loadFragment('menu');
     await loadFragment('footer');
@@ -85,40 +86,48 @@ function route() {
         getVal = url.hash.split('?')[1].split('=')[1];
     loadFragment(url.hash);
 }
+
 window.addEventListener('hashchange', () => {
     route();
 })
 
-function info(event,ms=5000,...args) {
-    var toast = document.getElementById('toast');
-    let left = 0, top = 0,x=0, y=0, defaultBg='bg-yellow';
-    var text = "brief_description of some link selected in the article_url";
-    let elem = 'li';
+async function info(event,ms=5000,...args) {
     clearTimeout(idTimeout);
-    // await query('urlInfo',url)
-    if (args.length == 0) {
-        if (Array.from(event.target.classList).includes('fixed-corner'))
-            elem = 'span.bg-reddiff';
-        left = event.target.closest(elem).getBoundingClientRect().left;
-        top = event.target.closest(elem).getBoundingClientRect().top;
-    } else {
+    var toast = document.getElementById('toast');
+    let left = 0, top = 0, defaultBg = 'bg-yellow',
+    elem = '', url = '', page=window.location.hash, data=null;
+   
+    if (event != null) {
+        if (page.startsWith('#diffs')) 
+            url = document.querySelector('#article-url-data').href.split('diff=')[1];
+        else if (page.startsWith('#notes'))
+            url = document.querySelector('a.ml1').href.split('diff=')[1];
+        else if (page.startsWith('#listby') || page.startsWith('#alfabetrium')) 
+            url = event.target.parentNode.children[0].href.split('diff=')[1];
+        data = await query('descriptionUrl',url);
+        toast.innerText = data[0].description;
+
+        left = event.target.getBoundingClientRect().left-300 < 0?
+            0: event.target.getBoundingClientRect().left-300;
+        if (window.screen.availWidth<=1400 && 
+            !(page.startsWith('#listby') || page.startsWith('#alfabetrium')) )
+            left = window.screen.availWidth/2 - toast.offsetWidth/2
+        top = event.target.getBoundingClientRect().top+10;
+    
+    } else { 
         elem = args[0].elem;
-        if (args[0].hasOwnProperty('x'))
-            x = args[0].x
-        if (args[0].hasOwnProperty('y'))
-            y = args[0].y
-        left = elem.getBoundingClientRect().left + y;
-        top = elem.getBoundingClientRect().top + x;
-        text = args[0].text;
-        if (args[0].hasOwnProperty('classes')) {
+        toast.innerText = args[0].text;
+        left = elem.getBoundingClientRect().left + toast.offsetWidth/2;
+        top = elem.getBoundingClientRect().top+elem.offsetHeight/4;
+        
+        if (args[0].hasOwnProperty('classes')) 
             if (args[0].classes.length > 0) 
                 defaultBg = args[0].classes[0];
-        }
     }
+
     if (toast.classList.contains(defaultBg))
         toast.classList.remove(defaultBg);
     toast.classList.add(defaultBg);
-    toast.innerText = text;
     toast.style.opacity = 1
     toast.style.top = (top + window.scrollY)+'px';
     toast.style.left = (left + window.scrollX)+'px';
@@ -130,4 +139,3 @@ function info(event,ms=5000,...args) {
         toast.classList.remove(defaultBg);
     },ms);
 }
-

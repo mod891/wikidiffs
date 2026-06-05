@@ -29,7 +29,11 @@
     grid-area: D; 
     align-content: center;
 }
-#external-url { grid-area: E; margin-left:1rem;}
+#external-url { 
+    grid-area: E; 
+    margin-left:1rem;
+    margin-right:1rem;
+}
 
 .ico-extern-url {
     width: 30px;
@@ -175,7 +179,7 @@ async function loadDiffs() {
         else if (articleUrl == "random") 
             articleUrl = (await query('randUrl'))[0].articleUrl;
         else if (articleUrl.match(/[0-9]{9}/) != null) 
-            dbquery = 'diffFromId';            //articleUrl = (await query('urlFromId',articleUrl))[0].articleUrl;
+            dbquery = 'diffFromId';    
         else if (articleUrl.split('user::').length > 1) {
             articleUrl = articleUrl.split('user::')[1];
             if (articleUrl.match('90.167.*') != null)
@@ -219,7 +223,7 @@ async function loadDiffs() {
                             </div>
                             <label class="bg-cyan info bold fixed-corner" onclick="info(event)">?</label>
                         </span> 
-                        <span id="user" class="bg-greendiff">
+                        <span id="user" class="bg-greendiff"> 
                             <b id="user-data"><a href="#diffs?diff=user::${currentDiff.user}">${currentDiff.user}</a></b>
                         </span>
                         <div class='tl'>                        

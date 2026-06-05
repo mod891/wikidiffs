@@ -41,13 +41,16 @@ li {
 }
 #logo {
     height: 120px;
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+
 }
 #weblogo {
     padding-left:2rem;
     padding-right:2rem;
 }
 #content {
-    margin-top:2rem;
+    margin-top:0rem;
 }
 #content > div {
     padding: 1rem;
@@ -75,6 +78,8 @@ li {
     position: absolute;
     padding: 0.5rem;
     margin: 1rem;
+    max-width: 300px;
+    min-width: 100px;
     opacity: 0;
     transition: opacity bottom left 0.5s;  
     z-index: 1000;
@@ -89,6 +94,9 @@ li {
         padding-left: 0%;
         width: 100%;
         height: 100%;
+    }
+    #content {
+        margin-top:2rem;
     }
     #content > div {
         padding: 0rem;
@@ -107,6 +115,7 @@ li {
     }
     #logo {
         height: 90px;
+        margin-bottom: 0rem;
         transform: translateX(0);
     }
 }

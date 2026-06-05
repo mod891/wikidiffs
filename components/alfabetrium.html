@@ -168,7 +168,7 @@ async function fetchLiLinks() {
 
         for (let j=0; j<urls.length; j++) {       
             text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ')
-            html = `<li class="d-mr1-5"><div class="link"><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a>
+            html = `<li class="d-mr1-5"><div class="link"><a class="articleUrl" href="#diffs?diff=${urls[j].articleUrl}">${text}</a>
                 <label title="nº de ediciones" class="n-editions">${urls[j].nedits}</label>
                 <label class="bg-cyan bold info" onclick="info(event)">?</label>
                 </div></li>`
@@ -187,10 +187,13 @@ async function fetchLiLinks() {
 
     for (let j=0; j<urls.length; j++) {               
         text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ').replace('Anexo:','')
-        html = `<li class="d-mr1-5"><div class="link"><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a>
-            <label title="nº de ediciones" class="n-editions">${urls[j].nedits}</label>
-            <label class="bg-cyan bold info" onclick="info(event)">?</label>
-            </div></li>`
+        html = `<li class="d-mr1-5">
+                    <div class="link">
+                        <a href="#diffs?diff=${urls[j].articleUrl}">${text}</a>
+                        <label title="nº de ediciones" class="n-editions">${urls[j].nedits}</label>
+                        <label class="bg-cyan bold info" onclick="info(event)">?</label>
+                    </div>
+                </li>`
         ul.insertAdjacentHTML('beforeend',html)
         charObj.anexo.push(html)
     }

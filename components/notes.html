@@ -145,7 +145,7 @@
                         text = 'Nota modificada';
                     }
                 localStorage.setItem('notes',JSON.stringify(notes));
-                info(null,1000, { text:text, elem: textarea, classes:['bg-cyan'] } );
+                info(null, 1000, { elem: textarea, text:text,  classes:['bg-cyan'] } );
                 updateGUI(1)
             }
         });
@@ -155,7 +155,7 @@
             else {
                 notes.notes = notes.notes.filter(note => note.n != Number.parseInt(selectNotes.value))
                 localStorage.setItem('notes',JSON.stringify(notes));
-                info(null,1000, {elem: textarea, text:'Nota borrada', classes:['bg-cyan'] } );
+                info(null, 1000, {elem: textarea, text:'Nota borrada', classes:['bg-cyan'] } );
                 updateGUI(2);
             }
         });
@@ -168,7 +168,7 @@
             aSelected.innerHTML = `
             <div class="w80 dflex justify-between">
                 <a class="ml1" href="#diffs?diff=${evt.target.value}">#diffs?diff=${evt.target.value}</a>
-                <label class="bg-cyan bold info" onclick="info(null,4000,{elem:this, x:20, y:-250, text:'url message 20 word aprox'})">?</label>
+                <label class="bg-cyan bold info" onclick="info(event)">?</label>
             </div>`;
         }
     }
