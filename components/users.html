@@ -90,7 +90,7 @@
 </div>  
 <script>
 
-var data = null;
+var userData = null;
 var nUsers = document.getElementById('title')
 init()
 
@@ -100,7 +100,7 @@ async function init() {
     var storage = false;
     var storageObj = JSON.parse(sessionStorage.getItem('users'))
     if (storageObj != null) {
-        data = storageObj['users'];
+        userData = storageObj['users'];
         storage = true;
     }
     if (storage == false)
@@ -110,7 +110,7 @@ async function init() {
 
 function liLinks() {
     var div = document.getElementById('users-content');
-    var users = data;
+    var users = userData;
     nUsers.innerText =`${users.length} Usuarios`;
     var ul = document.createElement('ul');
     ul.classList = 'grid-content';
@@ -142,11 +142,11 @@ async function fetchUsers() {
     }
     var storageObj = { users };
     sessionStorage.setItem('users',JSON.stringify(storageObj));
-    data = users;   
+    userData = users;   
 }
 
 function filterData(e) {
-    let nVisibles = data.length;
+    let nVisibles = userData.length;
     applySearchFilter = false;
     var searchInput = document.getElementById('search')
   

@@ -1,7 +1,7 @@
 
 const local = {
     endpoint: 'http://127.0.0.1:3000/api',
-    token: null
+    token: 'token'
 }
 
 async function query(option,...args) {
@@ -18,7 +18,6 @@ async function query(option,...args) {
         case 'diffFromId':
             stmt = diffsQueries(option,args[0],limit);
         break;
-
         case 'urlsStartsWith':
         case 'urlsByCategory':
         case 'anexo':
@@ -40,17 +39,59 @@ async function query(option,...args) {
         default:
             console.log('hoiga esto no furula',option)
     }
+
     var request = await fetch(local.endpoint,{
         method: 'POST',
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({data:stmt})
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${local.token}`
+        },
+        body: tursonizer('request',stmt)
     })
-    if (request.ok) {
-        data = await request.json()
-
+     if (request.ok) {
+        var data = await request.json();
+        data = tursonizer('response',data);
         return data;
     }
 }
+function tursonizer(type,data) {
+
+    var tursoObj = '', normalizedData = null;
+    if (type=='request') {
+        tursoObj = {
+            requests: [
+                { type:"execute", stmt:{ sql: data.sql } },
+                { type:"close" }
+            ]
+        }
+        if (data.args.length > 0) {
+            tursoObj.requests[0].stmt = {
+                ...tursoObj.requests[0].stmt,
+                args:[
+                    { type:"string", value:data.args[0] }
+                ]
+            }
+        }
+        normalizedData = JSON.stringify({data:tursoObj});
+    } else {
+        tursoObj = [];
+        if (data.results[0].rows.length > 0) {
+			let keys = [];
+            for (let i=0; i< data.results[0].cols.length; i++)
+                keys.push(data.results[0].cols[i].name);
+            for (let i=0; i<data.results[0].rows.length; i++) {
+                let obj = {};
+                for (let j=0; j<keys.length; j++) {
+                    obj[keys[j]] = data.results[0].rows[i][j].value;
+                }
+                tursoObj.push(obj);
+            }
+        }
+        normalizedData = tursoObj;
+    }
+    return normalizedData;
+}
+
 function diffsQueries(whereType, arg, limit=0) {
     var where = ` where df.id = ? `;
     if (whereType == 'diffsFromUrl')
@@ -73,7 +114,7 @@ function diffsQueries(whereType, arg, limit=0) {
         
     if (limit != 0 )
         sql += `limit ${limit}`
-
+    
     return { sql:sql, args:[arg] };
 }
 function urlsQueries(whereType, arg, limit=10) {
@@ -125,6 +166,7 @@ function prevUsers() {
 function categorias() {
     sql = `select distinct json_extract(obj, '$.category') as category
         from history_contribs`;
+
     return { sql:sql, args:[] };
 }
 function descriptionUrl(idurl) {
