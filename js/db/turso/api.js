@@ -113,7 +113,7 @@ function diffsQueries(whereType, arg, limit=0) {
         on df.id = hc.id` + where;
         
     if (limit != 0 )
-        sql += `limit ${limit}`
+        sql += `limit ${limit} offset 0` //${offset}
     
     return { sql:sql, args:[arg] };
 }
@@ -142,7 +142,7 @@ function urlsQueries(whereType, arg, limit=10) {
         order by nedits desc `;
 
     if (limit != 0 )
-        sql += `limit ${limit}`
+        sql += `limit ${limit} offset 0`
 
     return { sql:sql, args:args };
 }
@@ -152,7 +152,7 @@ function randUrl() {
 
     return { sql:sql, args:[] };
 }
-function prevUsers() {
+function prevUsers(limit=0) {
     sql = `select json_extract(df.obj, '$.prev_username') as prevUser,
         count(*) as nedits
         from diffs df join history_contribs hc 
@@ -160,6 +160,9 @@ function prevUsers() {
         where prevUser not like '90.167%'
         group by prevUser
         order by nedits desc `;
+        
+        if (limit != 0 )
+            sql += `limit ${limit} offset 0`
 
     return { sql:sql, args:[] };
 }

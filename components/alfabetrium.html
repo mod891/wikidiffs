@@ -50,6 +50,25 @@
 #anexo { grid-area: anexo;}
 #discusion { grid-area: discusion;}
 
+.pager {
+justify-content: center;
+padding-bottom: 0.5rem;
+}
+
+.pager input {
+    display: flex;
+    margin-right: 1.5rem;
+    width: 20px;
+}
+.pager button {
+    display: flex;
+    justify-content: center;
+    padding: 0 1rem 0 1rem;
+    font-weight: 900;
+    font-size: 20px;
+    width: 10px;
+    margin:0rem 2rem;
+}
 @media (max-width: 950px) and (orientation: landscape), (max-width: 930px) and (orientation:portrait) {
 
     #abcdario {
@@ -130,12 +149,16 @@
 </div>   
 
 <script>
-
-if (sessionStorage.getItem('alfabetrium') == null)
-    fetchLiLinks()
-else
-    storageLiLinks()
-
+    var perPage = 3;
+init()
+function init() {
+    if (sessionStorage.getItem('alfabetrium') == null)
+        fetchLiLinks()
+    else
+        storageLiLinks()
+    document.querySelectorAll('input').forEach(e => e.addEventListener('input',pager));
+    document.querySelectorAll('button').forEach(e => e.addEventListener('click',pager));
+}
 function storageLiLinks() {
     obj = JSON.parse(sessionStorage.getItem('alfabetrium'))
 
@@ -149,7 +172,10 @@ function storageLiLinks() {
         urls = Object.values(values[i])
         
         for (let j=0; j<urls.length; j++)     
-            ul.insertAdjacentHTML('beforeend',urls[j].join('')) //JSON.stringify use array.join(',') 
+            ul.insertAdjacentHTML('beforeend',urls[j].join(''))
+        if ((urls[0]?.length ?? 0) >= perPage) // ? && ?? EcmaScript 2020
+            addPager(ul);
+        
     }
 }
 async function fetchLiLinks() {
@@ -159,7 +185,7 @@ async function fetchLiLinks() {
     let c = 65;
     for (let i=c; i<91; i++) {
         let char = String.fromCharCode(i)
-        charObj = { [char]: [] }
+        charObj = { [char]: [] } //, pager: { page: 1, offset: 10 }
         var urls = await query('urlsStartsWith',char,10);
         div = document.getElementById(char)
         a = div.childNodes[0]
@@ -167,13 +193,14 @@ async function fetchLiLinks() {
         ul = div.childNodes[1]
 
         for (let j=0; j<urls.length; j++) {       
-            text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ')
-            html = `<li class="d-mr1-5"><div class="link"><a class="articleUrl" href="#diffs?diff=${urls[j].articleUrl}">${text}</a>
-                <label title="nº de ediciones" class="n-editions">${urls[j].nedits}</label>
-                <label class="bg-cyan bold info" onclick="info(event)">?</label>
-                </div></li>`
+            html = li(urls[j]);
             ul.insertAdjacentHTML('beforeend',html)
             charObj[char].push(html)
+        }
+
+        // console.log('????',(urls.length >= perPage))
+        if (urls.length >= perPage) {
+            addPager(ul);
         }
         sessionStorageObj.char.push(charObj);
     }
@@ -186,17 +213,13 @@ async function fetchLiLinks() {
     charObj = { anexo: [] }
 
     for (let j=0; j<urls.length; j++) {               
-        text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ').replace('Anexo:','')
-        html = `<li class="d-mr1-5">
-                    <div class="link">
-                        <a href="#diffs?diff=${urls[j].articleUrl}">${text}</a>
-                        <label title="nº de ediciones" class="n-editions">${urls[j].nedits}</label>
-                        <label class="bg-cyan bold info" onclick="info(event)">?</label>
-                    </div>
-                </li>`
+        html = li(urls[j]);
         ul.insertAdjacentHTML('beforeend',html)
         charObj.anexo.push(html)
     }
+
+    if (urls.length >= perPage)  // && !lastPage
+        addPager(ul);
     sessionStorageObj.char.push(charObj);
 
     urls = await query('discusion',0,10);
@@ -206,19 +229,76 @@ async function fetchLiLinks() {
     ul = div.childNodes[1]
     charObj = { discusion: [] }
 
+    // refactor, localstorage not all html, just link url + neditions 
     for (let j=0; j<urls.length; j++) {               
-        text = decodeURIComponent(urls[j].articleUrl.split('/').at(-1)).replaceAll('_',' ').replace('Anexo:','')
-        html = `<li class="d-mr1-5"><div class="link"><a href="#diffs?diff=${urls[j].articleUrl}">${text}</a>
-            <label title="nº de ediciones" class="n-editions">${urls[j].nedits}</label>
-            <label class="bg-cyan bold info" onclick="info(event)">?</label>
-            </div></li>`
+        html = li(urls[j]);
         ul.insertAdjacentHTML('beforeend',html)
         charObj.discusion.push(html)
     }
+    if (urls.length >= perPage)
+        addPager(ul);    
     sessionStorageObj.char.push(charObj);
 
     sessionStorage.setItem('alfabetrium', JSON.stringify(sessionStorageObj))
 }
 
+function addPager(ul) {
+    let id = ul.closest('div').id;
+    var html=`
+        <div class="dflex pager">
+            <div class="dflex">
+                <button class="prevPage"><label class="prevPage"> < </label></button>
+                <input class="" type="text"/>
+                <label class="pr1">de </label>
+                <label class="totalPages">{N} </label>
+                <button class="nextPage"><label class="nextPage"> > </label></button>
+            </div>
+        </div>`
+    ul.parentElement.insertAdjacentHTML('beforeend',html)
+}
+function li(obj) {
+    text = decodeURIComponent(obj.articleUrl.split('/').at(-1)).replaceAll('_',' ').replace('Anexo:','')
+    html = `<li class="d-mr1-5">
+                <div class="link">
+                    <a class="articleUrl" href="#diffs?diff=${obj.articleUrl}">${text}</a>
+                    <label title="nº de ediciones" class="n-editions">${obj.nedits}</label>
+                    <label class="bg-cyan bold info" onclick="info(event)">?</label>
+                </div>
+            </li>`
+    return html;
+}
+
+function pager(evt) {
+    var currentPage = 0;
+    var updateRegs = false;
+    if (evt.type == 'click') {
+        if (evt.target.classList.contains('prevPage'))
+            currentPage -= 1; // disable etc.. y no < posibles
+        else
+            currentPage += 1;
+    // if updateRegs available
+        updateRegs = true;
+
+    } else {
+        // if is number, && not outbounding 
+
+        updateRegs = true;
+    }
+    if (updateRegs) {
+        // await query
+        // ul rm innerhtml
+        // paint ul
+        // eso
+    }
+    console.log('pager',{evt})
+}
+
+
+/*
+
+
+
+
+*/
 </script>
 

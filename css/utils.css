@@ -5,9 +5,6 @@ h1 {
 .bold {
     font-weight: bold;
 }
-.hcenter {
-    justify-content: center;
-}
 .hauto {
     height: auto;
 }
@@ -106,8 +103,8 @@ h1 {
 .pr1 {
     padding-right: 1rem;
 }
-.pr1 {
-    padding-right: 1rem;
+.pr2 {
+    padding-right: 2rem;
 }
 .pb3 {
     padding-bottom: 3rem;

@@ -284,6 +284,7 @@ function collapsableDiv() {
             
             obj.id = "text"+idCont 
             if (text.length > len) {
+                // 2 veces bucle, 1 ins 2 add
                 posIni = text.lastIndexOf('$$$BEGIN$$$',len)
                 posEnd = text.lastIndexOf('$$$END$$$',len)
                 if (posEnd < posIni) {
