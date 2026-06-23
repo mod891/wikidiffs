@@ -94,6 +94,15 @@
     background-color: var(--redgit);
     box-shadow: 2px 2px 5px var(--black);
 }
+.pager {
+    margin-top: 0rem;
+    padding-bottom: 2rem;
+    padding-top: 1rem;
+}
+.mt0 {
+    margin-top: 0rem !important;
+    padding-bottom: 0rem !important;
+}
 @media (max-width: 1400px) and (orientation: landscape), 
         (max-width: 1400px) and (orientation:portrait) { 
     .diff-header {
@@ -160,24 +169,49 @@
 }
 </style>
 
-<div id="diffs"></div>
+<div id="diffs">
+    <div class="dflex pager mt0 mb1">
+        <div class="dflex">
+            <button class="prevPage"><label class="prevPage"> < </label></button>
+            <input class="currentPageInput" class="" type="text" value="">
+            <label class="pr1">de </label>
+            <label class="totalPages"></label>
+            <button class="nextPage"><label class="nextPage"> > </label></button>
+        </div>
+    </div>
+    <div id="diffs-content"></div>
+    <div class="dflex pager mb1">
+        <div class="dflex">
+            <button class="prevPage"><label class="prevPage"> < </label></button>
+            <input class="currentPageInput" class="" type="text" value="">
+            <label class="pr1">de </label>
+            <label class="totalPages"></label>
+            <button class="nextPage"><label class="nextPage"> > </label></button>
+        </div>
+    </div>
+</div>
 
 <script>
 
 var idCont = 0;
 var diffTexts = [];
+var dbquery = "";
+// pagination shared vars
+var currentPage = 1, perPage = 3, totalPages = 0;
+var inputs = [], btns = [];
 
 loadDiffs()
 
 async function loadDiffs() {
     var articleUrl = getVal;
     var data = null;
-    var dbquery = 'diffsFromUrl';
+    var pagerObj = {page:currentPage-1, perPage:perPage};
+    dbquery = 'diffsFromUrl';
      try {
-        if (articleUrl == "")
-            data = await fetch(`/public/js/db/mock-sample1.json`).then(res => res.json()); // mock sample
-        else if (articleUrl == "random") 
+        if (articleUrl == "random") {// + paginate err
             articleUrl = (await query('randUrl'))[0].articleUrl;
+            getVal = articleUrl;
+        }
         else if (articleUrl.match(/[0-9]{9}/) != null) 
             dbquery = 'diffFromId';    
         else if (articleUrl.split('user::').length > 1) {
@@ -187,12 +221,39 @@ async function loadDiffs() {
             else
                 dbquery = 'diffsFromPreviousUser';
         }
-        data = await query(dbquery,articleUrl);
+        data = await query(dbquery,articleUrl,pagerObj);
     } catch (err) {
         console.log(`loadDiffs::data retrieving Error:`,err);
     }
-    
+
     if (data.length > 0) {
+
+        if (data[0].totalDiffs > perPage) {
+            totalPages = Number.parseInt((data[0].totalDiffs/perPage));
+            if (String(data[0].totalDiffs/perPage).includes('.'))
+                totalPages++;
+            document.querySelectorAll('.totalPages').forEach(elem => elem.innerText = totalPages);
+
+            if (btns.length == 0) {
+                document.querySelectorAll('button').forEach(btn => {
+                    btn.addEventListener('click',pager);
+                    btn.disabled = btn.classList.contains('prevPage')? true : false;
+                    btns.push(btn);
+                });
+            }
+            if (inputs.length == 0) {
+                document.querySelectorAll('input').forEach(input => {
+                    input.addEventListener('input',pager);
+                    input.value = currentPage;
+                    inputs.push(input);
+                });
+            }
+        } else {    
+            let diffsDiv = document.getElementById('diffs');
+            diffsDiv.children[0].remove();
+            diffsDiv.children[1].remove();
+        }
+
         var fragment = null;
         let svgMarker = "marker.svg";
         let notes = JSON.parse(localStorage.getItem('notes'));
@@ -226,7 +287,7 @@ async function loadDiffs() {
                         <span id="user" class="bg-greendiff"> 
                             <b id="user-data"><a href="#diffs?diff=user::${currentDiff.user}">${currentDiff.user}</a></b>
                         </span>
-                        <div class='tl'>                        
+                        <div class='tl'>
                             <span id="article-url">
                                 <a id="article-url-data" href="#diffs?diff=${diffs}">${articleTitle}</a></span>
                             <span id="external-url">
@@ -257,11 +318,11 @@ async function loadDiffs() {
                     collapsableDiv().forEach(item => diffTexts.push(item))
                 }
             }
-            document.getElementById(`diffs`).insertAdjacentHTML('beforeend',fragment.innerHTML)
+            document.getElementById('diffs-content').insertAdjacentHTML('beforeend',fragment.innerHTML)
         }
         document.head.appendChild(script);
     } else {
-        document.getElementById(`diffs`).innerHTML = '<center><h3>Error, no se han cargado datos</h3></center>';
+        document.getElementById('diffs-content').innerHTML = '<center><h3>Error, no se han cargado datos</h3></center>';
     }        
 }
 function collapsableDiv() {
@@ -356,4 +417,39 @@ function marker(event,elem) {
         localStorage.setItem('notes',JSON.stringify(objStorage));
     }
 } // toast variable -> title negrita articulo + brief
+
+function pager(evt) {
+
+    let updateRegs = false;
+    console.log(evt)
+    if (evt.type == 'click') {
+        if (evt.target.classList.contains('prevPage')) {
+            currentPage -= 1; 
+        } else {
+            currentPage += 1;
+        }
+        inputs.forEach(i => i.value = currentPage);
+        updateRegs = true;
+    } else {
+        let val = Number.parseInt(evt.target.value);
+        if (isNaN(val) || val < 1 || val > totalPages || val == (storageObj.pager.page)) {
+            inputs.forEach(i => i.value = currentPage);
+        } else {
+            inputs.forEach(i => i.value = val);
+            currentPage = val;
+            updateRegs = true;
+        }
+    }
+    btns.forEach(btn => {
+        if (btn.classList.contains('prevPage')) 
+            btn.disabled = currentPage == 1? true : false;
+        else
+            btn.disabled = currentPage == totalPages? true : false;
+    });
+    if (updateRegs) {
+        document.getElementById('diffs-content').innerHTML = "";
+        diffTexts = [];
+        loadDiffs();
+    }
+}
 </script>

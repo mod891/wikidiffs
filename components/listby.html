@@ -111,9 +111,6 @@ input:checked + .slider:before {
     #title {
         padding-left:5vw;
     }
-    /* .modal {
-        height: 50%;
-    } */
     #filter-inputs {
         display: grid;
         grid-template-columns: 100%;
@@ -218,8 +215,16 @@ input:checked + .slider:before {
             </div>    
         </div>
         <div id="listby-content">
-
         </div>
+        <div id="pager" class="dflex pager mb1">
+        <div class="dflex">
+            <button class="prevPage"><label class="prevPage"> < </label></button>
+            <input id="currentPageInput" class="" type="text" value="">
+            <label class="pr1">de </label>
+            <label class="totalPages"></label>
+            <button class="nextPage"><label class="nextPage"> > </label></button>
+        </div>
+    </div>
     </div>
     <div id="filters-modal" class="modal">
         <div class="">
@@ -280,10 +285,17 @@ input:checked + .slider:before {
 </div>  
 <script>
 var urlData = null;
-var title = document.getElementById('title');
-var titleText = "";
-var categories = null;
-var category = null;
+var filteredUrlData = null;
+var storageObj = null;
+var title = document.getElementById('title'), titleText = "";
+var categories = null, category = null;
+
+// pagination shared vars
+var pagerInput = document.getElementById('currentPageInput');
+var currentPage = 0, perPage = 3, totalPages = 0;
+var btns = document.getElementById('pager').querySelectorAll('button');
+var prevBtn = btns[0], nextBtn = btns[1];
+
 if (getVal.split('category:').length > 1) {
     category = getVal.split('category:')[1];
     document.getElementById('category-filter-div').remove()
@@ -296,6 +308,8 @@ async function init() {
     var filtersModal = document.getElementById('filters-modal');
     var closeFiltersModal = document.getElementById('close-modal');
     var switchs = document.querySelectorAll('input[type="checkbox"]');
+    var buttonsPager = document.querySelectorAll('button');
+    var inputPager =  document.getElementById('currentPageInput')
     switchs.forEach(e => {
         e.addEventListener('click',() => {showHideInputFilter(e)});
     });
@@ -305,14 +319,17 @@ async function init() {
     closeFiltersModal.addEventListener('click', () => {
         filtersModal.style.display = "none";
     })
+    buttonsPager.forEach( e => e.addEventListener('click',pager));
+    inputPager.addEventListener('input',pager);
 
-
-    var storageObj = JSON.parse(sessionStorage.getItem('listby'))
-    if (storageObj != null) {  
-        for (let i=0; i<storageObj.char.length; i++) { 
+    storageObj = JSON.parse(sessionStorage.getItem('listby'))
+    if (storageObj != null) {
+        currentPage = storageObj.pager.page+1;
+        for (let i=0; i<storageObj.char.length; i++) {
             if (Object.keys(storageObj.char[i])[0] == getVal) {
                 storage = true;
                 urlData = storageObj.char[i];
+                // filteredUrlData = [...urlData];
             }
         }
     }
@@ -324,7 +341,7 @@ async function init() {
         fetchSharedData();
         categories = JSON.parse(sessionStorage.getItem('categories'));
     }
-    liLinks();       
+    liLinks();
 }
 
 function liLinks() {
@@ -337,44 +354,64 @@ function liLinks() {
             titleText = ' Discusiones';
         else if (getVal == 'anexo') 
             titleText = ' Anexos';
-        title.innerText = `${urls.length} ${titleText}`;
     } else {
         urls = Object.values(urlData[category]);
-        titleText = ` páginas de categoría: ${category}`;
-        title.innerText = `${urls.length} ${titleText}`;
+        titleText = ` páginas con categoría: ${category}`;
     }
+    if (filteredUrlData != null) 
+        urls = Object.values(filteredUrlData);
+    title.innerText = `${urls.length} ${titleText}`;
+
+    pagerInput.value = currentPage;
+    totalPages = Number.parseInt((urls.length/perPage));
+    if (String(urls.length/perPage).includes('.'))
+        totalPages++;
+    document.querySelector('.totalPages').textContent = totalPages;
+
     var ul = document.createElement('ul');
     ul.id = 'links';
-    for (let i=0; i<urls.length; i++) {
-        text = decodeURIComponent(urls[i].articleUrl.split('/').at(-1)).replaceAll('_',' ')
-        var li = `<li data-articleurl="${decodeURIComponent(urls[i].articleUrl.split('/').at(-1))}"
-                    data-text="${text}"
-                    data-neditions=${urls[i].nedits}
-                    data-dates=${JSON.stringify(urls[i].dates)}
-                    data-category="${urls[i].category}" >
-                        <div class="link d-mr-2">
-                            <a href="#diffs?diff=${urls[i].articleUrl}">${text}</a>
-                            <label class="n-editions">${urls[i].nedits}</label>
-                            <label class="bg-cyan info d-mr2 bold" onclick="info(event)">?</label>
-                        </div>
-                    </li>`;
-        ul.insertAdjacentHTML('beforeend',li);
+    if (urls.length <= perPage)
+        document.getElementById('pager').style.display = 'none';
+    else 
+        document.getElementById('pager').style.display = 'flex';
+
+    if (urls.length > 0) {
+        let endFor = currentPage == totalPages? urls.length : storageObj.pager.page*perPage+perPage;
+        for (let i=storageObj.pager.page*perPage; i<endFor; i++) {
+            text = decodeURIComponent(urls[i].articleUrl.split('/').at(-1)).replaceAll('_',' ');
+            var li = `<li data-articleurl="${decodeURIComponent(urls[i].articleUrl.split('/').at(-1))}"
+                        data-text="${text}"
+                        data-neditions=${urls[i].nedits}
+                        data-dates=${JSON.stringify(urls[i].dates)}
+                        data-category="${urls[i].category}" >
+                            <div class="link d-mr-2">
+                                <a href="#diffs?diff=${urls[i].articleUrl}">${text}</a>
+                                <label class="n-editions">${urls[i].nedits}</label>
+                                <label class="bg-cyan info d-mr2 bold" onclick="info(event)">?</label>
+                            </div>
+                        </li>`;
+            ul.insertAdjacentHTML('beforeend',li);
+        }
     }
     div.appendChild(document.createElement('div'))
+    if (div.querySelector('ul') != null)
+        div.querySelector('ul').remove()
     div.lastChild.appendChild(ul)
+
+    nextBtn.disabled = currentPage == totalPages? true : false;
+    prevBtn.disabled = currentPage == 1? true : false;
 }
 
 async function fetchUrls() {
     var urls = [];
-
     if (getVal == 'discusion') 
-        urls = await query('discusion');
+        urls = await query('urlsStartsWith','discusion');
     else if (getVal == 'anexo')
-        urls = await query('anexo');
+        urls = await query('urlsStartsWith','anexo');
     else if (category != null) 
         urls = await query('urlsByCategory',category);
     else
-        urls = await query('urlsStartsWith',getVal,0);
+        urls = await query('urlsStartsWith',getVal);
 
     var ini = new Date('2-2-2222')
     var end = new Date('1-1-1111')
@@ -390,16 +427,23 @@ async function fetchUrls() {
                 end = minMaxDate;
         }
     }
-    var storageObj = JSON.parse(sessionStorage.getItem('listby'));
+    storageObj = JSON.parse(sessionStorage.getItem('listby'));
     var config = { minmaxdate: { ini: ini.toISOString().split('T')[0], end: end.toISOString().split('T')[0] } }
     var computed = category == null? getVal : category;
     if (storageObj == null) { 
-        storageObj = { char:[] };
-        storageObj.char.push({ [computed]: urls, config: config });
+        storageObj = { char:[ {[computed]: urls, config: config } ], pager: { page:0,perPage:perPage } };
+        currentPage = storageObj.pager.page+1;
         sessionStorage.setItem('listby',JSON.stringify(storageObj));
     }
     else {
-        storageObj.char.push({ [computed]: urls, config: config });
+        let ind = -1;
+        for (let i=0; i<storageObj.char.length; i++) 
+            if (Object.keys(storageObj.char[i]).includes(computed))
+                ind = i;
+        if (ind != -1)
+            storageObj.char[ind] = { [computed]: urls, config: config };
+        else
+            storageObj.char.push({ [computed]: urls, config: config });
         sessionStorage.setItem('listby',JSON.stringify(storageObj));
     }
     urlData = { [computed]: urls, config: config };
@@ -410,7 +454,7 @@ function showHideInputFilter(input) {
     var div = document.getElementById('filter-inputs');
     var id = input.id.split('-')[1];
     var rect = document.getElementById(`filter-${id}`);
-    let lis = Array.from(document.querySelectorAll('li'));
+    let key=Object.keys(urlData)[0];
 
     if (id == "1") { // text
         elem = `<div id="filter-switch-1" class="bg-cyan">
@@ -434,11 +478,10 @@ function showHideInputFilter(input) {
         elem = `<div id="filter-switch-3" class="bg-gold">
                     <label class="">Categoría</label>
                     <select id="category" class="w50" ><option>Seleccionar</option>`
-                for (i in categories) {
-                    if (lis.some(li => li.dataset.category == categories[i]) )
+                for (i in categories)
+                    if (urlData[key].some(obj => obj.category == categories[i]) )
                         elem += `<option value="${categories[i]}">${categories[i]}</option>`;
-                }
-             elem += `</select></div>`;
+            elem += `</select></div>`;
         
     } else { // undefined
         elem = `<div id="filter-switch-4" class="bg-yellow"><span >undefined</span></div>`;
@@ -453,11 +496,9 @@ function showHideInputFilter(input) {
             else
                 elem.addEventListener('input',filterData)
         })
-
         if (rect.classList.contains('slide-down'))
             rect.classList.remove('slide-down');
         rect.classList.add('slide-up')
-
     } else {
         rect.classList.add('slide-down')
         rect.classList.remove('slide-up')
@@ -474,12 +515,12 @@ function showHideInputFilter(input) {
 }
 
 function filterData(e) {
-    let lis = document.querySelectorAll('li');
-    let nVisibles = lis.length;
+    filteredUrlData = [];
+    let inds = [];
+    let text = '',articleUrl='', key=Object.keys(urlData)[0];
     applySearchFilter = false;
     applyDateFilter = false;
     applyCategoryFilter = false;
-
     var searchInput = document.getElementById('search')
     var begin = document.getElementById('begin')
     var end = document.getElementById('end')
@@ -495,50 +536,90 @@ function filterData(e) {
         if (categorySelect.value != 'Seleccionar')
             applyCategoryFilter = true;
 
-    lis.forEach(li => {
-        let display = true;
+    for (let i=0; i<urlData[key].length; i++)
+        inds.push(i);
+
+    urlData[key].forEach( (obj,i) => {
         if (applySearchFilter) {
-            if (!li.dataset.text.toUpperCase().includes(searchInput.value.toUpperCase()) ||
-            !li.dataset.articleurl.toUpperCase().includes(searchInput.value.toUpperCase()) ) {
-                display = false;
-                nVisibles--;
-            }
+            text = decodeURIComponent(obj.articleUrl.split('/').at(-1)).replaceAll('_',' ');
+            if (!text.toUpperCase().includes(searchInput.value.toUpperCase()) )
+                inds[i] = -1;
         }
         if (applyDateFilter) {
-            let dates = JSON.parse(li.dataset.dates);           
-            for (let i=0; i<dates.length; i++) {
-                let date = new Date(dates[i].split('/')[2]+'-'+dates[i].split('/')[1]+'-'+dates[i].split('/')[0]);
+            let dates = obj.dates;
+            let allDatesOutOfRange = false; // ind[i][ndates] = [ i:0[d1,d2], i:1[d3], ... ,i:n[d1,...,dn] ] 
+            // NOW: if found !invalid url.date range, discard all others dates for the same url
+            // [TODO] : check all dates, if (1 date==1 diff) show only diffs in bounds + adapt diffs
+            let beginDate= "", endDate = "", d,m,y;
+            if (end.value != "") {
+                [y,m,d] = end.value.split('-');
+                endDate = new Date(y, (Number.parseInt(m)-1), d);
+            }
+            if (begin.value != "") {
+                [y,m,d] = begin.value.split('-');
+                beginDate = new Date(y, (Number.parseInt(m)-1), d);
+            }
+            for (let j=0; j<dates.length; j++) {
+                [d,m,y] = dates[j].split('/');
+                let date = new Date(y, (Number.parseInt(m)-1), d);
+                if (beginDate != "" && endDate == "" && inds[i] != -1)    // [begin,inf)
+                    if (date < beginDate) 
+                        inds[i] = -1; 
+                else if (beginDate == "" && endDate != "" && inds[i] != -1)  // (-inf,end] 
+                    if (date > endDate) 
+                        inds[i] = -1;
+                else if (beginDate != "" && endDate != ""  && inds[i] != -1) // [begin,end]
+                    if (date < beginDate || date > endDate)
+                        inds[i] = -1;
+            }
+        }
+        if (applyCategoryFilter)
+            if ( !obj.category.includes(categorySelect.value) ) 
+                    inds[i] = -1;
+    });
 
-                if (e.target.id == 'begin' && e.target.value != "" && end.value == "" && display == true) {     // [begin,inf)
-                    if (date < new Date(e.target.value)) {
-                        display = false;
-                        nVisibles--;
-                    }
-                }
-                else if (e.target.id == 'end' && e.target.value != "" && begin.value == "" && display == true) {    // (-inf,end] 
-                    if (date > new Date(e.target.value)) {
-                        display = false;
-                        nVisibles--;
-                    }
-                }
-                else if (begin.value != "" && end.value != "" && display == true) {   // [begin,end]
-                    if (date <= new Date(begin.value) || date >= new Date(end.value)) {
-                        display = false;
-                        nVisibles--;
-                    }
-                }   
-            }
-        }
-        if (applyCategoryFilter) {
-            if ( !li.dataset.category.includes(categorySelect.value) ) {
-                    display = false;
-                    nVisibles--;
-            }
-        }
-            
-        li.style.display = display? "block" : "none";
-    });  
-    title.innerText= nVisibles + titleText;      
+    for (let i=0; i<urlData[key].length; i++)
+        if (inds[i] != -1)
+            filteredUrlData.push(urlData[key][i]);
+    if (inds.includes(-1)) {
+        storageObj.pager.page = 0;
+        currentPage = 1;
+    }
+    console.log(filteredUrlData.length)
+    title.innerText= filteredUrlData.length + titleText;
+    liLinks();      
 }
 
+function pager(evt) {
+
+    let char = document.URL.split('c=')[1];
+    char = char.includes(':') ? char.split(':')[1] : char;
+    let updateRegs = false;
+
+    if (evt.type == 'click') {
+        if (evt.target.classList.contains('prevPage')) {
+            currentPage -= 1; 
+            storageObj.pager.page -= 1;
+        } else {
+            currentPage += 1;
+            storageObj.pager.page += 1;
+        }
+        pagerInput.value = currentPage;
+        updateRegs = true;
+    } else {
+        let val = Number.parseInt(pagerInput.value);
+        if (isNaN(val) || val < 1 || val > totalPages || val == (storageObj.pager.page)) {
+            pagerInput.value = storageObj.pager.page;
+        } else {
+            pagerInput.value = val;
+            currentPage = val;
+            storageObj.pager.page = currentPage-1; 
+            updateRegs = true;
+        }
+    }
+    if (updateRegs)
+        liLinks()
+   nextBtn.disabled = currentPage == totalPages? true : false;
+   prevBtn.disabled = currentPage == 1? true : false;
+}
 </script>                     

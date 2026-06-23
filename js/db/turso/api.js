@@ -5,25 +5,22 @@ const local = {
 }
 
 async function query(option,...args) {
-    var limit = 0; 
+    var  pager = {};
     var stmt = {};
     if (args.length == 2)
-        limit = args[1]
+        pager = args[1];
 
     switch (option) {
-
         case 'diffsFromUrl':
         case 'diffsFromUser':
         case 'diffsFromPreviousUser':
         case 'diffFromId':
-            stmt = diffsQueries(option,args[0],limit);
+            stmt = diffsQueries(option,args[0],pager);
         break;
         case 'urlsStartsWith':
         case 'urlsByCategory':
-        case 'anexo':
-        case 'discusion':
-            stmt = urlsQueries(option,args[0],limit);
-        break;
+            stmt = urlsQueries(option,args[0],pager);
+    break;
         case 'randUrl':
             stmt = randUrl();
         break;
@@ -55,7 +52,6 @@ async function query(option,...args) {
     }
 }
 function tursonizer(type,data) {
-
     var tursoObj = '', normalizedData = null;
     if (type=='request') {
         tursoObj = {
@@ -92,7 +88,7 @@ function tursonizer(type,data) {
     return normalizedData;
 }
 
-function diffsQueries(whereType, arg, limit=0) {
+function diffsQueries(whereType, arg, pager={}) {
     var where = ` where df.id = ? `;
     if (whereType == 'diffsFromUrl')
         where = ` where articleUrl = ? `;
@@ -102,6 +98,7 @@ function diffsQueries(whereType, arg, limit=0) {
          where = ` where json_extract(df.obj, '$.prev_username') = ? `;
 
     var sql = `select df.id as id,
+        sum(count(df.id)) over () as totalDiffs,
         json_extract(hc.obj, '$.article_url') as articleUrl,
         json_extract(hc.obj, '$.diff_url') as diffUrl,
         json_extract(hc.obj,'$.date_edition') as date,
@@ -110,49 +107,56 @@ function diffsQueries(whereType, arg, limit=0) {
         json_extract(df.obj, '$.prev_username') as prevUser,
         json_extract(df.obj, '$.changes') as changes
         from diffs df join history_contribs hc 
-        on df.id = hc.id` + where;
+        on df.id = hc.id` 
+        + where + 
+        `group by df.id`;
         
-    if (limit != 0 )
-        sql += `limit ${limit} offset 0` //${offset}
-    
+    if (Object.keys(pager).length != 0) 
+        sql += ` limit ${pager.perPage} offset ${pager.perPage*pager.page}`
+
     return { sql:sql, args:[arg] };
 }
-function urlsQueries(whereType, arg, limit=10) {
-    var where = ` where json_extract(hc.obj, '$.category') = ? `;
+
+function urlsQueries(whereType, arg, pager={}) {
     var args = [arg];
-    if (whereType == 'discusion') { 
-        where = ` where articleUrl like '%Discusi%C3%B3n:%' `;
-        args = [];
-    }
-    if (whereType == 'anexo') { 
-        where = ` where articleUrl like '%wiki/Anexo:%' and articleUrl not like '%Discusi%C3%B3n%' `;
-        args =  [] ;
-    } 
+    var where = ` where json_extract(hc.obj, '$.category') = ? `;
+
     if (whereType == 'urlsStartsWith') {
-        args = [`%wiki/${arg}%`] ;
-        where = ` where articleUrl like ? and articleUrl not like '%wiki/Anexo:%' `;
+        args = []
+        if (arg.length == 1) {
+            args = [`%wiki/${arg}%`] ;
+            where = ` where articleUrl like ? and articleUrl not like '%wiki/Anexo:%' `;
+        }
+        else if (arg == 'discusion')
+            where = ` where articleUrl like '%Discusi%C3%B3n:%' `;
+        else if (arg == 'anexo')
+            where = ` where articleUrl like '%wiki/Anexo:%' and articleUrl not like '%Discusi%C3%B3n%' `;
     }
-     sql = `select distinct json_extract(hc.obj, '$.article_url') as articleUrl,
+
+    sql = `select distinct json_extract(hc.obj, '$.article_url') as articleUrl,
         json_extract(hc.obj, '$.category') as category,
         '[' || group_concat('"' || json_extract(hc.obj, '$.date_edition') || '"' ) || ']' as dates,
-        count(json_extract(hc.obj, '$.date_edition')) as nedits
+        count(json_extract(hc.obj, '$.date_edition')) as nedits,
+        sum(count(distinct json_extract(hc.obj, '$.article_url'))) over () as totalUrls
         from history_contribs hc `
          + where +
         `group by articleUrl
-        order by nedits desc `;
+        order by nedits desc `; 
 
-    if (limit != 0 )
-        sql += `limit ${limit} offset 0`
+    if (Object.keys(pager).length != 0)
+        sql += `limit ${pager.perPage} offset ${pager.perPage*pager.page}`
 
     return { sql:sql, args:args };
 }
+
 function randUrl() {
     sql = `select json_extract(obj, '$.article_url') as articleUrl
         from history_contribs limit 1 offset (select abs(random()) % count(*) from diffs)`;
 
     return { sql:sql, args:[] };
 }
-function prevUsers(limit=0) {
+
+function prevUsers() {
     sql = `select json_extract(df.obj, '$.prev_username') as prevUser,
         count(*) as nedits
         from diffs df join history_contribs hc 
@@ -160,18 +164,17 @@ function prevUsers(limit=0) {
         where prevUser not like '90.167%'
         group by prevUser
         order by nedits desc `;
-        
-        if (limit != 0 )
-            sql += `limit ${limit} offset 0`
 
     return { sql:sql, args:[] };
 }
+
 function categorias() {
     sql = `select distinct json_extract(obj, '$.category') as category
         from history_contribs`;
 
     return { sql:sql, args:[] };
 }
+
 function descriptionUrl(idurl) {
     var where = ` where articleUrl = ? `;
     if (idurl.match(/[0-9]{9}/) != null)

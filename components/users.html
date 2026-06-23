@@ -83,15 +83,31 @@
                 </div>
             </div>
         </div>
+        
         <div id="users-content">
 
+        </div>
+        <div class="dflex pager mb1">
+            <div class="dflex">
+                <button class="prevPage"><label class="prevPage"> < </label></button>
+                <input class="currentPageInput" class="" type="text" value="">
+                <label class="pr1">de </label>
+                <label class="totalPages"></label>
+                <button class="nextPage"><label class="nextPage"> > </label></button>
+            </div>
         </div>
     </div>
 </div>  
 <script>
 
 var userData = null;
+var filteredUserData = null;
 var nUsers = document.getElementById('title')
+var pagerInput = document.querySelector('.currentPageInput');
+var currentPage = 1, perPage = 20, totalPages = 0;
+var btns = document.querySelectorAll('button');
+var prevBtn = btns[0], nextBtn = btns[1];
+
 init()
 
 async function init() {
@@ -105,25 +121,49 @@ async function init() {
     }
     if (storage == false)
         await fetchUsers();
-    liLinks();       
+    liLinks();
+    btns.forEach( btn => btn.addEventListener('click',pager));
+    pagerInput.addEventListener('input',pager);
 }
 
 function liLinks() {
     var div = document.getElementById('users-content');
     var users = userData;
+    
+    if (filteredUserData != null) 
+    users = filteredUserData;
     nUsers.innerText =`${users.length} Usuarios`;
+
+    pagerInput.value = currentPage;
+    totalPages = Number.parseInt((users.length/perPage));
+    if (String(users.length/perPage).includes('.'))
+        totalPages++;
+    document.querySelector('.totalPages').textContent = totalPages;
+    nextBtn.disabled = currentPage == totalPages? true : false;
+    prevBtn.disabled = currentPage == 1? true : false;
     var ul = document.createElement('ul');
     ul.classList = 'grid-content';
-    for (let i=0; i<users.length; i++) {
-        var li = `<li data-prevuser="${users[i].user}">
-                    <div class="link">
-                        <a href="#diffs?diff=user::${users[i].user}">${users[i].user}</a>
-                        <label title="nº de ediciones" class="n-editions">${users[i].nedits}</label>
-                    </div>
-                </li>`;        
-        ul.insertAdjacentHTML('beforeend',li);
+
+    if (users.length <= perPage)
+        document.querySelector('.pager').style.display = 'none';
+    else 
+        document.querySelector('.pager').style.display = 'flex';
+
+    if (users.length > 0) {
+        let endFor = currentPage == totalPages? users.length : (currentPage-1)*perPage+perPage;
+        for (let i=(currentPage-1)*perPage; i<endFor; i++) {
+            var li = `<li data-prevuser="${users[i].user}">
+                        <div class="link">
+                            <a href="#diffs?diff=user::${users[i].user}">${users[i].user}</a>
+                            <label title="nº de ediciones" class="n-editions">${users[i].nedits}</label>
+                        </div>
+                    </li>`;        
+            ul.insertAdjacentHTML('beforeend',li);
+        }
     }
     div.appendChild(document.createElement('div'))
+    if (div.querySelector('ul') != null)
+        div.querySelector('ul').remove()
     div.lastChild.appendChild(ul)
 }
 
@@ -131,7 +171,6 @@ async function fetchUsers() {
     var rawData = await query('prevUsers');
     var users = [];
     for (i in rawData) {
-        
         let user = rawData[i].prevUser;
         if (user.split('&').length > 1)
             user = user.split('&')[0];
@@ -146,24 +185,55 @@ async function fetchUsers() {
 }
 
 function filterData(e) {
+    filteredUserData = [];
+    let inds = [];
     let nVisibles = userData.length;
-    applySearchFilter = false;
-    var searchInput = document.getElementById('search')
+    var applySearchFilter = false;
+    var searchInput = document.getElementById('search');
   
     if (searchInput != null)
         if (searchInput.value != '')
             applySearchFilter = true;
-   
-    document.querySelectorAll('li').forEach(li => {
-        let display = true;
-        if (applySearchFilter) {
-            if (!li.dataset.prevuser.toUpperCase().includes(searchInput.value.toUpperCase()) ) {
-                display = false;
-                nVisibles--;
-            }
-        }
-        li.style.display = display? "block" : "none";
+
+    userData.forEach( (obj,i) => {
+        if (applySearchFilter)
+            if (!obj.user.toUpperCase().includes(searchInput.value.toUpperCase()) ) 
+                inds[i] = -1;
     });
-    nUsers.innerText= nVisibles + " usuarios";
+
+    for (let i=0; i<userData.length; i++)
+        if (inds[i] != -1)
+            filteredUserData.push(userData[i]);
+    if (inds.includes(-1)) 
+        currentPage = 1;
+    nUsers.innerText= filteredUserData.length + " usuarios";
+    liLinks();  
+}
+
+function pager(evt) {
+    let updateRegs = false;
+    if (evt.type == 'click') {
+        if (evt.target.classList.contains('prevPage')) 
+            currentPage -= 1; 
+        else
+            currentPage += 1;
+
+        pagerInput.value = currentPage;
+        updateRegs = true;
+    } else {
+        let val = Number.parseInt(pagerInput.value);
+        if (isNaN(val) || val < 1 || val > totalPages || val == (storageObj.pager.page)) {
+            pagerInput.value = storageObj.pager.page;
+        } else {
+            pagerInput.value = val;
+            currentPage = val;
+            updateRegs = true;
+        }
+    }
+    if (updateRegs)
+        liLinks()
+
+   nextBtn.disabled = currentPage == totalPages? true : false;
+   prevBtn.disabled = currentPage == 1? true : false;
 }
 </script>                     

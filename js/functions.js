@@ -89,7 +89,7 @@ function route() {
 
 window.addEventListener('hashchange', () => {
     route();
-})
+});
 
 async function info(event,ms=5000,...args) {
     clearTimeout(idTimeout);
