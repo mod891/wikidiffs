@@ -168,6 +168,7 @@ function liLinks() {
 }
 
 async function fetchUsers() {
+    freezeGUI();
     var rawData = await query('prevUsers');
     var users = [];
     for (i in rawData) {
@@ -181,7 +182,8 @@ async function fetchUsers() {
     }
     var storageObj = { users };
     sessionStorage.setItem('users',JSON.stringify(storageObj));
-    userData = users;   
+    userData = users;
+    freezeGUI(false);   
 }
 
 function filterData(e) {

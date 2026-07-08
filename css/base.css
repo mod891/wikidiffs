@@ -84,11 +84,34 @@ li {
     transition: opacity bottom left 0.5s;  
     z-index: 1000;
 }
-.pager {
-justify-content: center;
-padding-bottom: 0.5rem;
+#overlay {
+    position:fixed;
+    backdrop-filter: blur(6px);
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    z-index: 9999;
 }
-
+#overlay > div {
+    display: flex;
+    flex-direction: column;
+}
+#overlay[hidden] {
+    display:none;
+    backdrop-filter: blur(0px);
+}
+#overlay-msg {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bolder;
+    max-width: 15rem;
+}
+.pager {
+    justify-content: center;
+    padding-bottom: 0.5rem;
+}
 .pager input {
     display: flex;
     margin-right: 1.5rem;

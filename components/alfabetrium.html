@@ -158,6 +158,7 @@ function storageLiLinks() {
 }
 
 async function fetchLiLinks() {
+    freezeGUI('Cargando...');
     sessionStorageObj = { char : [] }
     let c = 65;
     for (let i=c; i<93; i++) {
@@ -186,6 +187,7 @@ async function fetchLiLinks() {
         sessionStorageObj.char.push(charObj);
     }
     sessionStorage.setItem('alfabetrium', JSON.stringify(sessionStorageObj));
+    freezeGUI(false);
 }
 
 function addPager(ul,total) {

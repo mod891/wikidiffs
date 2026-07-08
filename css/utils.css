@@ -17,14 +17,12 @@ h1 {
 .font30px {
     font-size:30px;
 }
-
 .flexrow {
     flex-direction: row;
 }
 .flexcol {
     flex-direction: column;
 }
-
 .drow-mcol {
     display: flex;
     flex-direction: row;
@@ -33,7 +31,9 @@ h1 {
     display: flex;
     flex-direction: column;
 }
-
+.dnone {
+    display: none !important;
+}
 .dflex {
     display: flex;
 }

@@ -170,7 +170,7 @@
 </style>
 
 <div id="diffs">
-    <div class="dflex pager mt0 mb1">
+    <div class="dflex pager mt0 mb1 dnone" >
         <div class="dflex">
             <button class="prevPage"><label class="prevPage"> < </label></button>
             <input class="currentPageInput" class="" type="text" value="">
@@ -180,7 +180,7 @@
         </div>
     </div>
     <div id="diffs-content"></div>
-    <div class="dflex pager mb1">
+    <div class="dflex pager mb1 dnone">
         <div class="dflex">
             <button class="prevPage"><label class="prevPage"> < </label></button>
             <input class="currentPageInput" class="" type="text" value="">
@@ -196,11 +196,12 @@
 var idCont = 0;
 var diffTexts = [];
 var dbquery = "";
-// pagination shared vars
 var currentPage = 1, perPage = 3, totalPages = 0;
 var inputs = [], btns = [];
 
-loadDiffs()
+freezeGUI();
+loadDiffs();
+freezeGUI(false);
 
 async function loadDiffs() {
     var articleUrl = getVal;
@@ -222,6 +223,7 @@ async function loadDiffs() {
                 dbquery = 'diffsFromPreviousUser';
         }
         data = await query(dbquery,articleUrl,pagerObj);
+        console.log(data);
     } catch (err) {
         console.log(`loadDiffs::data retrieving Error:`,err);
     }
@@ -248,11 +250,8 @@ async function loadDiffs() {
                     inputs.push(input);
                 });
             }
-        } else {    
-            let diffsDiv = document.getElementById('diffs');
-            diffsDiv.children[0].remove();
-            diffsDiv.children[1].remove();
-        }
+            document.querySelectorAll('.pager').forEach(e => e.classList.remove('dnone') );
+        } 
 
         var fragment = null;
         let svgMarker = "marker.svg";
@@ -419,9 +418,7 @@ function marker(event,elem) {
 } // toast variable -> title negrita articulo + brief
 
 function pager(evt) {
-
     let updateRegs = false;
-    console.log(evt)
     if (evt.type == 'click') {
         if (evt.target.classList.contains('prevPage')) {
             currentPage -= 1; 

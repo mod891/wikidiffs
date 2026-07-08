@@ -1,6 +1,9 @@
 var getVal = "";
 var idTimeout = "";
 var categories = "";
+var wwFreeze = false;
+var ww = null;
+var db = null;
 
 init()
 
@@ -57,6 +60,28 @@ async function fetchSharedData() {
 }
 
 async function init() {
+    freezeGUI('Cargando...');
+
+    ww = new Worker('js/db/indexedDB/webworker.js');
+    ww.onmessage = (e) => {
+        let wwdata = e.data;
+        
+        if (wwdata.hasOwnProperty('fn')) {
+            if (wwdata.hasOwnProperty('arg'))
+                window[wwdata.fn](wwdata.arg);
+            else if (wwdata.hasOwnProperty('args'))
+                window[wwdata.fn](wwdata.args[0],wwdata.args[1],wwdata.args[2]); 
+        }
+        if (wwdata.hasOwnProperty('var')) {
+            window[wwdata.var] = wwdata.value;
+        }
+        if (wwdata.hasOwnProperty('log')) {
+            console.log(wwdata.log);         
+        }
+    };
+    if (db == null)
+        ww.postMessage('initDB');
+
     await loadFragment('menu');
     await loadFragment('footer');
     await fetchSharedData();
@@ -73,18 +98,26 @@ async function init() {
         scrollTopBtn.classList.add('show');
      else 
         scrollTopBtn.classList.remove('show');
-    })
-    route()
+    });
+    route();
+
+    if (!wwFreeze)
+        freezeGUI(false);
 }
 
 function route() {
     getVal = ""
-    url = new URL(window.location);
-    if (url.hash.length == 0)
-        url.hash = "#index"
-    if (url.hash.split('?').length > 1) 
-        getVal = url.hash.split('?')[1].split('=')[1];
-    loadFragment(url.hash);
+    if (window.location.hash.length == 0) 
+        window.location.hash = "#index";
+
+    if (db == null && window.location.hash != "#index") {
+        ww.postMessage('DBupdates');
+        window.location.hash = "#index";
+    }
+    if (window.location.hash.split('?').length > 1) 
+        getVal = window.location.hash.split('?')[1].split('=')[1];
+    
+    loadFragment(window.location.hash);
 }
 
 window.addEventListener('hashchange', () => {
@@ -92,7 +125,7 @@ window.addEventListener('hashchange', () => {
 });
 
 async function info(event,ms=5000,...args) {
-    clearTimeout(idTimeout);
+
     var toast = document.getElementById('toast');
     let left = 0, top = 0, defaultBg = 'bg-yellow',
     elem = '', url = '', page=window.location.hash, data=null;
@@ -111,15 +144,19 @@ async function info(event,ms=5000,...args) {
             0: event.target.getBoundingClientRect().left-300;
         if (window.screen.availWidth<=1400 && 
             !(page.startsWith('#listby') || page.startsWith('#alfabetrium')) )
-            left = window.screen.availWidth/2 - toast.offsetWidth/2
+            left = window.screen.availWidth/2 - toast.offsetWidth/2;
         top = event.target.getBoundingClientRect().top+10;
     
     } else { 
-        elem = args[0].elem;
+        elem = typeof args[0].elem == "string"? document.getElementById(args[0].elem) : args[0].elem;
         toast.innerText = args[0].text;
+
         left = elem.getBoundingClientRect().left + toast.offsetWidth/2;
         top = elem.getBoundingClientRect().top+elem.offsetHeight/4;
-        
+        if (page.startsWith('#index')) {
+            left = window.screen.width/2 - 150; 
+            top = window.screen.height/4;
+        }
         if (args[0].hasOwnProperty('classes')) 
             if (args[0].classes.length > 0) 
                 defaultBg = args[0].classes[0];
@@ -131,6 +168,7 @@ async function info(event,ms=5000,...args) {
     toast.style.opacity = 1
     toast.style.top = (top + window.scrollY)+'px';
     toast.style.left = (left + window.scrollX)+'px';
+    clearTimeout(idTimeout);
     idTimeout = setTimeout(() => {
         toast.style.opacity = 0
         toast.style.top = 0;
@@ -138,4 +176,20 @@ async function info(event,ms=5000,...args) {
         toast.innerText = "";
         toast.classList.remove(defaultBg);
     },ms);
+}
+
+function freezeGUI(msg) {
+    if (typeof msg === "string") {
+        document.getElementById('overlay').hidden = false;
+        document.getElementById('overlay-msg').innerText = msg;
+    } else
+        overlay.hidden = true; 
+}
+
+function openDB() {
+    var opendb = indexedDB.open("wikidiffs",1);
+    opendb.onsuccess = (e) => {
+        // console.log(e,opendb.result);
+        db = opendb.result;
+    }
 }

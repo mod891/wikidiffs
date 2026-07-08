@@ -51,6 +51,7 @@ async function query(option,...args) {
         return data;
     }
 }
+
 function tursonizer(type,data) {
     var tursoObj = '', normalizedData = null;
     if (type=='request') {
