@@ -1,6 +1,9 @@
 var getVal = "";
 var idTimeout = "";
 var categories = "";
+var DBTYPE = "";
+
+/* indexedDB vars */
 var wwFreeze = false;
 var ww = null;
 var db = null;
@@ -61,27 +64,33 @@ async function fetchSharedData() {
 
 async function init() {
     freezeGUI('Cargando...');
+    document.querySelectorAll('script[src]').forEach(e => {
+        if (e.src.includes('indexedDB'))
+            DBTYPE = "indexedDB";
+    });
+    DBTYPE = DBTYPE == ""? "sqlite" : DBTYPE;
 
-    ww = new Worker('js/db/indexedDB/webworker.js');
-    ww.onmessage = (e) => {
-        let wwdata = e.data;
-        
-        if (wwdata.hasOwnProperty('fn')) {
-            if (wwdata.hasOwnProperty('arg'))
-                window[wwdata.fn](wwdata.arg);
-            else if (wwdata.hasOwnProperty('args'))
-                window[wwdata.fn](wwdata.args[0],wwdata.args[1],wwdata.args[2]); 
-        }
-        if (wwdata.hasOwnProperty('var')) {
-            window[wwdata.var] = wwdata.value;
-        }
-        if (wwdata.hasOwnProperty('log')) {
-            console.log(wwdata.log);         
-        }
-    };
-    if (db == null)
-        ww.postMessage('initDB');
-
+    if (DBTYPE == "indexedDB") {
+        ww = new Worker('js/db/indexedDB/webworker.js');
+        ww.onmessage = (e) => {
+            let wwdata = e.data;
+            
+            if (wwdata.hasOwnProperty('fn')) {
+                if (wwdata.hasOwnProperty('arg'))
+                    window[wwdata.fn](wwdata.arg);
+                else if (wwdata.hasOwnProperty('args'))
+                    window[wwdata.fn](wwdata.args[0],wwdata.args[1],wwdata.args[2]); 
+            }
+            if (wwdata.hasOwnProperty('var')) {
+                window[wwdata.var] = wwdata.value;
+            }
+            if (wwdata.hasOwnProperty('log')) {
+                console.log(wwdata.log);         
+            }
+        };
+        if (db == null)
+            ww.postMessage('initDB');
+    }
     await loadFragment('menu');
     await loadFragment('footer');
     await fetchSharedData();
@@ -110,7 +119,7 @@ function route() {
     if (window.location.hash.length == 0) 
         window.location.hash = "#index";
 
-    if (db == null && window.location.hash != "#index") {
+    if (db == null && DBTYPE == 'indexedDB' && window.location.hash != "#index") {
         ww.postMessage('DBupdates');
         window.location.hash = "#index";
     }
@@ -189,7 +198,6 @@ function freezeGUI(msg) {
 function openDB() {
     var opendb = indexedDB.open("wikidiffs",1);
     opendb.onsuccess = (e) => {
-        // console.log(e,opendb.result);
         db = opendb.result;
     }
 }

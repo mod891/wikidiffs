@@ -83,7 +83,7 @@ input:checked + .slider:before {
     top:0;
     left:0;
     width: 100%;
-    padding-top:10rem;
+    /* padding-top:10rem; */
     display: none;
     align-items: center;
     justify-content: center;
@@ -99,7 +99,8 @@ input:checked + .slider:before {
     width: 350px;
     background-color: rgb(46, 130, 255);
 }
-@media (max-width: 950px) and (orientation: landscape), (max-width: 630px) and (orientation:portrait) {
+@media (max-width: 1400px) and (orientation: landscape), (max-width: 1400px) and (orientation:portrait) {
+/* @media (max-width: 950px) and (orientation: landscape), (max-width: 630px) and (orientation:portrait) { */
     .filter-icon {
         padding-top: 20px;
         width:40px;
@@ -234,7 +235,7 @@ input:checked + .slider:before {
 
             <div class="dflex mt05">
                 <div class="w50 pl1">
-                    <b>Filtrar por texto</b>
+                    <b>Filtrar por URL</b>
                 </div>
 
                 <div class="w50 jc-end">
@@ -313,12 +314,15 @@ async function init() {
     switchs.forEach(e => {
         e.addEventListener('click',() => {showHideInputFilter(e)});
     });
-    filtersIcon.addEventListener('click', () => {
+    filtersIcon.addEventListener('click', (evt) => {
+        let {height,y} = evt.target.getBoundingClientRect();
         filtersModal.style.display = "flex";
-    })
+        filtersModal.style.top = height+y+'px';
+    });
     closeFiltersModal.addEventListener('click', () => {
         filtersModal.style.display = "none";
-    })
+        filtersModal.style.top = '0px';
+    });
     buttonsPager.forEach( e => e.addEventListener('click',pager));
     inputPager.addEventListener('input',pager);
 

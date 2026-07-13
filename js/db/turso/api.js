@@ -1,8 +1,7 @@
-
 const local = {
     endpoint: 'http://127.0.0.1:3000/api',
-    token: 'token'
-}
+    token: 'token' // 500MB rw free tier
+};
 
 async function query(option,...args) {
     var  pager = {};
@@ -24,7 +23,7 @@ async function query(option,...args) {
         case 'randUrl':
             stmt = randUrl();
         break;
-        case 'descriptionUrl': // pointer: loading -> hasta que response.text OK
+        case 'descriptionUrl':
             stmt = descriptionUrl(args[0]);
         break;
         case 'prevUsers':

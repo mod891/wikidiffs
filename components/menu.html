@@ -23,8 +23,7 @@
     display:none;
 }
 /* mobile */
-@media (max-width: 1400px) and (orientation: landscape), 
-        (max-width: 1400px) and (orientation:portrait) {   
+@media (max-width: 1400px) and (orientation: landscape), (max-width: 1400px) and (orientation:portrait) {   
     #svgdiv {
         padding:0.7rem;
     }
@@ -52,10 +51,10 @@
         width: 100%;
     }
     .menu-links {
-        flex-direction: column;      
+        flex-direction: column;
         transition: left 1s ease;
         width:fit-content;
-        left:-200px;
+        left:-300px;
     }
     .openmenu {
         left:0px;
@@ -65,7 +64,7 @@
         display:inline;
         width:40px;
         height:40px;
-        transition: transform 0.7s ease;           
+        transition: transform 1s ease;           
     }
     .rota {
         transform: rotate(-90deg)
@@ -79,39 +78,38 @@
 
 <div id="menu">            
     <nav>
-        <div id="svgdiv" >
+        <div id="svgdiv">
             <img id="menu-icon" class="icon" src="resources/svg/vrt.svg" alt="" srcset="">
         </div>
         <div id="items" class="menu-links ">
-            <div class="item"><a href="/public/#index"><b>Inicio</b></a></div>
-            <div class="item"><a href="/public/#diffs?var=random" onclick="route()"><b>Página aleatoria</b></a></div>
-            <div class="item"><a href="/public/#alfabetrium"><b>Alfabéticamente</b></a></div>
-            <div class="item"><a href="/public/#categories"><b>Por categorías</b></a></div>
-            <div class="item"><a href="/public/#users"><b>Usuarios</b></a></div>
-            <div class="item"><a href="/public/#notes"><b>Notas</b></a></div>
+            <a href="/public/#index"><div class="item"><b>Inicio</b></div></a>
+            <a href="/public/#diffs?var=random" onclick="route()"><div class="item"><b>Página aleatoria</b></div></a>
+            <a href="/public/#alfabetrium"><div class="item"><b>Alfabéticamente</b></div></a>
+            <a href="/public/#categories"><div class="item"><b>Categorías</b></div></a>
+            <a href="/public/#users"><div class="item"><b>Usuarios</b></div></a>
+            <a href="/public/#notes"><div class="item"><b>Notas</b></div></a>
         </div>
     </nav>
 </div>
 
 <script>
-    var img = document.getElementById('menu-icon')
-    var items = document.getElementById('items')
+    var img = document.getElementById('menu-icon');
+    var items = document.getElementById('items');
     // #ISSUE1 : elements under menu overlapping area can't be clicked
     // #SOL1 : change to display:none, break open animation
     items.classList.add('display-none') // #ISSUE1
-
     img.addEventListener('click', () => {
         img.classList.toggle('rota')
         items.classList.toggle('openmenu')
 // #ISSUE1 begin block
         if (items.classList.contains('display-none')) 
-            items.classList.remove('display-none')                
+            items.classList.remove('display-none')
     })
-    items.addEventListener('transitionend',() => { 
+    items.addEventListener('transitionend',() => {
         if (!items.classList.contains('openmenu')) { 
             items.classList.add('display-none')
-        }     
-    }) 
+        }
+    })
 // #ISSUE1 end block
 
     menuLinks = document.querySelectorAll('a');

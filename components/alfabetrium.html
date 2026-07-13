@@ -50,7 +50,7 @@
 #anexo { grid-area: anexo;}
 #discusion { grid-area: discusion;}
 
-@media (max-width: 950px) and (orientation: landscape), (max-width: 930px) and (orientation:portrait) {
+@media (max-width: 1400px) and (orientation: landscape), (max-width: 1400px) and (orientation:portrait) {
 
     #abcdario {
         display:grid;
@@ -139,6 +139,7 @@ async function init() {
 }
 
 function storageLiLinks() {
+    freezeGUI('Cargando...');
     obj = JSON.parse(sessionStorage.getItem('alfabetrium'))
     let values = Object.values(obj.char);
     for (let i=0; i<values.length; i++) { 
@@ -152,9 +153,11 @@ function storageLiLinks() {
 
         for (let j=0; j<urls.length; j++) 
             ul.insertAdjacentHTML('beforeend',li(urls[j]))
+
         if ((urls[0]?.totalUrls ?? 0) > perPage)
             addPager(ul,urls[0].totalUrls);
     }
+    freezeGUI(false);
 }
 
 async function fetchLiLinks() {
@@ -170,6 +173,7 @@ async function fetchLiLinks() {
         charObj = { [char]: { urls:[], pager:{ page:0, perPage: perPage } } }
 
         var urls = await query('urlsStartsWith',char,charObj[char].pager);
+
         div = document.getElementById(char)
         a = div.childNodes[0]
         if (urls.length > 0)
@@ -192,7 +196,9 @@ async function fetchLiLinks() {
 
 function addPager(ul,total) {
     var nPages = Number.parseInt((total/perPage));
-    nPages = nPages == 1? 2 : nPages;
+    if (!Number.isInteger(total/perPage))
+        nPages++;
+    //nPages = nPages == 1? 2 : nPages;
     let char = ul.closest('div').id;
     let currentPage=1;
     var sessionObj = JSON.parse(sessionStorage.getItem('alfabetrium'))
@@ -243,7 +249,6 @@ async function pager(evt) {
     let lastPage = Number.parseInt(div.querySelector('.totalPages').textContent);
     let sessionObj = JSON.parse(sessionStorage.getItem('alfabetrium'));
     let updateRegs = false;
-    // console.log('startswith:',char,'currentPage:',currentPage,'lastPage:',lastPage,'sessionObj.pager',sessionObj.char[pos][char],prevBtn,nextBtn) 
     
     if (sessionObj != null) {
         if (evt.type == 'click') {
