@@ -18,6 +18,13 @@ onmessage = async function(e) {
 
 async function initDB() {
 
+    performanceMarks.push(
+        {
+            debug:'db.onupgradeneeded',
+            t:(end-ini)/1000,
+            message:'abriendo la BD, cargado 1%',
+        }
+    );
     var db = indexedDB.open("wikidiffs",1);
     db.onupgradeneeded = (e) => {
 
@@ -155,6 +162,8 @@ function debug() {
 }
 
 async function DBupdates() {
+    if (performanceMarks.length == 0)
+        return;
     postMessage({ var: 'wwFreeze', value: true });
     while (!performanceMarks[performanceMarks.length-1].hasOwnProperty('loaded')) {
         postMessage({
@@ -185,4 +194,9 @@ async function DBupdates() {
             ],
         }
     );
+
+    postMessage({
+        fn: 'fetchSharedData', // require data with category
+        arg: []
+    })
 }

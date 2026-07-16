@@ -115,7 +115,7 @@ async function descriptionUrlIDB(url) {
     return new Promise((resolve, reject) => {
         var request = index.get(url);
         request.onsuccess = () => {
-            resolve(request.result.brief_description);
+            resolve([{description:request.result.brief_description}]);
         };
         request.onerror = () => reject(request.error);
     });

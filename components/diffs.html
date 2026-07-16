@@ -72,26 +72,35 @@
     grid-template-columns: 1fr 1fr;
     align-items: start;
 }
-.add {
-    grid-column: 2;
-    margin: 0rem 0 0 0;
-    padding: 0 0 0 0.5rem;
-    border: solid 1px rgb(242, 242, 242);
-    background-color: rgb(199, 255, 186);
+.addel-content > div {
+    margin-right:0.5rem;
+}
+.addel-content > div > p {
+    padding: 0 1rem;
 }
 .del {
     grid-column: 1;
     margin: 0rem 0 0 0;
     padding: 0 0 0 0.5rem;
     border: solid 1px rgb(242, 242, 242);
-    background-color: rgb(253, 145, 145); 
+    background-color: var(--reddiff);
+}
+.add {
+    grid-column: 2;
+    margin: 0rem 0 0 0;
+    padding: 0 0 0 0.5rem;
+    border: solid 1px rgb(242, 242, 242);
+    background-color:var(--greendiff);
+}
+.blank {
+    background-color: var(--white) !important;
 }
 .wadd {
-    background-color:var(--greegit);
+    background-color:var(--greendiff);
     box-shadow: 2px 2px 5px var(--black);
 }
 .wdel {
-    background-color: var(--redgit);
+    background-color: var(--reddiff);
     box-shadow: 2px 2px 5px var(--black);
 }
 .pager {
@@ -156,6 +165,10 @@
         display: grid;
         grid-template-columns: 1fr;
     }
+    .addel-content > div {
+        margin-right:0rem;
+        margin-bottom: 0.5rem;
+    }
     .add {
         grid-column: 1;
     }
@@ -192,16 +205,23 @@
 </div>
 
 <script>
-
 var idCont = 0;
 var diffTexts = [];
 var dbquery = "";
 var currentPage = 1, perPage = 3, totalPages = 0;
 var inputs = [], btns = [];
+var delimiters = {
+    'del':['$$-BEGIN-$$','$$-END-$$'],
+    'add':['$$+BEGIN+$$','$$+END+$$']
+};
 
 freezeGUI();
-loadDiffs();
+init();
 freezeGUI(false);
+
+async function init() {
+    await loadDiffs();
+}  
 
 async function loadDiffs() {
     var articleUrl = getVal;
@@ -229,7 +249,6 @@ async function loadDiffs() {
     }
 
     if (data.length > 0) {
-
         if (data[0].totalDiffs > perPage) {
             totalPages = Number.parseInt((data[0].totalDiffs/perPage));
             if (String(data[0].totalDiffs/perPage).includes('.'))
@@ -251,7 +270,7 @@ async function loadDiffs() {
                 });
             }
             document.querySelectorAll('.pager').forEach(e => e.classList.remove('dnone') );
-        } 
+        }
 
         var fragment = null;
         let svgMarker = "marker.svg";
@@ -259,7 +278,7 @@ async function loadDiffs() {
         for (let d=0; d<data.length; d++) {
             currentDiff = data[d];
             articleTitle = decodeURIComponent(currentDiff.articleUrl.split('/').at(-1).replaceAll('_',' '))
-            diffs = currentDiff.articleUrl.split('&diff')[0];
+            articleUrl = currentDiff.articleUrl.split('&diff')[0];
             if (notes != null) {
                 if (notes.diffs.filter(i => i.id == currentDiff.id).length > 0)
                     svgMarker = "marker-saved.svg";
@@ -271,7 +290,7 @@ async function loadDiffs() {
                 <div class="wrap-diff-header">
                     <div id="diff-header-${d}" class="diff-header">
                         <span id="datetime">
-                            <label class="">Editado el </label>
+                            <label class="">Edit el </label>
                             <b id="date-data">${currentDiff.date}</b>
                             <label class="">a las </label>
                             <b id="time-data">${currentDiff.time}</b>
@@ -288,7 +307,7 @@ async function loadDiffs() {
                         </span>
                         <div class='tl'>
                             <span id="article-url">
-                                <a id="article-url-data" href="#diffs?diff=${diffs}">${articleTitle}</a></span>
+                                <a id="article-url-data" href="#diffs?diff=${articleUrl}">${articleTitle}</a></span>
                             <span id="external-url">
                                 <a id="external-url-data" href="${currentDiff.diffUrl}" target="_blank">
                                     <img class="ico-extern-url" src="resources/svg/extern-link2.svg" alt="" title="Link externo" srcset="">
@@ -302,7 +321,7 @@ async function loadDiffs() {
 
             fragment = document.createElement('template');
             fragment.innerHTML = diffHeader;
-            changes = JSON.parse(currentDiff.changes)
+            changes = JSON.parse(currentDiff.changes);
             for (let i=0; i<changes.length; i++) {
                 change = changes[i];
                 lineno = `<div class="lineno">
@@ -311,10 +330,22 @@ async function loadDiffs() {
                             </div><div class="addel-content"></div>`
                 
                 fragment.content.querySelectorAll('.lines')[fragment.content.querySelectorAll('.lines').length-1].innerHTML += lineno
+                
                 for (let j=0; j<change.change.length; j++) {
                     addels = change.change[j]
                     addelDiv = fragment.content.querySelectorAll('.addel-content')[fragment.content.querySelectorAll('.addel-content').length-1]
-                    collapsableDiv().forEach(item => diffTexts.push(item))
+                    let collapsables = collapsableDiv();
+
+                    if (addelDiv.childNodes.length >= 2) {
+                        let last1 = addelDiv.childNodes[addelDiv.childNodes.length-1];
+                        let last2 = addelDiv.childNodes[addelDiv.childNodes.length-2];
+                        if ( last1.classList.contains('add') && last2.classList.contains('blank') ) 
+                            addelDiv.childNodes[addelDiv.childNodes.length-1].className = 'add blank';
+                        else if ( last1.classList.contains('add') && last1.classList.contains('blank') 
+                        && last2.classList.contains('del') && !last2.classList.contains('blank') )
+                            addelDiv.childNodes[addelDiv.childNodes.length-2].className = 'del blank';
+                    }
+                    collapsables.forEach(item => diffTexts.push(item));
                 }
             }
             document.getElementById('diffs-content').insertAdjacentHTML('beforeend',fragment.innerHTML)
@@ -322,58 +353,62 @@ async function loadDiffs() {
         document.head.appendChild(script);
     } else {
         document.getElementById('diffs-content').innerHTML = '<center><h3>Error, no se han cargado datos</h3></center>';
-    }        
+    }
 }
+
 function collapsableDiv() {
-    var objStruct = {
-        id: '',
-        shortText: '',
-        fullText: '',
-    };
+    var objStruct = { id: '', shortText: '', fullText: '' };
     var objs = [];
-    keys = Object.keys(addels)
+    var cass = '';
+    var keys = Object.keys(addels);
+
     for (i in keys) {
-        let len = 300;
+        let len = 300, text = '';
         if (Object.keys(addels[keys[i]]).length > 0) {
-            obj = { ...objStruct}
+            let obj = { ...objStruct};
             idCont++;
-            if (addels[keys[i]].hasOwnProperty('text')) 
-                text = escapeHTML(addels[keys[i]].text)
-            else 
-                text = escapeHTML(addels[keys[i]])
-            
-            obj.id = "text"+idCont 
+            obj.id = "text" + idCont;
+            text = addels[keys[i]].hasOwnProperty('text') ? addels[keys[i]].text : addels[keys[i]];
+            text = escapeHTML(text);
+            cass = text.includes(delimiters[keys[i]][0]) ? keys[i]+' blank' : keys[i];
+            text = escapeBeginEnd(text, keys[i]);
+
             if (text.length > len) {
-                // 2 veces bucle, 1 ins 2 add
-                posIni = text.lastIndexOf('$$$BEGIN$$$',len)
-                posEnd = text.lastIndexOf('$$$END$$$',len)
-                if (posEnd < posIni) {
-                    len = text.indexOf('$$$END$$$',len)+'$$$END$$$'.length
+                if ( cass.includes('blank') ) {
+                    let cls = keys[i] == 'add'?  'wadd' : 'wdel';
+                    posIni = text.lastIndexOf( `<b class=${cls}>`, len );
+                    posEnd = text.lastIndexOf( '</b>', len );
+                    if (posEnd < posIni) 
+                        len = text.indexOf( '</b>', len ) + '</b>'.length;
                 }
-                obj.shortText = escapeBeginEnd(text.substr(0, len)) + "... <a href='#' onClick='changeText(event,this)'><b>{más}</b></a>";
-                obj.fullText = escapeBeginEnd(text)+" <a href='#' onClick='changeText(event,this)'><b>{menos}</b></a>";
-            } else {
-                obj.shortText = escapeBeginEnd(text);
+                obj.shortText = text.substr(0, len) + "... <a href='#' onClick='changeText(event,this)'><b>{más}</b></a>";
+                obj.fullText = text+" <a href='#' onClick='changeText(event,this)'><b>{menos}</b></a>";
+            } 
+            else {
+                obj.shortText = text;
                 obj.fullText = null;
             }
-            addelDiv.innerHTML += `<div id="${obj.id}" class="${keys[i]}"><p>${obj.shortText} </p></div>`
-            objs.push(obj)
+            addelDiv.innerHTML += `<div id="${obj.id}" class="${cass}"><p>${obj.shortText} </p></div>`;
+            objs.push(obj);
         }
     }
     return objs;
 }
+
 function escapeHTML(str) {
     return str.replace(/&/g, "&amp;")
         .replace(/>/g, "&gt;")
         .replace(/</g, "&lt;")
-        .replace(/"/g, "&quot;")
+        .replace(/"/g, "&quot;");
 }
+
 function escapeBeginEnd(str,addel) {
-    let cls = addel == 'add'? 'wdel' : 'wadd'
-    return str
-         .replace(/\$\$\$BEGIN\$\$\$/g, `<b class=${cls}>`)
-         .replace(/\$\$\$END\$\$\$/g, `</b>`)
+    let cls = addel == 'add'?  'wadd' : 'wdel';
+     return str
+         .replaceAll(delimiters[addel][0], `<b class=${cls}>`)
+         .replaceAll(delimiters[addel][1], `</b>`);
 }
+
 function changeText(event,obj) {
     event.preventDefault();
     div = obj.closest('div')
@@ -381,23 +416,24 @@ function changeText(event,obj) {
         diffTexts.map( (it) =>  {
             if (it.id == div.id) 
                 div.children[0].innerHTML = it.shortText            
-        })
+        });
     } else {
         diffTexts.map( (it) =>  {
             if (it.id == div.id) 
                 div.children[0].innerHTML = it.fullText
-        })         
+        });
     }
 }
+
 function marker(event,elem) {
     let notes = JSON.parse(localStorage.getItem('notes'));
     let id = event.target.closest('.diff').id;
-    let url = event.target.closest('.diff').querySelector('#article-url-data').href.split('=')[1]      
+    let url = event.target.closest('.diff').querySelector('#article-url-data').href.split('=')[1];
     let del = false;
     if (elem.src.includes('saved')) {
         elem.src = "resources/svg/marker.svg";
         del = true;
-    } else 
+    } else
         elem.src = "resources/svg/marker-saved.svg";
     
     if (notes != null) {
@@ -411,11 +447,11 @@ function marker(event,elem) {
             diffs: [],
             notes: []
         };
-        if (!del) 
+        if (!del)
             objStorage.diffs.push({id:id,url:url});
         localStorage.setItem('notes',JSON.stringify(objStorage));
     }
-} // toast variable -> title negrita articulo + brief
+}
 
 function pager(evt) {
     let updateRegs = false;
@@ -447,6 +483,6 @@ function pager(evt) {
         document.getElementById('diffs-content').innerHTML = "";
         diffTexts = [];
         loadDiffs();
-    } 
+    }
 }
 </script>
