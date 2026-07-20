@@ -13,7 +13,9 @@ async function query(option,...args) {
         break;
         case 'urlsStartsWith':
         case 'urlsByCategory':
-            IDBdata = urlsQueriesIDB(option,args[0],pager);
+            //IDBdata = urlsQueriesIDB(option,args[0],pager);
+            IDBdata = urlsQueriesIDBrange(option,args[0],pager);
+
         break;
         case 'randUrl':
             IDBdata = await randUrlIDB();            
@@ -55,24 +57,23 @@ function categoriesIDB() {
 }
 
 function randUrlIDB() {
-    // let ini = performance.now();
     var ts = db.transaction(['historycontribs'],'readonly');
     var store = ts.objectStore('historycontribs');
     var index = store.index('articleUrl');
-    var url = []; i=0;
+    var UNIQUEURLS = 11839; // :O
+    let pos = Math.trunc(UNIQUEURLS*Math.random());
     return new Promise((resolve, reject) => {
-        
         var request = index.openKeyCursor(null, "nextunique");
+        let advanced = false;
         request.onsuccess = (evt) => {
             var cursor = evt.target.result;
             if (cursor) {
-                url.push(cursor.key);
-                cursor.continue();
-            } else {
-                i = Math.trunc(url.length*Math.random());
-                url = url[i];
-                // let end = performance.now();
-                resolve([{articleUrl:url}]);
+                if (!advanced) {
+                    cursor = cursor.advance(pos);
+                    advanced = true;
+                }
+                else
+                    resolve([{articleUrl:cursor.key}]);
             }
         };
         request.onerror = () => reject(request.error);
@@ -197,7 +198,8 @@ function join(hcData, dfData) {
     return result;
 }
 
-async function urlsQueriesIDB(filterBy, arg, pager=null) {
+async function urlsQueriesIDB(filterBy, arg, pager=null) {  
+    console.log(pager);
     var ts = db.transaction(['historycontribs'],'readonly');
     var hcStore = ts.objectStore('historycontribs');
     var index = null;
@@ -226,6 +228,7 @@ async function urlsQueriesIDB(filterBy, arg, pager=null) {
 
         var vect1 = [], urlsMap = new Map();
         var request = index.openCursor(null, "next");
+
         request.onsuccess = (evt) => {
             var cursor = evt.target.result;
             if (cursor) {
@@ -281,3 +284,107 @@ async function urlsQueriesIDB(filterBy, arg, pager=null) {
         request.onerror = () => reject(request.error);
     });
 }
+
+
+
+async function urlsQueriesIDBrange(filterBy, arg, pager=null) { // 1.549s t.carga
+    var ts = db.transaction(['historycontribs'],'readonly');
+    var hcStore = ts.objectStore('historycontribs');
+    var index = null;
+    var str = "", strNot = "";
+
+    const baseUrl = "https://es.wikipedia.org/wiki/";
+
+
+    if (filterBy == 'urlsStartsWith') {
+        if (arg.length == 1) {
+            str = arg;
+            strNot = 'wiki/Anexo:';
+        }
+        else if (arg == 'discusion') {
+            str = 'Discusi%C3%B3n:';
+        }
+        else if (arg == 'anexo') {
+            str = 'Anexo:';
+            strNot = 'Discusi%C3%B3n';
+        }
+        index = hcStore.index('articleUrl');
+    }
+
+    else if (filterBy == 'urlsByCategory') {
+        index = hcStore.index('category');
+        str = arg;
+    }
+
+    return new Promise((resolve, reject) => {
+
+        var vect1 = [], urlsMap = new Map();
+        var range = null, request = null;
+        
+        if (filterBy == 'urlsStartsWith') {
+            range = IDBKeyRange.bound(
+                baseUrl+str,
+                baseUrl+str+"\uffff"
+            );
+            request = index.openCursor(range);
+        }
+        else
+            request = index.openCursor(IDBKeyRange.only(str));
+            // request = index.openCursor(null, "next");
+        
+        request.onsuccess = (evt) => {
+            var cursor = evt.target.result;
+            if (cursor) {                   
+                vect1.push({
+                    id: cursor.primaryKey,
+                    articleUrl: cursor.value.article_url,
+                    date: cursor.value.date_edition,
+                    category: cursor.value.category
+                });
+                cursor.continue();
+            }
+            else {
+                if (strNot.length > 0) {
+                    vect1 = vect1.filter(item => !item.articleUrl.includes(strNot));
+                }
+                vect1.forEach( it => {
+                    let obj = {
+                        articleUrl: it.articleUrl,
+                        category: it.category,
+                        dates: [it.date],
+                        nedits: 1,
+                    }
+                    if (!urlsMap.get(it.articleUrl)) 
+                        urlsMap.set(it.articleUrl,obj);
+                    else {
+                        obj.dates.push(it.date);
+                        obj.nedits = urlsMap.get(it.articleUrl).nedits+1;
+                        urlsMap.set(it.articleUrl,obj);
+                    }
+                })
+                vect1 = [];
+                urlsMap.forEach((it) => {
+                    vect1.push({
+                        articleUrl: it.articleUrl,
+                        category: it.category,
+                        dates: JSON.stringify(it.dates),
+                        nedits: it.nedits,
+                        totalUrls:urlsMap.size
+                    });
+                });
+                vect1 = vect1.sort( (a,b) => b.nedits - a.nedits)
+                if (pager != null) {
+                    vect1 = vect1.slice(
+                        pager.page*pager.perPage,
+                        pager.perPage+(pager.perPage*pager.page)
+                    );
+                }
+                
+                resolve(vect1);
+            }
+        }
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// await urlsQueriesIDBrange('urlsStartsWith','a',{page:0,perPage:10})

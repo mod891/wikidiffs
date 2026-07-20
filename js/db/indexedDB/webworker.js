@@ -18,18 +18,20 @@ onmessage = async function(e) {
 
 async function initDB() {
 
-    performanceMarks.push(
-        {
+    var db = indexedDB.open("wikidiffs",1);
+
+    db.onupgradeneeded = (e) => {
+
+        performanceMarks.push({
+            fn: 'freezeGUI',
             debug:'db.onupgradeneeded',
             t:(end-ini)/1000,
-            message:'abriendo la BD, cargado 1%',
-        }
-    );
-    var db = indexedDB.open("wikidiffs",1);
-    db.onupgradeneeded = (e) => {
+            arg:'Creando la BD, cargado 3%',
+        });
 
         postMessage({
             fn: 'info',
+            log: 'db.onupgradeneeded ',
             args: [
                 null,
                 4000,
@@ -62,7 +64,7 @@ async function initDB() {
             {
                 debug:'db.onupgradeneeded',
                 t:(end-ini)/1000,
-                message:'creando stores en BD, cargado al 3%',
+                message:'creando stores en BD (stores,indices), cargado al 3%',
             }
         );
     };
@@ -74,43 +76,63 @@ async function initDB() {
         const hcStore = ts1.objectStore("historycontribs");
         const diffsStore = ts2.objectStore("diffs");
 
+        var chunkSize = 0, percent=0, tsWrite = null, storeWrite = null;
+
         var hcSize = hcStore.count();
         var diffsSize = diffsStore.count();
 
         hcSize.onsuccess = async () => {
+
             ini = performance.now();
 
             if (hcSize.result > 0) {
                 end = performance.now();
-                performanceMarks.push(
-                    {
-                        debug:'hcSize.onsuccess::hcSize.result > 0',
-                        t:(end-ini)/1000,
-                        message:'historyContribs en BD, cargado al 40%'
-                    }
-                );
+                performanceMarks.push({
+                    fn:'freezeGUI',
+                    arg:'historyContribs en BD, 1/2 stores cargadas',
+                    debug:'hcSize.onsuccess::hcSize.result > 0',
+                    t:(end-ini)/1000,
+                });
             }
             else {
+                
                 var hcReq = await fetch(`/public/resources/store/historycontribs.json`);
                 if (hcReq.ok)
                     hcjson = await hcReq.json();
 
-                var tsWrite = dbi.transaction("historycontribs", "readwrite");
-                var storeWrite = tsWrite.objectStore("historycontribs");
+                chunkSize = Math.trunc(hcjson.length/100);
+                percent = 0;
 
-                for (let i=0; i<hcjson.length; i++)
-                            storeWrite.put(hcjson[i]);
-                
-                tsWrite.oncomplete = () => {
-                    end = performance.now();
-                    performanceMarks.push(
-                        {
-                            debug:'hcSize.onsuccess::hcSize.result > 0',
-                            t:(end-ini)/1000,
-                            message:'historyContribs en BD, cargado al 40%'
+                for ( let i = 0; i < hcjson.length; i += chunkSize ) {
+
+                    postMessage({
+                        fn: 'freezeGUI',
+                        arg: `Cargando history contribs en BD: ${percent}% completado`,
+                        log:`percent: ${percent}`
+                    });
+                    percent += 1;
+
+                    tsWrite = dbi.transaction("historycontribs", "readwrite");
+                    storeWrite = tsWrite.objectStore("historycontribs");
+
+
+                    for (let j = i; j< Math.min(i+chunkSize, hcjson.length); j++) {
+                        try {
+                            storeWrite.put(hcjson[j]);
+
+                        } catch (e) {
+                            console.log(e)
+                            postMessage({log})
                         }
-                    );
-                };
+                    }
+    
+                    await transactionOnComplete(tsWrite);
+
+                }
+                postMessage({
+                        fn: 'freezeGUI',
+                        arg: false
+                });
             }
         };
 
@@ -120,38 +142,69 @@ async function initDB() {
             if (diffsSize.result > 0)   {
                 end = performance.now();
                 performanceMarks.push({
-                    debug:'diffsSize.onsuccess::diffsSize.result > 0',
-                    t:(end-ini)/1000,
-                    message:'diffs en BD, cargado al 100%',
+                    fn: 'freezeGUI',
+                    arg:'diffs en BD, cargado al 100%',
                     loaded: true,
+                    t:(end-ini)/1000,
                 });
                 postMessage({ fn: 'openDB', args:[] });
+
             } else {
-                var diffsReq = await fetch(`/public/resources/store/diffs.json`);
+
+                chunkSize = 0, tsWrite = null, storeWrite = null, diffsReq = null, diffsjson = [];
+
+                diffsReq = await fetch(`/public/resources/store/diffs.json`);
                 if (diffsReq.ok)
                     diffsjson = await diffsReq.json();
 
-                var tsWrite = dbi.transaction("diffs", "readwrite");
-                var storeWrite = tsWrite.objectStore("diffs");
 
-                for (let i=0; i<diffsjson.length; i++)
-                    storeWrite.put(diffsjson[i]);
+                chunkSize = Math.trunc(diffsjson.length/100);
+                percent = 0;
 
-                tsWrite.oncomplete = () => {
-                    end = performance.now();
-                    performanceMarks.push(
-                        {
-                            debug:'diffsSize.onsuccess::fetch && db.put',
-                            t:(end-ini)/1000,
-                            message:'diffs en BD, cargado al 100%',
-                            loaded: true,
+                for ( let i = 0; i < diffsjson.length; i += chunkSize ) {
+
+                    postMessage({
+                        fn: 'freezeGUI',
+                        arg: `Cargando diffs en BD: ${percent}% completado`,
+                        log:`percent: ${percent}`
+                    });
+                    percent += 1;
+
+                    tsWrite = dbi.transaction("diffs", "readwrite");
+                    storeWrite = tsWrite.objectStore("diffs");
+
+
+                    for (let j = i; j< Math.min(i+chunkSize, diffsjson.length); j++) {
+                        try {
+                            storeWrite.put(diffsjson[j]);
+
+                        } catch (e) {
+                            console.log(e)
+                            postMessage({log})
                         }
-                    );
-                    postMessage({ fn: 'openDB', args:[] });
-                };
+                    }
+    
+                    await transactionOnComplete(tsWrite);
+
+                }
+                postMessage({
+                        fn: 'freezeGUI',
+                        arg: false
+                });
+                postMessage({ fn: 'openDB', args:[] });
             }
-        }
-    };
+        };
+    }
+}
+
+async function transactionOnComplete(ts) {
+    return new Promise((resolve, reject) => {
+        ts.oncomplete = () => {
+            postMessage({log:'transactionOnComplete'});
+            resolve();
+        };
+        ts.onerror = () => reject(ts.error);
+    });
 }
 
 function debug() {
@@ -164,21 +217,13 @@ function debug() {
 async function DBupdates() {
     if (performanceMarks.length == 0)
         return;
-    postMessage({ var: 'wwFreeze', value: true });
     while (!performanceMarks[performanceMarks.length-1].hasOwnProperty('loaded')) {
-        postMessage({
-            fn: 'freezeGUI',
-            arg: performanceMarks[performanceMarks.length-1].message,
-        });
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        postMessage(performanceMarks[performanceMarks.length-1]);
+        await new Promise(resolve => setTimeout(resolve, 500));
     }
-    postMessage({
-        fn: 'freezeGUI',
-        arg: performanceMarks[performanceMarks.length-1].message
-    });
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    postMessage({ fn: 'freezeGUI', arg: false, var: 'wwFreeze', value: false });
-    postMessage({ var: 'indexedDBloaded', value:true });
+    postMessage(performanceMarks[performanceMarks.length-1]);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    postMessage({ fn: 'freezeGUI', arg: false });
 
     postMessage(
         {
@@ -194,9 +239,5 @@ async function DBupdates() {
             ],
         }
     );
-
-    postMessage({
-        fn: 'fetchSharedData', // require data with category
-        arg: []
-    })
+    postMessage({ fn: 'fetchSharedData', arg: [] });
 }

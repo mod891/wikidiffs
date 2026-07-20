@@ -208,19 +208,19 @@
 var idCont = 0;
 var diffTexts = [];
 var dbquery = "";
-var currentPage = 1, perPage = 3, totalPages = 0;
+var currentPage = 1, perPage = 10, totalPages = 0;
 var inputs = [], btns = [];
 var delimiters = {
     'del':['$$-BEGIN-$$','$$-END-$$'],
     'add':['$$+BEGIN+$$','$$+END+$$']
 };
 
-freezeGUI();
 init();
-freezeGUI(false);
 
 async function init() {
+    freezeGUI('Cargando página...');
     await loadDiffs();
+    freezeGUI(false);
 }  
 
 async function loadDiffs() {

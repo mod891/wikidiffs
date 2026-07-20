@@ -293,7 +293,7 @@ var categories = null, category = null;
 
 // pagination shared vars
 var pagerInput = document.getElementById('currentPageInput');
-var currentPage = 0, perPage = 10, totalPages = 0;
+var currentPage = 0, perPage = 30, totalPages = 0;
 var btns = document.getElementById('pager').querySelectorAll('button');
 var prevBtn = btns[0], nextBtn = btns[1];
 
@@ -304,6 +304,7 @@ if (getVal.split('category:').length > 1) {
 init()
 
 async function init() {
+    freezeGUI('Cargando...');
     var storage = false;
     var filtersIcon = document.getElementById('filter-icon');
     var filtersModal = document.getElementById('filters-modal');
@@ -345,7 +346,9 @@ async function init() {
         fetchSharedData();
         categories = JSON.parse(sessionStorage.getItem('categories'));
     }
+    
     liLinks();
+    freezeGUI(false);
 }
 
 function liLinks() {

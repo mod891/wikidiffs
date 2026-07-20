@@ -4,10 +4,9 @@ var categories = null;
 var DBTYPE = "";
 
 /* indexedDB vars */
-var wwFreeze = false;
 var ww = null;
 var db = null;
-
+var wwFreeze = false;
 init()
 
 async function loadFragment(what) {
@@ -64,7 +63,8 @@ async function fetchSharedData() {
 }
 
 async function init() {
-    freezeGUI('Cargando...');
+    console.log('functions.js::init()')
+    
     document.querySelectorAll('script[src]').forEach(e => {
         if (e.src.includes('indexedDB'))
             DBTYPE = "indexedDB";
@@ -77,8 +77,17 @@ async function init() {
             let wwdata = e.data;
             
             if (wwdata.hasOwnProperty('fn')) {
-                if (wwdata.hasOwnProperty('arg'))
+                if (wwdata.hasOwnProperty('arg')) {
                     window[wwdata.fn](wwdata.arg);
+                    /*
+                    if (wwdata.fn == 'freezeGUI' && wwFreeze == true)
+                        window[wwdata.fn](wwdata.arg);
+                    else if (wwdata.fn != 'freezeGUI')
+                        window[wwdata.fn](wwdata.arg);
+                    else
+                        console.log('eein?')
+                    */
+                }
                 else if (wwdata.hasOwnProperty('args'))
                     window[wwdata.fn](wwdata.args[0],wwdata.args[1],wwdata.args[2]); 
             }
@@ -89,8 +98,10 @@ async function init() {
                 console.log(wwdata.log);
             }
         };
-        if (db == null)
+        if (db == null) {
+            console.log('init():: ww.postMessage(initDB);')
             ww.postMessage('initDB');
+        }
     }
     await loadFragment('menu');
     await loadFragment('footer');
@@ -100,32 +111,44 @@ async function init() {
         window.scrollTo({
             top: 0,
             behavior: "smooth"
-        })
+        });
     })
     window.addEventListener('scroll', () => {
-    if (window.scrollY > 200) 
-        scrollTopBtn.classList.add('show');
-     else 
-        scrollTopBtn.classList.remove('show');
+        if (window.scrollY > 200) 
+            scrollTopBtn.classList.add('show');
+        else 
+            scrollTopBtn.classList.remove('show');
     });
     route();
 
-    if (!wwFreeze)
+    if (sessionStorage.getItem('indexedDB') != null)
         freezeGUI(false);
 }
 
 async function route() {
+    console.log('functions.js::route()')
+
     getVal = ""
-    if (window.location.hash.length == 0)
-        window.location.hash = "#index";
- 
-    if ( sessionStorage.getItem('indexedDB') == null && 
-        DBTYPE == 'indexedDB' && window.location.hash != "#index") {
-        ww.postMessage('DBupdates');
+    if (window.location.hash.length == 0) {
         window.location.hash = "#index";
     }
-    if (db == null &&  DBTYPE == 'indexedDB')
-        await openDB();
+    if ( sessionStorage.getItem('indexedDB') == null && DBTYPE == 'indexedDB') {
+
+        console.log('route::ww.postMessage(DBupdates)')
+
+        // ww.postMessage('DBupdates'); // → w8 + yisus bailando
+        window.location.hash = "#index";
+    }
+    /*
+    if ( sessionStorage.getItem('indexedDB') == null && 
+        DBTYPE == 'indexedDB' && window.location.hash != "#index") {
+            alert('indDB etc...')
+        window.location.hash = "#index";
+        ww.postMessage('DBupdates');
+    }
+        */
+    // if (db == null &&  DBTYPE == 'indexedDB')
+    //     await openDB();
 
     if (window.location.hash.split('?').length > 1)
         getVal = window.location.hash.split('?')[1].split('=')[1];
@@ -191,6 +214,7 @@ async function info(event,ms=5000,...args) {
 }
 
 function freezeGUI(msg) {
+    
     if (typeof msg === "string") {
         document.getElementById('overlay').hidden = false;
         document.getElementById('overlay-msg').innerText = msg;
@@ -199,6 +223,8 @@ function freezeGUI(msg) {
 }
 
 async function openDB() {
+        console.log('cc::openDB()');
+
     var opendb = indexedDB.open("wikidiffs",1);
     opendb.onsuccess = () => {
         db = opendb.result;
@@ -206,5 +232,49 @@ async function openDB() {
     }
     opendb.onerror = () => {
         console.log(opendb.error);
+        alert(opendb.error)
+    }
+}
+
+async function clear() {
+
+    await infoDB();
+    console.log('CLEARING....');
+    sessionStorage.clear();
+    console.log('sessionStorage borrado')
+     if (db != null)
+        db.close()
+    var req = indexedDB.deleteDatabase('wikidiffs')
+    req.onsuccess = () => {
+        console.log('wikidiffs db borrada');
+    }
+    req.onerror = () => {
+        console.log('error al borrar wikidiffs db');
+    }
+
+}
+
+async function infoDB() {
+    if (db != null) {
+        try {
+
+        
+            const ts1 = db.transaction("historycontribs", "readwrite");
+            const ts2 = db.transaction("diffs","readwrite");
+            const hcStore = ts1.objectStore("historycontribs");
+            const diffsStore = ts2.objectStore("diffs");
+
+            var hcSize = hcStore.count();
+            var diffSize = diffsStore.count();
+            hcSize.onsuccess = async () => {
+                console.log('hc loaded: ',hcSize.result)
+            }
+            diffSize.onsuccess = async () => {
+                console.log('diffs loaded: ',diffSize.result)
+            }
+
+        } catch (e) {
+            console.log('exception',e)
+        }
     }
 }
