@@ -1,9 +1,15 @@
+
+var db = null;
+
 async function query(option,...args) {
     var  pager = null;
     var IDBdata = {};
     if (args.length == 2)
         pager = args[1];
 
+    if (db == null)
+        await openDB();
+    
     switch (option) {
         case 'diffsFromUrl':
         case 'diffsFromUser':
@@ -13,8 +19,7 @@ async function query(option,...args) {
         break;
         case 'urlsStartsWith':
         case 'urlsByCategory':
-            //IDBdata = urlsQueriesIDB(option,args[0],pager);
-            IDBdata = urlsQueriesIDBrange(option,args[0],pager);
+            IDBdata = urlsQueriesIDB(option,args[0],pager);
 
         break;
         case 'randUrl':
@@ -33,6 +38,20 @@ async function query(option,...args) {
             console.log('hoiga esto no furula',option)
     }
     return IDBdata;
+}
+
+async function openDB() {
+
+    var opendb = indexedDB.open("wikidiffs",1);
+    opendb.onsuccess = () => {
+        db = opendb.result;
+        localStorage.setItem('indexedDB',true);
+        wwFreeze = false;
+    }
+    opendb.onerror = () => {
+        console.log(opendb.error);
+        alert(opendb.error)
+    }
 }
 
 function categoriesIDB() {
@@ -198,96 +217,7 @@ function join(hcData, dfData) {
     return result;
 }
 
-async function urlsQueriesIDB(filterBy, arg, pager=null) {  
-    console.log(pager);
-    var ts = db.transaction(['historycontribs'],'readonly');
-    var hcStore = ts.objectStore('historycontribs');
-    var index = null;
-    var str = "", strNot = "";
-
-    if (filterBy == 'urlsStartsWith') {
-        if (arg.length == 1) {
-            str = `wiki/${arg}`;
-            strNot = 'wiki/Anexo:';
-        }
-        else if (arg == 'discusion') {
-            str = 'Discusi%C3%B3n:';
-        }
-        else if (arg == 'anexo') {
-            str = 'wiki/Anexo:';
-            strNot = 'Discusi%C3%B3n';
-        }
-        index = hcStore.index('articleUrl');
-    }
-    else if (filterBy == 'urlsByCategory') {
-        index = hcStore.index('category');
-        str = arg;
-    }
-
-    return new Promise((resolve, reject) => {
-
-        var vect1 = [], urlsMap = new Map();
-        var request = index.openCursor(null, "next");
-
-        request.onsuccess = (evt) => {
-            var cursor = evt.target.result;
-            if (cursor) {
-                if ( ( cursor.key.includes(str) && strNot.length > 0 && !cursor.key.includes(strNot) )
-                    || ( cursor.key.includes(str) && strNot.length ==  0 )  ) {
-                    
-                    vect1.push({
-                        id: cursor.primaryKey,
-                        articleUrl: cursor.value.article_url,
-                        date: cursor.value.date_edition,
-                        category: cursor.value.category
-                    });
-                }
-                cursor.continue();
-
-            } else {
-                vect1.forEach( it => {
-                    let obj = {
-                        articleUrl: it.articleUrl,
-                        category: it.category,
-                        dates: [it.date],
-                        nedits: 1,
-                    }
-                    if (!urlsMap.get(it.articleUrl)) 
-                        urlsMap.set(it.articleUrl,obj);
-                    else {
-                        obj.dates.push(it.date);
-                        obj.nedits = urlsMap.get(it.articleUrl).nedits+1;
-                        urlsMap.set(it.articleUrl,obj);
-                    }
-                })
-                vect1 = [];
-                urlsMap.forEach((it) => {
-                    vect1.push({
-                        articleUrl: it.articleUrl,
-                        category: it.category,
-                        dates: JSON.stringify(it.dates),
-                        nedits: it.nedits,
-                        totalUrls:urlsMap.size
-                    });
-                });
-                vect1 = vect1.sort( (a,b) => b.nedits - a.nedits)
-                if (pager != null) {
-                    vect1 = vect1.slice(
-                        pager.page*pager.perPage,
-                        pager.perPage+(pager.perPage*pager.page)
-                    );
-                }
-                
-                resolve(vect1);
-            }
-        }
-        request.onerror = () => reject(request.error);
-    });
-}
-
-
-
-async function urlsQueriesIDBrange(filterBy, arg, pager=null) { // 1.549s t.carga
+async function urlsQueriesIDB(filterBy, arg, pager=null) { // 1.549s t.carga
     var ts = db.transaction(['historycontribs'],'readonly');
     var hcStore = ts.objectStore('historycontribs');
     var index = null;

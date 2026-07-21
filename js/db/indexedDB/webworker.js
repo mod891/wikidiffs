@@ -1,8 +1,5 @@
 /* Web Worker */
-var hcjson = null;
-var diffsjson = null;
 var performanceMarks = [];
-var ini=0,end=0;
 
 onmessage = async function(e) {
     const message = e.data;
@@ -17,24 +14,22 @@ onmessage = async function(e) {
 }
 
 async function initDB() {
+    console.time('initDB');
+    var openDBrequest = indexedDB.open("wikidiffs",1);
 
-    var db = indexedDB.open("wikidiffs",1);
-
-    db.onupgradeneeded = (e) => {
+    openDBrequest.onupgradeneeded = (e) => {
 
         performanceMarks.push({
             fn: 'freezeGUI',
-            debug:'db.onupgradeneeded',
-            t:(end-ini)/1000,
             arg:'Creando la BD, cargado 3%',
         });
 
         postMessage({
             fn: 'info',
-            log: 'db.onupgradeneeded ',
+            log: 'openDBrequest.onupgradeneeded ',
             args: [
                 null,
-                4000,
+                3000,
                 {
                     elem: 'loading',
                     text:'Cargandose la BD en el navegador...',
@@ -43,175 +38,138 @@ async function initDB() {
             ],
         });
 
-        ini = performance.now();
-        const dbi = e.target.result;
-        if (!dbi.objectStoreNames.contains("historycontribs")) {
-            
-            var hcStore = dbi.createObjectStore("historycontribs", { keyPath: "id" });
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains("historycontribs")) {
+            var hcStore = db.createObjectStore("historycontribs", { keyPath: "id" });
             hcStore.createIndex("articleUrl","article_url",{ unique: false });
             hcStore.createIndex("diffUrl","diff_url",{ unique: true });
             hcStore.createIndex("user","user",{ unique: false });
             hcStore.createIndex("date","date_edition",{ unique: false });
             hcStore.createIndex("category","category",{ unique: false }); 
         }
-        if (!dbi.objectStoreNames.contains("diffs")) {
-            var diffsStore = dbi.createObjectStore("diffs", { keyPath: "id" });
+        if (!db.objectStoreNames.contains("diffs")) {
+            var diffsStore = db.createObjectStore("diffs", { keyPath: "id" });
             diffsStore.createIndex("prevUser","prev_username",{ unique: false });
         }
-
-        end = performance.now();
-        performanceMarks.push(
-            {
-                debug:'db.onupgradeneeded',
-                t:(end-ini)/1000,
-                message:'creando stores en BD (stores,indices), cargado al 3%',
-            }
-        );
     };
 
-    db.onsuccess = (e) => {
-        const dbi = e.target.result;
-        const ts1 = dbi.transaction("historycontribs", "readwrite");
-        const ts2 = dbi.transaction("diffs","readwrite");
-        const hcStore = ts1.objectStore("historycontribs");
-        const diffsStore = ts2.objectStore("diffs");
+    openDBrequest.onsuccess = (e) => {
+        var tsRead = null, tsWrite = null, store = null,
+        jsonFetch = null, json = null, chunkSize = 0, 
+        parts = 5, progress=0, hcSize = 0, diffsSize = 0;
 
-        var chunkSize = 0, percent=0, tsWrite = null, storeWrite = null;
+        const db = e.target.result;
+        tsRead = db.transaction("historycontribs", "readonly");
+        store = tsRead.objectStore("historycontribs");
 
-        var hcSize = hcStore.count();
-        var diffsSize = diffsStore.count();
-
+        hcSize = store.count();
         hcSize.onsuccess = async () => {
-
-            ini = performance.now();
-
             if (hcSize.result > 0) {
-                end = performance.now();
                 performanceMarks.push({
                     fn:'freezeGUI',
                     arg:'historyContribs en BD, 1/2 stores cargadas',
-                    debug:'hcSize.onsuccess::hcSize.result > 0',
-                    t:(end-ini)/1000,
                 });
             }
             else {
-                
-                var hcReq = await fetch(`/public/resources/store/historycontribs.json`);
-                if (hcReq.ok)
-                    hcjson = await hcReq.json();
-
-                chunkSize = Math.trunc(hcjson.length/100);
-                percent = 0;
-
-                for ( let i = 0; i < hcjson.length; i += chunkSize ) {
-
+                jsonFetch = await fetch(`/public/resources/store/historycontribs.json`);
+                if (jsonFetch.ok)
+                    json = await jsonFetch.json();
+                chunkSize = Math.trunc(json.length/parts);
+                progress = 0;
+                for ( let i = 0; i < json.length; i += chunkSize ) {
                     postMessage({
                         fn: 'freezeGUI',
-                        arg: `Cargando history contribs en BD: ${percent}% completado`,
-                        log:`percent: ${percent}`
+                        arg: `Cargando historyContribs en BD: ${progress}% completado`,
                     });
-                    percent += 1;
+                    progress += 100/parts;
+                    tsWrite = db.transaction("historycontribs", "readwrite");
+                    store = tsWrite.objectStore("historycontribs");
 
-                    tsWrite = dbi.transaction("historycontribs", "readwrite");
-                    storeWrite = tsWrite.objectStore("historycontribs");
-
-
-                    for (let j = i; j< Math.min(i+chunkSize, hcjson.length); j++) {
+                    for (let j = i; j< Math.min(i+chunkSize, json.length); j++) {
                         try {
-                            storeWrite.put(hcjson[j]);
-
+                            store.put(json[j]);
                         } catch (e) {
                             console.log(e)
                             postMessage({log})
                         }
                     }
-    
                     await transactionOnComplete(tsWrite);
-
                 }
                 postMessage({
-                        fn: 'freezeGUI',
-                        arg: false
+                    fn:'freezeGUI',
+                    arg:'1/2 stores cargadas en BD',
                 });
-            }
-        };
 
-        diffsSize.onsuccess = async () => {
-            ini = performance.now();
-            
-            if (diffsSize.result > 0)   {
-                end = performance.now();
-                performanceMarks.push({
-                    fn: 'freezeGUI',
-                    arg:'diffs en BD, cargado al 100%',
-                    loaded: true,
-                    t:(end-ini)/1000,
-                });
-                postMessage({ fn: 'openDB', args:[] });
-
-            } else {
-
-                chunkSize = 0, tsWrite = null, storeWrite = null, diffsReq = null, diffsjson = [];
-
-                diffsReq = await fetch(`/public/resources/store/diffs.json`);
-                if (diffsReq.ok)
-                    diffsjson = await diffsReq.json();
-
-
-                chunkSize = Math.trunc(diffsjson.length/100);
-                percent = 0;
-
-                for ( let i = 0; i < diffsjson.length; i += chunkSize ) {
-
-                    postMessage({
-                        fn: 'freezeGUI',
-                        arg: `Cargando diffs en BD: ${percent}% completado`,
-                        log:`percent: ${percent}`
-                    });
-                    percent += 1;
-
-                    tsWrite = dbi.transaction("diffs", "readwrite");
-                    storeWrite = tsWrite.objectStore("diffs");
-
-
-                    for (let j = i; j< Math.min(i+chunkSize, diffsjson.length); j++) {
-                        try {
-                            storeWrite.put(diffsjson[j]);
-
-                        } catch (e) {
-                            console.log(e)
-                            postMessage({log})
-                        }
+                tsRead = db.transaction("diffs", "readonly");
+                store = tsRead.objectStore("diffs");
+                       
+                diffsSize = store.count();
+                diffsSize.onsuccess = async () => {
+                    if (diffsSize.result > 0) {
+                        performanceMarks.push({
+                            fn:'freezeGUI',
+                            arg:'diffs en BD, 2/2 stores cargadas',
+                        });
                     }
-    
-                    await transactionOnComplete(tsWrite);
+                    else {
+                        jsonFetch = await fetch(`/public/resources/store/diffs.json`);
+                        if (jsonFetch.ok)
+                            json = await jsonFetch.json();
 
+                        parts = 5;
+                        chunkSize = Math.trunc(json.length/parts);
+                        progress = 0;
+                        for ( let i = 0; i < json.length; i += chunkSize ) {
+                            postMessage({
+                                fn: 'freezeGUI',
+                                arg: `Cargando diffs en BD: ${progress}% completado`,
+                            });
+                            progress += 100/parts;
+
+                            tsWrite = db.transaction("diffs", "readwrite");
+                            store = tsWrite.objectStore("diffs");
+
+                            for (let j = i; j< Math.min(i+chunkSize, json.length); j++) {
+                                try {
+                                    store.put(json[j]);
+                                } catch (e) {
+                                    console.log(e)
+                                    postMessage({log})
+                                }
+                            }
+                            await transactionOnComplete(tsWrite);
+                        }
+                        postMessage({
+                            fn:'freezeGUI',
+                            arg:'2/2 stores cargadas en BD',
+                        });
+                        postMessage({ fn: 'freezeGUI', arg: false });
+                        postMessage({ fn: 'openDB', args:[] });
+                        postMessage({
+                            fn: 'info',
+                            args: [ 
+                                null,
+                                4000,
+                                {
+                                    elem: 'loading',
+                                    text:'Se ha cargado la BD en el navegador',
+                                    classes:['bg-cyan'] 
+                                }
+                            ],
+                        });
+                        console.timeEnd('initDB');
+                    }
                 }
-                postMessage({
-                        fn: 'freezeGUI',
-                        arg: false
-                });
-                postMessage({ fn: 'openDB', args:[] });
             }
         };
-    }
+    };
 }
 
 async function transactionOnComplete(ts) {
     return new Promise((resolve, reject) => {
-        ts.oncomplete = () => {
-            postMessage({log:'transactionOnComplete'});
-            resolve();
-        };
+        ts.oncomplete = () => resolve();
         ts.onerror = () => reject(ts.error);
     });
-}
-
-function debug() {
-    postMessage({log:'debug'});
-    for (let i=0; i<performanceMarks.length; i++) {
-        postMessage(performanceMarks[i]);
-    }
 }
 
 async function DBupdates() {
@@ -224,7 +182,6 @@ async function DBupdates() {
     postMessage(performanceMarks[performanceMarks.length-1]);
     await new Promise(resolve => setTimeout(resolve, 1000));
     postMessage({ fn: 'freezeGUI', arg: false });
-
     postMessage(
         {
             fn: 'info',
