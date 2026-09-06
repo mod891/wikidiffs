@@ -3,7 +3,6 @@ var idTimeout = null;
 var categories = null;
 var DBTYPE = "";
 var wwFreeze = false;
-/* indexedDB vars */
 var ww = null;
 init()
 
@@ -53,7 +52,6 @@ async function loadFragment(what) {
 async function fetchSharedData() {
     categories = JSON.parse(sessionStorage.getItem('categories'));
     if (categories == null) {
-       
         let querydata = await query('categories');
         categories = querydata.map(i => i.category);                
         sessionStorage.setItem('categories',JSON.stringify(categories));
@@ -67,12 +65,10 @@ async function init() {
             DBTYPE = "indexedDB";
     });
     DBTYPE = DBTYPE == ""? "sqlite" : DBTYPE;
-
     if (DBTYPE == "indexedDB") {
         ww = new Worker('js/db/indexedDB/webworker.js');
         ww.onmessage = (e) => {
             let wwdata = e.data;
-            
             if (wwdata.hasOwnProperty('fn')) {
                 if (wwdata.hasOwnProperty('arg')) {
                     if (wwdata.fn == 'freezeGUI') {
@@ -91,37 +87,34 @@ async function init() {
                 console.log(wwdata.log);
             }
         };
-        if (localStorage.getItem('indexedDB') == null) {
-            console.log('init():: ww.postMessage(initDB);')
+        if (localStorage.getItem('indexedDB') == null) 
             ww.postMessage('initDB');
-        }
+    } else {
+        if (localStorage.getItem('indexedDB') != null)
+            localStorage.removeItem('indexedDB');
     }
     await loadFragment('menu');
     await loadFragment('footer');
     const scrollTopBtn = document.getElementById('scrollBtn');
 
-    scrollTopBtn.addEventListener('click', ()=> {
+    scrollTopBtn.addEventListener('click', () => {
         window.scrollTo({
             top: 0,
             behavior: "smooth"
         });
     });
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 200) 
+        if (window.scrollY > 200)
             scrollTopBtn.classList.add('show');
-        else 
+        else
             scrollTopBtn.classList.remove('show');
     });
     route();
-
-    if (sessionStorage.getItem('indexedDB') != null)
-        freezeGUI(false);
 }
 
 async function route() {
     // console.log('functions.js::route() hash=',window.location.hash)
     getVal = ""
-
     if (window.location.hash.length == 0)
         window.location.hash = "#index";
     if ( localStorage.getItem('indexedDB') != null && db == null)
@@ -202,40 +195,13 @@ function freezeGUI(msg) {
 }
 
 async function clear() {
-    await infoDB();
     console.log('sessionStorage.clear()');
     sessionStorage.clear();
     console.log('localStorage.clear()');
     localStorage.clear();
      if (db != null)
-        db.close()
-    var req = indexedDB.deleteDatabase('wikidiffs')
-    req.onsuccess = () => {
-        console.log('indexedDB borrada');
-    }
-    req.onerror = () => {
-        console.log('error al borrar indexedDB');
-    }
-}
-
-async function infoDB() {
-    if (db != null) {
-        try {
-            const ts1 = db.transaction("historycontribs", "readwrite");
-            const ts2 = db.transaction("diffs","readwrite");
-            const hcStore = ts1.objectStore("historycontribs");
-            const diffsStore = ts2.objectStore("diffs");
-
-            var hcSize = hcStore.count();
-            var diffSize = diffsStore.count();
-            hcSize.onsuccess = async () => {
-                console.log('hc loaded: ',hcSize.result)
-            }
-            diffSize.onsuccess = async () => {
-                console.log('diffs loaded: ',diffSize.result)
-            }
-        } catch (e) {
-            console.log('exception',e)
-        }
-    }        
+        await db.close();
+    var req = indexedDB.deleteDatabase('wikidiffs');
+    req.onsuccess = () => console.log('indexedDB borrada');
+    req.onerror = () => console.log('error al borrar indexedDB');
 }

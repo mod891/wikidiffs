@@ -229,7 +229,7 @@ async function loadDiffs() {
     var pagerObj = {page:currentPage-1, perPage:perPage};
     dbquery = 'diffsFromUrl';
      try {
-        if (articleUrl == "random") {// + paginate err
+        if (articleUrl == "random") {
             articleUrl = (await query('randUrl'))[0].articleUrl;
             getVal = articleUrl;
         }
@@ -465,7 +465,7 @@ function pager(evt) {
         updateRegs = true;
     } else {
         let val = Number.parseInt(evt.target.value);
-        if (isNaN(val) || val < 1 || val > totalPages || val == (storageObj.pager.page)) {
+        if (isNaN(val) || val < 1 || val > totalPages || val == currentPage) {
             inputs.forEach(i => i.value = currentPage);
         } else {
             inputs.forEach(i => i.value = val);

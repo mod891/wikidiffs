@@ -1,16 +1,11 @@
 /* Web Worker */
-var performanceMarks = [];
 
 onmessage = async function(e) {
     const message = e.data;
-    switch (message) {
-        case 'initDB':
-            await initDB();
-        break;
-        case 'DBupdates':
-            DBupdates();     
-        break;
-    }
+    if (message == 'initDB')
+        await initDB();
+    // [TODO]: little DB && load little while FullDB is being loaded
+    // && replace full by little if is full loaded.
 }
 
 async function initDB() {
@@ -18,12 +13,6 @@ async function initDB() {
     var openDBrequest = indexedDB.open("wikidiffs",1);
 
     openDBrequest.onupgradeneeded = (e) => {
-
-        performanceMarks.push({
-            fn: 'freezeGUI',
-            arg:'Creando la BD, cargado 3%',
-        });
-
         postMessage({
             fn: 'info',
             log: 'openDBrequest.onupgradeneeded ',
@@ -33,7 +22,7 @@ async function initDB() {
                 {
                     elem: 'loading',
                     text:'Cargandose la BD en el navegador...',
-                    classes:['bg-cyan'] 
+                    classes:['bg-cyan']
                 }
             ],
         });
@@ -65,7 +54,7 @@ async function initDB() {
         hcSize = store.count();
         hcSize.onsuccess = async () => {
             if (hcSize.result > 0) {
-                performanceMarks.push({
+                postMessage({
                     fn:'freezeGUI',
                     arg:'historyContribs en BD, 1/2 stores cargadas',
                 });
@@ -106,7 +95,7 @@ async function initDB() {
                 diffsSize = store.count();
                 diffsSize.onsuccess = async () => {
                     if (diffsSize.result > 0) {
-                        performanceMarks.push({
+                        postMessage.push({
                             fn:'freezeGUI',
                             arg:'diffs en BD, 2/2 stores cargadas',
                         });
@@ -170,31 +159,4 @@ async function transactionOnComplete(ts) {
         ts.oncomplete = () => resolve();
         ts.onerror = () => reject(ts.error);
     });
-}
-
-async function DBupdates() {
-    if (performanceMarks.length == 0)
-        return;
-    while (!performanceMarks[performanceMarks.length-1].hasOwnProperty('loaded')) {
-        postMessage(performanceMarks[performanceMarks.length-1]);
-        await new Promise(resolve => setTimeout(resolve, 500));
-    }
-    postMessage(performanceMarks[performanceMarks.length-1]);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    postMessage({ fn: 'freezeGUI', arg: false });
-    postMessage(
-        {
-            fn: 'info',
-            args: [
-                null,
-                4000,
-                {
-                    elem: 'loading',
-                    text:'Se ha cargado la BD en el navegador',
-                    classes:['bg-cyan'] 
-                }
-            ],
-        }
-    );
-    postMessage({ fn: 'fetchSharedData', arg: [] });
 }

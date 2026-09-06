@@ -22,11 +22,22 @@ li {
 .link label {
     margin-left: 0.5rem;
 }
+/*
 .n-editions::before {
     content: "\270F";
     margin: 0.2rem 0.2rem;
     display: inline-block;
     transform: rotate(45deg);
+}
+*/
+.n-editions::before {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background: url("../resources/svg/edits.svg") center no-repeat;
+    background-size: 100% 100%;
+    margin: 0rem 0.2rem;
 }
 .n-editions {
     background-color: rgb(99,190,0);
@@ -81,7 +92,7 @@ li {
     max-width: 300px;
     min-width: 100px;
     opacity: 0;
-    transition: opacity bottom left 0.5s;  
+    transition: opacity 0.5s;  
     z-index: 1000;
 }
 #overlay {
@@ -91,16 +102,22 @@ li {
     display: flex;
     justify-content: center;
     align-items: center;
-    
-    z-index: 9999;
 }
-#overlay > div {
-    display: flex;
-    flex-direction: column;
+#gif {
+    width: 7rem;
+    height: 7rem;
+    transform: translateY(-1rem) translateX(9.8rem);
+}
+#overlay > div:nth-child(2) {
+    padding-right:7rem;
 }
 #overlay[hidden] {
     display:none;
     backdrop-filter: blur(0px);
+}
+.overlay-msg {
+    justify-content: center;
+    display: flex;
 }
 #overlay-msg {
     text-align: center;

@@ -8,7 +8,7 @@
         <link rel="stylesheet" href="css/utils.css">
         <link rel="stylesheet" href="css/bg-colors.css">
         <script src="js/functions.js" defer></script>
-    <!--<script src="js/db/turso/api.js"></script> -->
+        <!-- <script src="js/db/turso/api.js"></script> -->
         <script src="js/db/indexedDB/api.js"></script>
     </head>
     <body>
@@ -27,62 +27,68 @@
                     <img id="scrollBtn" src="resources/svg/up-rect.svg" alt="" srcset="">
                 </div>
             </div>
+            
             <div id="overlay" hidden>
-                  <div>
-                <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-                <svg
-                    id="loading"
-                    width="15rem"
-                    height="15rem"
-                    viewBox="-60 0 150.780123 100"
-                    version="1.1"
-                    id="svg1"
-                    xmlns="http://www.w3.org/2000/svg"
-                    xmlns:svg="http://www.w3.org/2000/svg">
-                <defs
-                    id="defs1" />
-                <g
-                    id="layer1"
-                    transform="translate(-90.472765,-37.808514)">
-                    <rect
-                        style="fill:#1a1a1a;stroke:#000000;stroke-width:0.108"
-                        id="recth"
-                        width="3.8"
-                        height="59.06551"
-                        x="90.617599"
-                        y="37.862511"
-                        ry="0.0052583343" >
-                        <animateTransform 
-                            attributeName="transform"
-                            attributeType="XML"
-                            type="rotate"
-                            from="360 100 100"
-                            to="0 100 100"
-                            dur="2s"
-                            repeatCount="indefinite" />
-                    </rect>
-                    <rect
-                        style="fill:#1a1a1a;stroke:#000000;stroke-width:0.0941163"
-                        id="rectm"
-                        width="3.8"
-                        height="44.691639"
-                        x="90.617599"
-                        y="37.862511"
-                        ry="0.0052583343"
-                        transform="rotate(21.177193)" >
+                <div>
+                    <img id="gif" class="gif" src="resources/gif/yisus.gif">
+                </div>
+                <div>
+                    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+                    <svg
+                        id="loading"
+                        width="15rem"
+                        height="15rem"
+                        viewBox="-60 0 150.780123 100"
+                        version="1.1"
+                        id="svg1"
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlns:svg="http://www.w3.org/2000/svg">
+                    <defs
+                        id="defs1" />
+                    <g
+                        id="layer1"
+                        transform="translate(-90.472765,-37.808514)">
+                        <rect
+                            style="fill:#1a1a1a;stroke:#000000;stroke-width:0.108"
+                            id="recth"
+                            width="3.8"
+                            height="59.06551"
+                            x="90.617599"
+                            y="37.862511"
+                            ry="0.0052583343" >
+                            <animateTransform 
+                                attributeName="transform"
+                                attributeType="XML"
+                                type="rotate"
+                                from="360 100 100"
+                                to="0 100 100"
+                                dur="2s"
+                                repeatCount="indefinite" />
+                        </rect>
+                        <rect
+                            style="fill:#1a1a1a;stroke:#000000;stroke-width:0.0941163"
+                            id="rectm"
+                            width="3.8"
+                            height="44.691639"
+                            x="90.617599"
+                            y="37.862511"
+                            ry="0.0052583343"
+                            transform="rotate(21.177193)" >
 
-                        <animateTransform 
-                            attributeName="transform"
-                            attributeType="XML"
-                            type="rotate"
-                            from="360 100 100"
-                            to="0 100 100"
-                            dur="24s"
-                            repeatCount="indefinite" />
-                    </rect>
-                </g>
-                </svg>
-                <label id="overlay-msg" class="mt2">{MSG FROM WORKER}</label>
+                            <animateTransform 
+                                attributeName="transform"
+                                attributeType="XML"
+                                type="rotate"
+                                from="360 100 100"
+                                to="0 100 100"
+                                dur="24s"
+                                repeatCount="indefinite" />
+                        </rect>
+                    </g>
+                    </svg>
+                    <div class="overlay-msg">
+                        <label id="overlay-msg" class="mt2">{MSG FROM WORKER}</label>
+                    </div>
                 </div>
             </div>
             <div id="toast" class="toast">           

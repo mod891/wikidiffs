@@ -7,9 +7,9 @@
     "C J Q X"
     "D K R Y"
     "E L S Z"
-    "F M T anexo"
-    "G N U discusion"
-    "1 Ñ 2 0";
+    "F M T 1-9"
+    "G N U anexo"
+    "1 Ñ 2 discusion";
     grid-template-columns: 1fr 1fr 1fr 1fr;
     margin-top: 1rem;
 }
@@ -47,6 +47,7 @@
 #X { grid-area: X;}
 #Y { grid-area: Y;}
 #Z { grid-area: Z;}
+#1-9 {grid-area: 1-9;}
 #anexo { grid-area: anexo;}
 #discusion { grid-area: discusion;}
 
@@ -83,16 +84,16 @@
         "X"
         "Y"
         "Z"
+        "1-9"
         "anexo"
-        "discusion"; 
+        "discusion";
     }
     .listin {
         position: sticky;
         top:0;
         background-color: var(--bluez);
         width: 100%;
-    }
-    
+    }   
 }
 </style>
 <div id="alfabetrium">
@@ -124,6 +125,7 @@
         <div id="X"><a class="listin dfcenter"><b>X</b></a><ul></ul></div>
         <div id="Y"><a class="listin dfcenter"><b>Y</b></a><ul></ul></div>
         <div id="Z"><a class="listin dfcenter"><b>Z</b></a><ul></ul></div>
+        <div id="1-9"><a class="listin dfcenter"><b>1-9</b></a><ul></ul></div>
         <div id="anexo"><a class="listin dfcenter">Anexo</a><ul><ul></div>
         <div id="discusion"><a class="listin dfcenter">Discusiones</a><ul><ul></div>
     </div>
@@ -164,7 +166,7 @@ async function fetchLiLinks() {
     sessionStorageObj = { char : [] }
     let c = 65;
     ini = performance.now()
-    for (let i=c; i<93; i++) {
+    for (let i=c; i<94; i++) { // 94
         let char = String.fromCharCode(i)
         
         freezeGUI(`Cargando ${char}...`);
@@ -174,6 +176,11 @@ async function fetchLiLinks() {
         }
         else if (i == 92) {
             char = 'discusion';
+            freezeGUI(`Cargando ${char}...`);
+        }
+        else if (i == 93) {
+            console.log('1-9 load')
+            char = '1-9';
             freezeGUI(`Cargando ${char}...`);
         }
         charObj = { [char]: { urls:[], pager:{ page:0, perPage: perPage } } }
@@ -206,15 +213,20 @@ function addPager(ul,total) {
     var nPages = Number.parseInt((total/perPage));
     if (!Number.isInteger(total/perPage))
         nPages++;
-    //nPages = nPages == 1? 2 : nPages;
     let char = ul.closest('div').id;
     let currentPage=1;
     var sessionObj = JSON.parse(sessionStorage.getItem('alfabetrium'))
 
     if (sessionObj != null) {
         let pos = char.charCodeAt(0)-65;
-        if (char.length > 1 )
-            pos = char[0] == 'a'? 26 : 27;
+        if (char.length > 1 ) {
+            if (char == 'anexo')
+                pos = 26;
+            else if (char == 'discusion')
+                pos = 27;
+            else if (char == '1-9')
+                pos = 28;
+        }
         currentPage = sessionObj.char[pos][char].pager.page+1
     }
 
@@ -251,8 +263,14 @@ async function pager(evt) {
     let prevBtn = btns[0], nextBtn = btns[1];
     let char = div.id;
     let pos = char.charCodeAt(0)-65;
-    if (char.length > 1 )
-        pos = char[0] == 'a'? 26 : 27;
+    if (char.length > 1 ) {
+        if (char == 'anexo')
+            pos = 26;
+        else if (char == 'discusion')
+            pos = 27;
+        else if (char == '1-9')
+            pos = 28;
+    }
     let currentPage = Number.parseInt(div.querySelector('input').value);
     let lastPage = Number.parseInt(div.querySelector('.totalPages').textContent);
     let sessionObj = JSON.parse(sessionStorage.getItem('alfabetrium'));

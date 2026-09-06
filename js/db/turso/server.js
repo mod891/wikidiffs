@@ -8,7 +8,7 @@ const db = createClient({
 });
 /* Mock for turso dev --db-file file.sqlite */ 
 const app = express();
-app.use(cors())
+app.use(cors());
 app.use(express.json());
 
 app.post('/api', async (req, res) => {

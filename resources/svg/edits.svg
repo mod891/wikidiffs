@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1.3825347mm"
+   height="1.4582887mm"
+   viewBox="0 0 1.3825348 1.4582886"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="matrix(0.61637251,0,0,0.66314452,-0.54513366,-0.33121576)">
+    <rect
+       style="fill:#ececec;stroke:#000000;stroke-width:0.0804484"
+       id="rect2-3-3-3"
+       width="0.32348773"
+       height="1.489236"
+       x="2.0289376"
+       y="-0.58851212"
+       ry="0.0038660651"
+       transform="matrix(0.87580436,0.48266627,-0.65324711,0.75714478,0,0)" />
+    <rect
+       style="fill:#ececec;stroke:#000000;stroke-width:0.0804484"
+       id="rect2-3-3-3-1"
+       width="0.32348773"
+       height="1.489236"
+       x="2.395808"
+       y="-0.58872926"
+       ry="0.0038660651"
+       transform="matrix(0.87580436,0.48266627,-0.65324711,0.75714478,0,0)" />
+    <rect
+       style="fill:#ececec;stroke:#000000;stroke-width:0.0804484"
+       id="rect2-3-3-3-3"
+       width="0.32348773"
+       height="1.489236"
+       x="2.7662272"
+       y="-0.58123046"
+       ry="0.0038660651"
+       transform="matrix(0.87580436,0.48266627,-0.65324711,0.75714478,0,0)" />
+    <path
+       style="fill:#ececec;stroke:#000000;stroke-width:0.173542"
+       d="M 2.0002538,2.1762752 1.0080801,2.557971 1.2094597,1.7336642"
+       id="path3-3" />
+    <path
+       style="fill:#000000;stroke:#000000;stroke-width:0.168927"
+       d="m 1.1287655,1.7107406 0.092489,0.030799"
+       id="path2" />
+    <path
+       style="fill:#000000;stroke:#000000;stroke-width:0.191089"
+       d="M 2.0279687,2.2513875 1.9758565,2.1455849"
+       id="path4" />
+  </g>
+  <path
+     style="fill:#000000;stroke:#000000;stroke-width:0.0495116"
+     d="M 0.41614729,1.1920347 0.11800999,1.3080376 0.17085145,1.0851755"
+     id="path3" />
+</svg>

@@ -41,7 +41,6 @@ async function query(option,...args) {
 }
 
 async function openDB() {
-
     var opendb = indexedDB.open("wikidiffs",1);
     opendb.onsuccess = () => {
         db = opendb.result;
@@ -72,14 +71,14 @@ function categoriesIDB() {
             }
         }
         request.onerror = () => reject(request.error);
-    })
+    });
 }
 
 function randUrlIDB() {
     var ts = db.transaction(['historycontribs'],'readonly');
     var store = ts.objectStore('historycontribs');
     var index = store.index('articleUrl');
-    var UNIQUEURLS = 11839; // :O
+    var UNIQUEURLS = 100; // :O
     let pos = Math.trunc(UNIQUEURLS*Math.random());
     return new Promise((resolve, reject) => {
         var request = index.openKeyCursor(null, "nextunique");
@@ -88,7 +87,8 @@ function randUrlIDB() {
             var cursor = evt.target.result;
             if (cursor) {
                 if (!advanced) {
-                    cursor = cursor.advance(pos);
+                    if (pos > 0)
+                        cursor = cursor.advance(pos);
                     advanced = true;
                 }
                 else
@@ -146,7 +146,7 @@ async function diffsQueriesIDB(filterBy, arg, pager=null) {
     var hcStore = ts.objectStore('historycontribs');
     var diffsStore = ts.objectStore('diffs');
     var index = null;
-    var request1Data, request2, hcData, dfData, ids = [], objs = [],  totalDiffs = 0;
+    var request1Data, request2, hcData, dfData, ids = [], objs = [], totalDiffs = 0;
 
     if (filterBy == 'diffsFromUrl')
         index = hcStore.index('articleUrl');
@@ -162,7 +162,7 @@ async function diffsQueriesIDB(filterBy, arg, pager=null) {
                 request2 = diffsStore.get(request1.result.id);
                 request2.onsuccess = () => resolve(join([request1.result],[request2.result]));
                 request2.onerror = () => reject(request2.error);
-            }
+            };
             request1.onerror = () => reject(request1.error);
         } else {
             var request1 = index.getAll(arg);
@@ -204,7 +204,7 @@ function join(hcData, dfData) {
     for (let i=0; i<dfData.length; i++) {
         result.push({
             id: Number.parseInt(hcData[i].id),
-            totalDiffs: hcData[i].totalDiffs,
+            totalDiffs: hcData[i].totalDiffs?? dfData[i].totalDiffs,
             articleUrl: hcData[i].article_url,
             diffUrl: hcData[i].diff_url,
             date: hcData[i].date_edition,
@@ -217,14 +217,12 @@ function join(hcData, dfData) {
     return result;
 }
 
-async function urlsQueriesIDB(filterBy, arg, pager=null) { // 1.549s t.carga
+async function urlsQueriesIDB(filterBy, arg, pager=null) {
+    const baseUrl = "https://es.wikipedia.org/wiki/";
     var ts = db.transaction(['historycontribs'],'readonly');
     var hcStore = ts.objectStore('historycontribs');
     var index = null;
-    var str = "", strNot = "";
-
-    const baseUrl = "https://es.wikipedia.org/wiki/";
-
+    var str = "", strNot = "", requests = [];
 
     if (filterBy == 'urlsStartsWith') {
         if (arg.length == 1) {
@@ -240,7 +238,6 @@ async function urlsQueriesIDB(filterBy, arg, pager=null) { // 1.549s t.carga
         }
         index = hcStore.index('articleUrl');
     }
-
     else if (filterBy == 'urlsByCategory') {
         index = hcStore.index('category');
         str = arg;
@@ -248,73 +245,91 @@ async function urlsQueriesIDB(filterBy, arg, pager=null) { // 1.549s t.carga
 
     return new Promise((resolve, reject) => {
 
-        var vect1 = [], urlsMap = new Map();
+        var vect1 = [], results = [], urlsMap = new Map();
         var range = null, request = null;
         
         if (filterBy == 'urlsStartsWith') {
-            range = IDBKeyRange.bound(
-                baseUrl+str,
-                baseUrl+str+"\uffff"
-            );
-            request = index.openCursor(range);
-        }
-        else
-            request = index.openCursor(IDBKeyRange.only(str));
-            // request = index.openCursor(null, "next");
-        
-        request.onsuccess = (evt) => {
-            var cursor = evt.target.result;
-            if (cursor) {                   
-                vect1.push({
-                    id: cursor.primaryKey,
-                    articleUrl: cursor.value.article_url,
-                    date: cursor.value.date_edition,
-                    category: cursor.value.category
-                });
-                cursor.continue();
+            if (arg != '1-9') {
+                range = IDBKeyRange.bound(
+                    baseUrl+str,
+                    baseUrl+str+"\uffff"
+                );
+                request = index.openCursor(range);
+                requests.push(request);
             }
             else {
-                if (strNot.length > 0) {
-                    vect1 = vect1.filter(item => !item.articleUrl.includes(strNot));
-                }
-                vect1.forEach( it => {
-                    let obj = {
-                        articleUrl: it.articleUrl,
-                        category: it.category,
-                        dates: [it.date],
-                        nedits: 1,
-                    }
-                    if (!urlsMap.get(it.articleUrl)) 
-                        urlsMap.set(it.articleUrl,obj);
-                    else {
-                        obj.dates.push(it.date);
-                        obj.nedits = urlsMap.get(it.articleUrl).nedits+1;
-                        urlsMap.set(it.articleUrl,obj);
-                    }
-                })
-                vect1 = [];
-                urlsMap.forEach((it) => {
-                    vect1.push({
-                        articleUrl: it.articleUrl,
-                        category: it.category,
-                        dates: JSON.stringify(it.dates),
-                        nedits: it.nedits,
-                        totalUrls:urlsMap.size
-                    });
-                });
-                vect1 = vect1.sort( (a,b) => b.nedits - a.nedits)
-                if (pager != null) {
-                    vect1 = vect1.slice(
-                        pager.page*pager.perPage,
-                        pager.perPage+(pager.perPage*pager.page)
+                for (let i=1; i<10; i++) {
+                    range = IDBKeyRange.bound(
+                        baseUrl+i,
+                        baseUrl+i+"\uffff"
                     );
+                    request = index.openCursor(range);
+                    requests.push(request);
                 }
-                
-                resolve(vect1);
             }
         }
-        request.onerror = () => reject(request.error);
+        else {
+            request = index.openCursor(IDBKeyRange.only(str));
+            requests.push(request);
+        }
+        for (let i=0; i<requests.length; i++) {
+            urlsMap = new Map();
+            request = requests[i];
+            request.onsuccess = (evt) => {
+                var cursor = evt.target.result;
+                if (cursor) {                   
+                    vect1.push({
+                        id: cursor.primaryKey,
+                        articleUrl: cursor.value.article_url,
+                        date: cursor.value.date_edition,
+                        category: cursor.value.category
+                    });
+                    cursor.continue();
+                }
+                else {
+                    if (strNot.length > 0) {
+                        vect1 = vect1.filter(item => !item.articleUrl.includes(strNot));
+                    }
+                    vect1.forEach( it => {
+                        let obj = {
+                            articleUrl: it.articleUrl,
+                            category: it.category,
+                            dates: [it.date],
+                            nedits: 1,
+                        }
+                        if (!urlsMap.get(it.articleUrl)) 
+                            urlsMap.set(it.articleUrl,obj);
+                        else {
+                            obj.dates.push(it.date);
+                            obj.nedits = urlsMap.get(it.articleUrl).nedits+1;
+                            urlsMap.set(it.articleUrl,obj);
+                        }
+                    });
+                    vect1 = [];
+                    urlsMap.forEach((it) => {
+                        if (results.filter(obj => obj.articleUrl == it.articleUrl).length == 0) {
+                            results.push({
+                                articleUrl: it.articleUrl,
+                                category: it.category,
+                                dates: JSON.stringify(it.dates),
+                                nedits: it.nedits,
+                                totalUrls:urlsMap.size
+                            });
+                        }
+                    });
+                    results = results.sort( (a,b) => b.nedits - a.nedits)
+                }
+            }
+            request.onerror = () => reject(request.error);
+        }
+        ts.oncomplete = () => {
+            if (pager != null) {
+                results = results.slice(
+                    pager.page*pager.perPage,
+                    pager.perPage+(pager.perPage*pager.page)
+                );
+            }
+            resolve(results);
+        }
     });
 }
-
-// await urlsQueriesIDBrange('urlsStartsWith','a',{page:0,perPage:10})
