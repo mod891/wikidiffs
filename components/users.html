@@ -100,7 +100,7 @@
 </div>  
 <script>
 
-var userData = null;
+var storageObj = null, userData = null;
 var filteredUserData = null;
 var nUsers = document.getElementById('title')
 var pagerInput = document.querySelector('.currentPageInput');
@@ -114,7 +114,7 @@ async function init() {
     document.getElementById('search').addEventListener('input',filterData)
 
     var storage = false;
-    var storageObj = JSON.parse(sessionStorage.getItem('users'))
+    storageObj = JSON.parse(sessionStorage.getItem('users'))
     if (storageObj != null) {
         userData = storageObj['users'];
         storage = true;
@@ -131,7 +131,7 @@ function liLinks() {
     var users = userData;
     
     if (filteredUserData != null) 
-    users = filteredUserData;
+        users = filteredUserData;
     nUsers.innerText =`${users.length} Usuarios`;
 
     pagerInput.value = currentPage;
@@ -180,7 +180,7 @@ async function fetchUsers() {
             nedits:rawData[i].nedits
         });
     }
-    var storageObj = { users };
+    storageObj = { users, pager: { page:0, perPage:perPage } };
     sessionStorage.setItem('users',JSON.stringify(storageObj));
     userData = users;
     freezeGUI(false);   

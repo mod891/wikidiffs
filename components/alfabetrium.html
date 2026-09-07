@@ -166,9 +166,8 @@ async function fetchLiLinks() {
     sessionStorageObj = { char : [] }
     let c = 65;
     ini = performance.now()
-    for (let i=c; i<94; i++) { // 94
+    for (let i=c; i<94; i++) { 
         let char = String.fromCharCode(i)
-        
         freezeGUI(`Cargando ${char}...`);
         if (i == 91) {
             char = 'anexo';
@@ -179,7 +178,6 @@ async function fetchLiLinks() {
             freezeGUI(`Cargando ${char}...`);
         }
         else if (i == 93) {
-            console.log('1-9 load')
             char = '1-9';
             freezeGUI(`Cargando ${char}...`);
         }
@@ -316,4 +314,3 @@ async function pager(evt) {
     prevBtn.disabled = currentPage == 1? true : false;
 }
 </script>
-

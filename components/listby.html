@@ -234,7 +234,7 @@ input:checked + .slider:before {
 
             <div class="dflex mt05">
                 <div class="w50 pl1">
-                    <b>Filtrar por URL</b>
+                    <b>Filtrar por artículo</b>
                 </div>
 
                 <div class="w50 jc-end">
@@ -345,7 +345,6 @@ async function init() {
         fetchSharedData();
         categories = JSON.parse(sessionStorage.getItem('categories'));
     }
-    
     liLinks();
     freezeGUI(false);
 }
@@ -362,7 +361,21 @@ function liLinks() {
             titleText = ' Anexos';
     } else {
         urls = Object.values(urlData[category]);
-        titleText = ` páginas con categoría: ${category}`;
+        categoryTitle = category;
+        categoryTitles = {
+            "politica":"política",
+            "deportes":"fútbol/deportes",
+            "religion":"religión",
+            "hechos_historicos":"hechos históricos",
+            "filosofia/ideas":"filosofía/ideas",
+            "musica/arte/literatura":"música/arte/literatura"
+        }
+        if (Object.keys(categoryTitles).filter(c => c == categoryTitle).length > 0)
+            categoryTitle = categoryTitles[categoryTitle]
+      
+        titleText = ` páginas con categoría: ${categoryTitle}`;
+
+       
     }
     if (filteredUrlData != null) 
         urls = Object.values(filteredUrlData);
@@ -464,7 +477,7 @@ function showHideInputFilter(input) {
 
     if (id == "1") { // text
         elem = `<div id="filter-switch-1" class="bg-cyan">
-                    <label class="ml05">Buscar:</label>
+                    <label class="ml05">Artículo:</label>
                     <input id="search" type="text" class="mr05 ml05 w70" placeholder="text">
                 </div>`;
 

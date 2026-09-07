@@ -4,6 +4,7 @@
     flex-direction: row;
     justify-content: center;
     flex-wrap: wrap;
+    padding-bottom: 2rem;
 }
 
 #category-list > div {
@@ -40,7 +41,6 @@
     #category-list > div:first-child {
         margin-top: 1rem;
     }
-
 }
 </style>
 
@@ -49,7 +49,6 @@
     </div>
 </div>
 <script>
-
 init()
 
 async function init() {
@@ -61,13 +60,24 @@ async function init() {
 function loadCategories() {
     var categoryListDiv = document.getElementById('category-list');
     let html = '';
+    categoryTitles = {
+        "politica":"política",
+        "religion":"religión",
+        "hechos_historicos":"hechos históricos",
+        "deportes":"fútbol/deportes",
+        "filosofia/ideas":"filosofía/ideas",
+        "musica/arte/literatura":"música/arte/literatura"
+    };
     for (i in categories) {
+        categoryTitle = categories[i];
+        if (Object.keys(categoryTitles).filter(c => c == categories[i]).length > 0)
+            categoryTitle = categoryTitles[categories[i]];
+            
         html = `<div id="${categories[i]}">
-                    <a href="#listby?c=category:${categories[i]}" class="listin dfcenter"><b>${categories[i]}</b></a>
+                    <a href="#listby?c=category:${categories[i]}" class="listin dfcenter"><b>${categoryTitle}</b></a>
                     <ul></ul>
                 </div>`
         categoryListDiv.insertAdjacentHTML('beforeend',html);
     }
 }
-
 </script>

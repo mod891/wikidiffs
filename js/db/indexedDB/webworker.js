@@ -30,6 +30,7 @@ async function initDB() {
         const db = e.target.result;
         if (!db.objectStoreNames.contains("historycontribs")) {
             var hcStore = db.createObjectStore("historycontribs", { keyPath: "id" });
+            hcStore.createIndex("id","id",{ unique: true });
             hcStore.createIndex("articleUrl","article_url",{ unique: false });
             hcStore.createIndex("diffUrl","diff_url",{ unique: true });
             hcStore.createIndex("user","user",{ unique: false });
@@ -60,7 +61,7 @@ async function initDB() {
                 });
             }
             else {
-                jsonFetch = await fetch(`/public/resources/store/historycontribs.json`);
+                jsonFetch = await fetch(`../../../resources/store/historycontribs.json?dt=${Date.now()}`);
                 if (jsonFetch.ok)
                     json = await jsonFetch.json();
                 chunkSize = Math.trunc(json.length/parts);
@@ -101,7 +102,7 @@ async function initDB() {
                         });
                     }
                     else {
-                        jsonFetch = await fetch(`/public/resources/store/diffs.json`);
+                        jsonFetch = await fetch(`../../../resources/store/diffs.json?dt=${Date.now()}`);
                         if (jsonFetch.ok)
                             json = await jsonFetch.json();
 

@@ -11,7 +11,7 @@ async function loadFragment(what) {
     const fragments = [ 'menu','footer','index','alfabetrium','diffs','listby','users','categories','notes'];
     if (fragments.includes(what)) {
         try {
-            var request = await fetch(`/public/components/${what}.html`);
+            var request = await fetch(`components/${what}.html`);
         } catch (err) {
             console.log(`loadFragment::${what} Error:`,err);
         }
@@ -59,7 +59,6 @@ async function fetchSharedData() {
 }
 
 async function init() {
-    // console.log('functions.js::init()')
     document.querySelectorAll('script[src]').forEach(e => {
         if (e.src.includes('indexedDB'))
             DBTYPE = "indexedDB";
@@ -113,7 +112,6 @@ async function init() {
 }
 
 async function route() {
-    // console.log('functions.js::route() hash=',window.location.hash)
     getVal = ""
     if (window.location.hash.length == 0)
         window.location.hash = "#index";
@@ -137,12 +135,13 @@ async function info(event,ms=5000,...args) {
     var toast = document.getElementById('toast');
     let left = 0, top = 0, defaultBg = 'bg-yellow',
     elem = '', url = '', page=window.location.hash, data=null;
-   
+
     if (event != null) {
         if (page.startsWith('#diffs')) 
-            url = document.querySelector('#article-url-data').href.split('diff=')[1];
+            url = event.target.parentElement.parentElement
+                .querySelector('#article-url-data').href.split('diff=')[1];
         else if (page.startsWith('#notes'))
-            url = document.querySelector('a.ml1').href.split('diff=')[1];
+            url = document.querySelector('a.ml3').href.split('diff=')[1];
         else if (page.startsWith('#listby') || page.startsWith('#alfabetrium')) 
             url = event.target.parentNode.children[0].href.split('diff=')[1];
         data = await query('descriptionUrl',url);

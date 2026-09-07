@@ -78,7 +78,7 @@ function randUrlIDB() {
     var ts = db.transaction(['historycontribs'],'readonly');
     var store = ts.objectStore('historycontribs');
     var index = store.index('articleUrl');
-    var UNIQUEURLS = 100; // :O
+    var UNIQUEURLS = 11839; //100; // :O
     let pos = Math.trunc(UNIQUEURLS*Math.random());
     return new Promise((resolve, reject) => {
         var request = index.openKeyCursor(null, "nextunique");
@@ -131,7 +131,8 @@ async function prevUsersIDB() {
 async function descriptionUrlIDB(url) {
     var ts = db.transaction(['historycontribs'],'readonly');
     var hcStore = ts.objectStore('historycontribs');
-    var index = hcStore.index('articleUrl');
+    var index = Number.isNaN(Number(url))? hcStore.index('articleUrl') : hcStore.index('id');
+    
     return new Promise((resolve, reject) => {
         var request = index.get(url);
         request.onsuccess = () => {

@@ -23,20 +23,21 @@
     .xaxisl30 {
         transform: translateX(-30%);
     }
-    .chpza {
-        width: 420px;
-        margin-left: 2rem;
-    }
+
 </style>
 
 <div id="notes">
     <div class="drow-mcol justify-evenly m-align-center pt2 pb3">
-        <div class="">
-            <div class="chpza">
+        <div class="m-w-100 w30">
+            <div class="">
                 <div class="dflex justify-center">
                     <h3 class="xaxisl30">Diferencias</h3>
                 </div>
-                <div><select id="diffSelect" class="w80"><option value="nodata">No hay Diffs guardadas</option></select></div>
+                <div>
+                    <select id="diffSelect" class="w80 m-ml1">
+                        <option value="nodata">No hay Diffs guardadas</option>
+                    </select>
+                </div>
                 <div><label id="aSelected"></label></div>
             </div>
         </div>
@@ -167,7 +168,7 @@
         else {
             aSelected.innerHTML = `
             <div class="w80 dflex justify-between">
-                <a class="ml1" href="#diffs?diff=${evt.target.value}">#diffs?diff=${evt.target.value}</a>
+                <a class="ml3" href="#diffs?diff=${evt.target.value}">#diffs?diff=${evt.target.value}</a>
                 <label class="bg-cyan bold info" onclick="info(event)">?</label>
             </div>`;
         }

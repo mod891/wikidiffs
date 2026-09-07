@@ -22,14 +22,6 @@ li {
 .link label {
     margin-left: 0.5rem;
 }
-/*
-.n-editions::before {
-    content: "\270F";
-    margin: 0.2rem 0.2rem;
-    display: inline-block;
-    transform: rotate(45deg);
-}
-*/
 .n-editions::before {
     content: "";
     display: inline-block;
