@@ -1,21 +1,22 @@
 /* Web Worker */
-
 onmessage = async function(e) {
     const message = e.data;
-    if (message == 'initDB')
-        await initDB();
-    // [TODO]: little DB && load little while FullDB is being loaded
-    // && replace full by little if is full loaded.
+    if (typeof(message) == "object") {
+        if (Object.keys(message).includes('initDB'))
+            await initDB(Object.values(message)[0])
+    }
+    else {
+        postMessage({ log: message });
+    }
 }
 
-async function initDB() {
+async function initDB(version) {
     console.time('initDB');
-    var openDBrequest = indexedDB.open("wikidiffs",1);
+    var openDBrequest = indexedDB.open(`wikidiffs_${version}`,1);
 
     openDBrequest.onupgradeneeded = (e) => {
         postMessage({
             fn: 'info',
-            log: 'openDBrequest.onupgradeneeded ',
             args: [
                 null,
                 3000,
@@ -55,22 +56,15 @@ async function initDB() {
         hcSize = store.count();
         hcSize.onsuccess = async () => {
             if (hcSize.result > 0) {
-                postMessage({
-                    fn:'freezeGUI',
-                    arg:'historyContribs en BD, 1/2 stores cargadas',
-                });
+                postMessage({log:'hcSize > 0'});
             }
             else {
-                jsonFetch = await fetch(`../../../resources/store/historycontribs.json?dt=${Date.now()}`);
+                jsonFetch = await fetch(`../../../resources/store/${version}/historycontribs.json?nocache=${Date.now()}`);
                 if (jsonFetch.ok)
                     json = await jsonFetch.json();
                 chunkSize = Math.trunc(json.length/parts);
                 progress = 0;
                 for ( let i = 0; i < json.length; i += chunkSize ) {
-                    postMessage({
-                        fn: 'freezeGUI',
-                        arg: `Cargando historyContribs en BD: ${progress}% completado`,
-                    });
                     progress += 100/parts;
                     tsWrite = db.transaction("historycontribs", "readwrite");
                     store = tsWrite.objectStore("historycontribs");
@@ -79,30 +73,21 @@ async function initDB() {
                         try {
                             store.put(json[j]);
                         } catch (e) {
-                            console.log(e)
-                            postMessage({log})
+                            postMessage({log:e})
                         }
                     }
                     await transactionOnComplete(tsWrite);
                 }
-                postMessage({
-                    fn:'freezeGUI',
-                    arg:'1/2 stores cargadas en BD',
-                });
-
                 tsRead = db.transaction("diffs", "readonly");
                 store = tsRead.objectStore("diffs");
                        
                 diffsSize = store.count();
                 diffsSize.onsuccess = async () => {
                     if (diffsSize.result > 0) {
-                        postMessage.push({
-                            fn:'freezeGUI',
-                            arg:'diffs en BD, 2/2 stores cargadas',
-                        });
+                        postMessage({log:'diffsSize > 0'});
                     }
                     else {
-                        jsonFetch = await fetch(`../../../resources/store/diffs.json?dt=${Date.now()}`);
+                        jsonFetch = await fetch(`../../../resources/store/${version}/diffs.json?nocache=${Date.now()}`);
                         if (jsonFetch.ok)
                             json = await jsonFetch.json();
 
@@ -110,12 +95,7 @@ async function initDB() {
                         chunkSize = Math.trunc(json.length/parts);
                         progress = 0;
                         for ( let i = 0; i < json.length; i += chunkSize ) {
-                            postMessage({
-                                fn: 'freezeGUI',
-                                arg: `Cargando diffs en BD: ${progress}% completado`,
-                            });
                             progress += 100/parts;
-
                             tsWrite = db.transaction("diffs", "readwrite");
                             store = tsWrite.objectStore("diffs");
 
@@ -123,18 +103,13 @@ async function initDB() {
                                 try {
                                     store.put(json[j]);
                                 } catch (e) {
-                                    console.log(e)
-                                    postMessage({log})
+                                     postMessage({log:e})
                                 }
                             }
                             await transactionOnComplete(tsWrite);
                         }
-                        postMessage({
-                            fn:'freezeGUI',
-                            arg:'2/2 stores cargadas en BD',
-                        });
-                        postMessage({ fn: 'freezeGUI', arg: false });
-                        postMessage({ fn: 'openDB', args:[] });
+
+                        postMessage({ fn: 'openDB', arg:[] });
                         postMessage({
                             fn: 'info',
                             args: [ 

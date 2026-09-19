@@ -2,8 +2,8 @@ var getVal = "";
 var idTimeout = null;
 var categories = null;
 var DBTYPE = "";
-var wwFreeze = false;
 var ww = null;
+var idbs = [];
 init()
 
 async function loadFragment(what) {
@@ -69,28 +69,19 @@ async function init() {
         ww.onmessage = (e) => {
             let wwdata = e.data;
             if (wwdata.hasOwnProperty('fn')) {
-                if (wwdata.hasOwnProperty('arg')) {
-                    if (wwdata.fn == 'freezeGUI') {
-                        if (wwFreeze == true)
-                            window[wwdata.fn](wwdata.arg);
-                    } else
-                        window[wwdata.fn](wwdata.arg);
-                }
+                if (wwdata.hasOwnProperty('arg')) 
+                    window[wwdata.fn](wwdata.arg);               
                 else if (wwdata.hasOwnProperty('args'))
                     window[wwdata.fn](wwdata.args[0],wwdata.args[1],wwdata.args[2]); 
             }
-            if (wwdata.hasOwnProperty('var')) {
-                window[wwdata.var] = wwdata.value;
-            }
-            if (wwdata.hasOwnProperty('log')) {
-                console.log(wwdata.log);
-            }
+            if (wwdata.hasOwnProperty('var'))
+                window[wwdata.var] = wwdata.value;           
+            if (wwdata.hasOwnProperty('log'))
+                console.log(wwdata.log);            
         };
-        if (localStorage.getItem('indexedDB') == null) 
-            ww.postMessage('initDB');
-    } else {
-        if (localStorage.getItem('indexedDB') != null)
-            localStorage.removeItem('indexedDB');
+        idbs = await indexedDB.databases();
+        if (idbs.length == 0)
+            ww.postMessage({initDB:'lite'});
     }
     await loadFragment('menu');
     await loadFragment('footer');
@@ -115,12 +106,8 @@ async function route() {
     getVal = ""
     if (window.location.hash.length == 0)
         window.location.hash = "#index";
-    if ( localStorage.getItem('indexedDB') != null && db == null)
+    if ( idbs.length > 0 && db == null)
         await openDB();
-    if ( localStorage.getItem('indexedDB') == null && DBTYPE == 'indexedDB' &&  window.location.hash != '#index' ) {
-        window.location.hash = "#index";
-        wwFreeze = true;
-    }
     if (window.location.hash.split('?').length > 1)
         getVal = window.location.hash.split('?')[1].split('=')[1];
     
@@ -193,14 +180,19 @@ function freezeGUI(msg) {
         overlay.hidden = true; 
 }
 
-async function clear() {
-    console.log('sessionStorage.clear()');
-    sessionStorage.clear();
-    console.log('localStorage.clear()');
-    localStorage.clear();
-     if (db != null)
-        await db.close();
-    var req = indexedDB.deleteDatabase('wikidiffs');
-    req.onsuccess = () => console.log('indexedDB borrada');
-    req.onerror = () => console.log('error al borrar indexedDB');
+async function clearData(local = true, session = true, db1 = true, db2 = true) {
+    if (local) {}
+        localStorage.clear();
+    if (session)
+        sessionStorage.clear();
+    if (db1) {
+        var req1 = indexedDB.deleteDatabase('wikidiffs_lite');
+        req1.onsuccess = () => console.log('indexedDB::wikidiffs_lite borrada');
+        req1.onerror = () => console.log('error al borrar indexedDB::wikidiffs_lite');
+    }
+    if (db2) {
+        var req2 = indexedDB.deleteDatabase('wikidiffs_full');
+        req2.onsuccess = () => console.log('indexedDB::wikidiffs_full borrada');
+        req2.onerror = () => console.log('error al borrar indexedDB::wikidiffs_full');
+    }
 }

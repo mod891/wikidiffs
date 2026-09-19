@@ -52,6 +52,10 @@ li {
     padding-left:2rem;
     padding-right:2rem;
 }
+.video {
+    width: 560px;
+    height: 315px;
+}
 #content {
     margin-top:0rem;
 }
@@ -169,5 +173,9 @@ li {
         height: 90px;
         margin-bottom: 0rem;
         transform: translateX(0);
+    }
+    .video {
+        width: 230px;
+        height: 150px;
     }
 }

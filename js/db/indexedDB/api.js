@@ -9,7 +9,7 @@ async function query(option,...args) {
 
     if (db == null)
         await openDB();
-    
+
     switch (option) {
         case 'diffsFromUrl':
         case 'diffsFromUser':
@@ -41,11 +41,18 @@ async function query(option,...args) {
 }
 
 async function openDB() {
-    var opendb = indexedDB.open("wikidiffs",1);
+    var opendb = null, version = 'lite';
+    idbs = await indexedDB.databases();
+    if ( idbs.filter(db => db.name == 'wikidiffs_full').length > 0 )
+        version = 'full';
+
+    opendb = indexedDB.open(`wikidiffs_${version}`,1);
     opendb.onsuccess = () => {
         db = opendb.result;
-        localStorage.setItem('indexedDB',true);
-        wwFreeze = false;
+        if (version == 'lite')
+            ww.postMessage({initDB:'full'});
+        else 
+            clearData(false,true,true,false);
     }
     opendb.onerror = () => {
         console.log(opendb.error);
@@ -78,7 +85,8 @@ function randUrlIDB() {
     var ts = db.transaction(['historycontribs'],'readonly');
     var store = ts.objectStore('historycontribs');
     var index = store.index('articleUrl');
-    var UNIQUEURLS = 11839; //100; // :O
+    var UNIQUEURLS = db.name.includes('lite')? 100: 11839; // numerología? :O
+
     let pos = Math.trunc(UNIQUEURLS*Math.random());
     return new Promise((resolve, reject) => {
         var request = index.openKeyCursor(null, "nextunique");
