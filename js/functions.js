@@ -181,7 +181,7 @@ function freezeGUI(msg) {
 }
 
 async function clearData(local = true, session = true, db1 = true, db2 = true) {
-    if (local) {}
+    if (local)
         localStorage.clear();
     if (session)
         sessionStorage.clear();

@@ -104,6 +104,10 @@ li {
     height: 7rem;
     transform: translateY(-1rem) translateX(9.8rem);
 }
+.icon-git {
+    width: 30px;
+    height: 30px;
+}
 #overlay > div:nth-child(2) {
     padding-right:7rem;
 }
@@ -175,7 +179,7 @@ li {
         transform: translateX(0);
     }
     .video {
-        width: 230px;
-        height: 150px;
+        width: 350px;
+        height: 250px;
     }
 }

@@ -1,26 +1,105 @@
 <style>
-
+.mainframe {
+    padding-top: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.anchor {
+    max-width: 55vw;
+}
+.border {
+    border: outset gold;
+    padding:0.5rem;
+}
+li {
+    list-style:disc;
+}
+@media (max-width: 950px) and (orientation: landscape), (max-width: 630px) and (orientation:portrait) {
+    .anchor {
+        max-width: 75vw;
+    }
+}
 </style>
 
 <div id="index">
-    <div>
-        <h1>WIP</h1>
-        Si ves a jesucristo sin parar de bailar, actualiza.        
-<!--
-        <iframe
-            class="video" ←
-            src="https://www.youtube.com/embed/7Ybw4KZFQfA?si=yTM0NPU3xQTLhvak"
-            title="YouTube video player"
-            frameborder="0"
+    <div class="mainframe">
+        <div class="ml4">
+            <h1>¡Bienvenido a WikiDiffs!</h1>
+        </div>
+        <div class="ml4">
+            <h3 class="mt2 anchor">Esta web muestra las diferencias hechas en páginas de wikipedia por los criminales
+                que tienen hackeado mi teléfono y conexiones. Se puede apreciar qué cambian, cuándo y en qué o quién se interesan.
+            </h3>
+            
+            <h4 class="anchor">
+                En el
+                <a href="https://www.youtube.com/" target="_blank">vídeo</a>
+                explico mi problema y la motivación para hacer esta web con humor,
+                porque mejor reir que llorar ¿no?
+            </h4>
+        
+            <h4 class="dflex justify-center mr3">
+                <label class="border"><i>Si ves a jesucristo que no para de bailar, ¡actualiza!</i></label>
+            </h4>
 
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen
-            >
-        </iframe>
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" -->
+            <div id="video" class="dflex justify-center"></div>
+                
+        </div>
+        <div class="mt2">
+            <ul>
+                <li>
+                    <p class="anchor">
+                    En <a href="#notes">Notas</a> se pueden guardar notas y diferencias concretas. Hay más de 25000 diferencias cuando
+                    carga la base de datos completa.
+                    
+                    </p>
+                </li>
+                <li>
+                    <p class="anchor">
+                    <a href="#users">Usuarios</a> son los <label class="bg-reddiff">Usuarios</label> que han realizado
+                    la edición anterior al  <label class="bg-greendiff">rango IP malicioso</label>, a veces el mismo rango IP.
+                    </p>
+                </li>
+                <li>
+                    <p class="anchor">
+                    Las <a href="#categories">categorías</a> y información del enlace
+                    <label class="bg-cyan info bold fixed-corner">?</label>
+                    costó hacerlas con chatGPT, no seguía las instrucciones muchas veces.
+                    </p>
+                </li>
+                <li>
+                    <p class="anchor mb3">
+                    Con una pequeña modificación del <a href="wikiDiffsBot" target="_blank">bot</a> 
+                    se puede crear otra base de datos de cualquier usuario o rango de ip y usarla en esta web. 
+                    </p>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
                   
 <script>
+loadVideo();
 
+function loadVideo() {
+    var divVideo = document.getElementById('video');
+    video = `
+        <iframe
+            class="video"
+            src="https://www.youtube.com/embed/7Ybw4KZFQfA?si=yTM0NPU3xQTLhvak"
+            title="YouTube video player"
+            frameborder="0"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+            >
+        </iframe>`;
+    // allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+
+    if (navigator.onLine) {
+        let element = document.createElement('template');
+        element.innerHTML = video;
+        divVideo.insertAdjacentHTML('beforeend',element.innerHTML);
+    }
+}
 </script>

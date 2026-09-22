@@ -9,8 +9,8 @@
     --cyan: cyan;
     --orange: rgb(255, 199, 95);
     --white: white;
-    --grey: rgb(230, 255, 255);
-    --grey-pre: rgb(242, 242, 242);
+    --blue2: rgb(230, 255, 255);
+    --grey2: rgb(242, 242, 242);
     --grey2: grey;
     --green2: rgb(2, 255, 2);
     --gold: gold; 
@@ -25,6 +25,7 @@
 .bg-greendiff { background-color: var(--greendiff); }
 .bg-red { background-color: var(--red); }
 .bg-blue { background-color: var(--blue); }
+.bg-blue2 { background-color: var(--blue2); }
 .bg-green { background-color: var(--green); }
 .bg-yellow { background-color: var(--yellow); }
 .bg-black { background-color: var(--black); }
@@ -33,6 +34,12 @@
 .bg-orange { background-color: var(--orange); }
 .bg-white { background-color: var(--white); }
 .bg-green2 { background-color: var(--green2); }
-.bg-grey { background-color: var(--grey); }
 .bg-gold { background-color: var(--gold); }
-.grey-pre { background-color: var(--grey-pre); }
+.bg-grey2 { background-color: var(--grey2); }
+.bg-footer {
+    background: linear-gradient(
+        to bottom,
+        rgba(245,245,245,1),
+        rgba(233,233,233,1)
+    );
+}

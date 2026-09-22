@@ -47,12 +47,15 @@ async function openDB() {
         version = 'full';
 
     opendb = indexedDB.open(`wikidiffs_${version}`,1);
+    
     opendb.onsuccess = () => {
         db = opendb.result;
         if (version == 'lite')
             ww.postMessage({initDB:'full'});
-        else 
-            clearData(false,true,true,false);
+        else if (version == 'full') {
+            sessionStorage.clear();
+            
+        }
     }
     opendb.onerror = () => {
         console.log(opendb.error);
@@ -86,7 +89,6 @@ function randUrlIDB() {
     var store = ts.objectStore('historycontribs');
     var index = store.index('articleUrl');
     var UNIQUEURLS = db.name.includes('lite')? 100: 11839; // numerología? :O
-
     let pos = Math.trunc(UNIQUEURLS*Math.random());
     return new Promise((resolve, reject) => {
         var request = index.openKeyCursor(null, "nextunique");

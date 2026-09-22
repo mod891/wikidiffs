@@ -1,4 +1,6 @@
 /* Web Worker */
+const DEBUG = false;
+
 onmessage = async function(e) {
     const message = e.data;
     if (typeof(message) == "object") {
@@ -12,6 +14,10 @@ onmessage = async function(e) {
 
 async function initDB(version) {
     console.time('initDB');
+
+    if (DEBUG)
+        postMessage({log:`webworker.js::initDB ${version}`});
+
     var openDBrequest = indexedDB.open(`wikidiffs_${version}`,1);
 
     openDBrequest.onupgradeneeded = (e) => {
@@ -77,6 +83,9 @@ async function initDB(version) {
                         }
                     }
                     await transactionOnComplete(tsWrite);
+                    if (DEBUG)
+                        postMessage({log:`historycontribs.json::transactionOnComplete ${i}`});
+
                 }
                 tsRead = db.transaction("diffs", "readonly");
                 store = tsRead.objectStore("diffs");
@@ -107,9 +116,13 @@ async function initDB(version) {
                                 }
                             }
                             await transactionOnComplete(tsWrite);
+                            if (DEBUG)
+                                postMessage({log:`diffs.json::transactionOnComplete ${i}`});
                         }
 
                         postMessage({ fn: 'openDB', arg:[] });
+                        if (DEBUG)
+                            postMessage({log:`openDB: ${version}`});
                         postMessage({
                             fn: 'info',
                             args: [ 

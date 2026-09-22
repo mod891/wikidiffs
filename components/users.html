@@ -129,7 +129,7 @@ async function init() {
 function liLinks() {
     var div = document.getElementById('users-content');
     var users = userData;
-    
+    freezeGUI('Cargando usuarios...');
     if (filteredUserData != null) 
         users = filteredUserData;
     nUsers.innerText =`${users.length} Usuarios`;
@@ -161,14 +161,15 @@ function liLinks() {
             ul.insertAdjacentHTML('beforeend',li);
         }
     }
-    div.appendChild(document.createElement('div'))
+    div.appendChild(document.createElement('div'));
     if (div.querySelector('ul') != null)
-        div.querySelector('ul').remove()
-    div.lastChild.appendChild(ul)
+        div.querySelector('ul').remove();
+    div.lastChild.appendChild(ul);
+    freezeGUI(false);
 }
 
 async function fetchUsers() {
-    freezeGUI();
+    freezeGUI('Cargando usuarios...');
     var rawData = await query('prevUsers');
     var users = [];
     for (i in rawData) {
