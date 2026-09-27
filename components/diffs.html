@@ -225,7 +225,7 @@ async function init() {
 
 async function loadDiffs() {
     var articleUrl = getVal;
-    var data = null;
+    var data = null, ids=[];
     var pagerObj = {page:currentPage-1, perPage:perPage};
     dbquery = 'diffsFromUrl';
      try {
@@ -233,7 +233,7 @@ async function loadDiffs() {
             articleUrl = (await query('randUrl'))[0].articleUrl;
             getVal = articleUrl;
         }
-        else if (articleUrl.match(/[0-9]{9}/) != null) 
+        else if (articleUrl.match(/^[0-9]{9}$/) != null) 
             dbquery = 'diffFromId';    
         else if (articleUrl.split('user::').length > 1) {
             articleUrl = articleUrl.split('user::')[1];
@@ -242,8 +242,12 @@ async function loadDiffs() {
             else
                 dbquery = 'diffsFromPreviousUser';
         }
+        ids = articleUrl.split('&');
+        if (ids.length > 1)
+            articleUrl = ids[0];
         data = await query(dbquery,articleUrl,pagerObj);
-        
+        if (ids.length > 1) 
+            data = data.filter(obj => ids.includes(String(obj.id)));
     } catch (err) {
         console.log(`loadDiffs::data retrieving Error:`,err);
     }

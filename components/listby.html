@@ -231,7 +231,6 @@ input:checked + .slider:before {
             <div id="" class="modal-header">
                 <span  id="close-modal" class="font20px cursor pr1">&times;</span>
             </div>
-
             <div class="dflex mt05">
                 <div class="w50 pl1">
                     <b>Filtrar por artículo</b>
@@ -244,8 +243,18 @@ input:checked + .slider:before {
                     </label>
                 </div>
             </div>
-
-            <div class="dflex mt05">
+            <div class="dflex mtb05">
+                <div class="w50 pl1">
+                    <b>Texto en diferencia</b>
+                </div>
+                <div class="w50 jc-end">
+                    <label class="switch">
+                        <input id="switch-4" type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="dflex mtb05">
                 <div class="w50 pl1">
                     <b>Por fecha </b>
                 </div>
@@ -256,7 +265,6 @@ input:checked + .slider:before {
                     </label>
                 </div>
             </div>
-            
             <div id="category-filter-div" class="dflex mt05">
                 <div class="w50 pl1">
                     <b>Por categoría</b>
@@ -268,18 +276,6 @@ input:checked + .slider:before {
                     </label>
                 </div>
             </div>
-
-            <div class="dflex mtb05">
-                <div class="w50 pl1">
-                    <b>undefined criterio</b>
-                </div>
-                <div class="w50 jc-end">
-                    <label class="switch">
-                        <input id="switch-4" type="checkbox">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-            </div>
         </div>
     </div>
 </div>  
@@ -287,12 +283,11 @@ input:checked + .slider:before {
 var urlData = null;
 var filteredUrlData = null;
 var storageObj = null;
+var urlIds = new Map();
 var title = document.getElementById('title'), titleText = "";
 var categories = null, category = null;
-
-// pagination shared vars
 var pagerInput = document.getElementById('currentPageInput');
-var currentPage = 0, perPage = 30, totalPages = 0;
+var currentPage = 0, perPage = 5, totalPages = 0;
 var btns = document.getElementById('pager').querySelectorAll('button');
 var prevBtn = btns[0], nextBtn = btns[1];
 
@@ -398,13 +393,14 @@ function liLinks() {
         let endFor = currentPage == totalPages? urls.length : storageObj.pager.page*perPage+perPage;
         for (let i=storageObj.pager.page*perPage; i<endFor; i++) {
             text = decodeURIComponent(urls[i].articleUrl.split('/').at(-1)).replaceAll('_',' ');
-            var li = `<li data-articleurl="${decodeURIComponent(urls[i].articleUrl.split('/').at(-1))}"
+            var li = `<li 
+                        data-articleurl="${decodeURIComponent(urls[i].articleUrl.split('/').at(-1))}"
                         data-text="${text}"
                         data-neditions=${urls[i].nedits}
                         data-dates=${JSON.stringify(urls[i].dates)}
                         data-category="${urls[i].category}" >
                             <div class="link d-mr-2">
-                                <a href="#diffs?diff=${urls[i].articleUrl}">${text}</a>
+                                <a id="${urls[i].articleUrl}" href="#diffs?diff=${urls[i].articleUrl}">${text}</a>
                                 <label class="n-editions">${urls[i].nedits}</label>
                                 <label class="bg-cyan info d-mr2 bold" onclick="info(event)">?</label>
                             </div>
@@ -416,7 +412,7 @@ function liLinks() {
     if (div.querySelector('ul') != null)
         div.querySelector('ul').remove()
     div.lastChild.appendChild(ul)
-
+// byId('articleurl') lineno404 + ids
     nextBtn.disabled = currentPage == totalPages? true : false;
     prevBtn.disabled = currentPage == 1? true : false;
 }
@@ -475,24 +471,21 @@ function showHideInputFilter(input) {
     var rect = document.getElementById(`filter-${id}`);
     let key=Object.keys(urlData)[0];
 
-    if (id == "1") { // text
+    if (id == "1") { // url
         elem = `<div id="filter-switch-1" class="bg-cyan">
                     <label class="ml05">Artículo:</label>
-                    <input id="search" type="text" class="mr05 ml05 w70" placeholder="text">
+                    <input id="searchUrl" type="text" class="mr05 ml05 w70" placeholder="text">
                 </div>`;
 
-    } else if (id == "2") { // date 
+    } else if (id == "2") { // date
         elem = `<div id="filter-switch-2" class="bg-green2">
                     <label class="ml05 pl03">Inicio</label>
-                    <input  id="begin" type="date" class="mr05 ml05"
-                        min="${urlData.config.minmaxdate.ini}" 
-                        max="${urlData.config.minmaxdate.end}">
+                    <input  id="begin" type="date" class="mr05 ml05" >
                     <label class="">Fin</label>
-                    <input  id="end" type="date" class="mr05 ml05"
-                        min="${urlData.config.minmaxdate.ini}"
-                        max="${urlData.config.minmaxdate.end}">
+                    <input  id="end" type="date" class="mr05 ml05" >
                 </div>`;
-
+                // min="${urlData.config.minmaxdate.ini}" max="${urlData.config.minmaxdate.end}"
+                        
     } else if (id == "3") { // category
         elem = `<div id="filter-switch-3" class="bg-gold">
                     <label class="">Categoría</label>
@@ -502,66 +495,78 @@ function showHideInputFilter(input) {
                         elem += `<option value="${categories[i]}">${categories[i]}</option>`;
             elem += `</select></div>`;
         
-    } else { // undefined
-        elem = `<div id="filter-switch-4" class="bg-yellow"><span >undefined</span></div>`;
+    } else { // search text in diff
+        elem = `
+        <div id="filter-switch-4" class="bg-yellow">
+            <label class="ml05">Texto:</label>
+            <input id="searchText" type="text" class="mr05 ml05 w70" placeholder="text">
+        </div>`;
     }
 
     if (input.checked) {
-        div.insertAdjacentHTML('beforeend',elem)
-        let inputs = div.querySelector(`#filter-switch-${id}`).querySelectorAll('input,select')
+        div.insertAdjacentHTML('beforeend',elem);
+        let inputs = div.querySelector(`#filter-switch-${id}`).querySelectorAll('input,select');
         inputs.forEach(elem => {
             if (elem.type == 'date' || elem.type == 'select-one')
-                elem.addEventListener('change',filterData)
+                elem.addEventListener('change',filterData);
             else
-                elem.addEventListener('input',filterData)
+                elem.addEventListener('input',filterData);
         })
         if (rect.classList.contains('slide-down'))
             rect.classList.remove('slide-down');
-        rect.classList.add('slide-up')
+        rect.classList.add('slide-up');
     } else {
-        rect.classList.add('slide-down')
-        rect.classList.remove('slide-up')
-        let inputs = div.querySelector(`#filter-switch-${id}`).querySelectorAll('input,select')
+        rect.classList.add('slide-down');
+        rect.classList.remove('slide-up');
+        let inputs = div.querySelector(`#filter-switch-${id}`).querySelectorAll('input,select');
         inputs.forEach(elem => {
             if (elem.type == 'date' || elem.type == 'select-one')
-                elem.removeEventListener('change',filterData)
+                elem.removeEventListener('change',filterData);
             else
-                elem.removeEventListener('input',filterData)
+                elem.removeEventListener('input',filterData);// add timeout? 1s wait end write
         })
-        document.getElementById(`filter-switch-${id}`).remove()
-        filterData()
+        document.getElementById(`filter-switch-${id}`).remove();
+        filterData();
     }
 }
 
-function filterData(e) {
+async function filterData(e) {
+
+    let iniT = performance.now();
+    
     filteredUrlData = [];
+    urlIds = new Map();
     let inds = [];
     let text = '',articleUrl='', key=Object.keys(urlData)[0];
-    applySearchFilter = false;
-    applyDateFilter = false;
-    applyCategoryFilter = false;
-    var searchInput = document.getElementById('search')
+    var applySearchUrlFilter = false;
+    var applySearchTextFilter = false;
+    var applyDateFilter = false;
+    var applyCategoryFilter = false;
+    var searchUrlInput = document.getElementById('searchUrl')
+    var searchTextInput = document.getElementById('searchText')
     var begin = document.getElementById('begin')
     var end = document.getElementById('end')
     var categorySelect = document.getElementById('category')
 
-    if (searchInput != null)
-        if (searchInput.value != '')
-            applySearchFilter = true;
-    if (begin != null)
+    if (searchUrlInput != null)
+        if (searchUrlInput.value != '')
+            applySearchUrlFilter = true;
+    if (searchTextInput != null)
+        if (searchTextInput.value != '')
+            applySearchTextFilter = true;
+    if (begin != null)//| end!=null ???
         if (begin.value != '' || end.value != '')
             applyDateFilter = true;
     if (categorySelect != null)
         if (categorySelect.value != 'Seleccionar')
             applyCategoryFilter = true;
-
     for (let i=0; i<urlData[key].length; i++)
         inds.push(i);
 
     urlData[key].forEach( (obj,i) => {
-        if (applySearchFilter) {
+        if (applySearchUrlFilter) {
             text = decodeURIComponent(obj.articleUrl.split('/').at(-1)).replaceAll('_',' ');
-            if (!text.toUpperCase().includes(searchInput.value.toUpperCase()) )
+            if (!text.toUpperCase().includes(searchUrlInput.value.toUpperCase()) )
                 inds[i] = -1;
         }
         if (applyDateFilter) {
@@ -594,8 +599,20 @@ function filterData(e) {
         }
         if (applyCategoryFilter)
             if ( !obj.category.includes(categorySelect.value) ) 
-                    inds[i] = -1;
+                    inds[i] = -1;       
     });
+    if (applySearchTextFilter) {
+        for (let i=0; i<urlData[key].length; i++) {
+            if (inds[i] != -1) {
+                let ids = await searchText(urlData[key][i],searchTextInput.value.toUpperCase());
+                if (ids.length > 0) 
+                    urlIds.set(urlData[key][i].articleUrl,ids);
+                else
+                    inds[i] = -1;
+            }
+        }
+    }
+    console.log('urlids:',urlIds,urlIds.size,'inds:',inds);
 
     for (let i=0; i<urlData[key].length; i++)
         if (inds[i] != -1)
@@ -604,9 +621,39 @@ function filterData(e) {
         storageObj.pager.page = 0;
         currentPage = 1;
     }
-    console.log(filteredUrlData.length)
     title.innerText= filteredUrlData.length + titleText;
-    liLinks();      
+    liLinks();
+    if (urlIds.size > 0) 
+        for (let entry of urlIds.entries()) 
+            document.getElementById(entry[0]).href += '&'+entry[1].join('&');     
+    
+    let endT = performance.now();
+    // console.log('filtered in',(endT-iniT)/1000,'sec')
+}
+
+async function searchText(liObj,text) {
+    var ids = new Set(), aux = null;
+    diffs = await query('diffsFromUrl',liObj.articleUrl,null);
+    for (let j=0; j<diffs.length; j++) {
+        let obj = JSON.parse(diffs[j].changes);
+        for (let k=0; k<obj.length; k++) {
+            for (let l=0; l<obj[k].change.length; l++) {
+                aux = obj[k].change[l].add;
+                if ( (typeof(aux) =='object' && Object.keys(aux).length > 0 ) || (typeof(aux) =='string' && aux.length > 0 ) ) {
+                    aux = typeof(aux) =='object'? aux.text.toUpperCase() : aux.toUpperCase();
+                    if (aux.replaceAll('$$+BEGIN+$$','').replaceAll('$$+END+$$','').includes(text))
+                        ids.add(diffs[j].id);
+                }
+                aux = obj[k].change[l].del;
+                if ( (typeof(aux) =='object' && Object.keys(aux).length > 0 ) || (typeof(aux) =='string' && aux.length > 0 ) ) {
+                    aux = typeof(aux) =='object'? aux.text.toUpperCase() : aux.toUpperCase();
+                    if (aux.replaceAll('$$-BEGIN-$$','').replaceAll('$$-END-$$','').includes(text))
+                        ids.add(diffs[j].id);
+                }
+            }
+        }
+    }
+    return Array.from(ids);
 }
 
 function pager(evt) {
@@ -637,7 +684,7 @@ function pager(evt) {
         }
     }
     if (updateRegs)
-        liLinks()
+        liLinks();
    nextBtn.disabled = currentPage == totalPages? true : false;
    prevBtn.disabled = currentPage == 1? true : false;
 }
