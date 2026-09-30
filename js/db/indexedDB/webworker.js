@@ -25,9 +25,9 @@ async function initDB(version) {
             fn: 'info',
             args: [
                 null,
-                3000,
+                6000,
                 {
-                    elem: 'loading',
+                    elem: 'scrollBtn',
                     text:'Cargandose la BD en el navegador...',
                     classes:['bg-cyan']
                 }
@@ -83,8 +83,20 @@ async function initDB(version) {
                         }
                     }
                     await transactionOnComplete(tsWrite);
+                    postMessage({
+                        fn:'info',
+                        args: [
+                            null,
+                            20000,
+                            {
+                                elem:"scrollBtn",
+                                text: `Cargando stores 1 de 2: ${progress}% completado`,
+                                classes:['bg-cyan']  
+                            } 
+                        ]
+                    });
                     if (DEBUG)
-                        postMessage({log:`historycontribs.json::transactionOnComplete ${i}`});
+                        postMessage({log:`historycontribs.json::transactionOnComplete ${i}, progreso: ${progress}%`});
 
                 }
                 tsRead = db.transaction("diffs", "readonly");
@@ -116,6 +128,18 @@ async function initDB(version) {
                                 }
                             }
                             await transactionOnComplete(tsWrite);
+                            postMessage({
+                                fn:'info',
+                                args: [
+                                    null,
+                                    20000,
+                                    {
+                                        elem:"scrollBtn",
+                                        text: `Cargando stores 2 de 2: ${progress}% completado`,
+                                        classes:['bg-cyan']  
+                                    } 
+                                ]
+                            });
                             if (DEBUG)
                                 postMessage({log:`diffs.json::transactionOnComplete ${i}`});
                         }
@@ -124,16 +148,16 @@ async function initDB(version) {
                         if (DEBUG)
                             postMessage({log:`openDB: ${version}`});
                         postMessage({
-                            fn: 'info',
-                            args: [ 
+                            fn:'info',
+                            args: [
                                 null,
-                                4000,
+                                6000,
                                 {
-                                    elem: 'loading',
-                                    text:'Se ha cargado la BD en el navegador',
-                                    classes:['bg-cyan'] 
-                                }
-                            ],
+                                    elem:"scrollBtn",
+                                    text: `Se ha cargado la base de datos en el navegador`,
+                                    classes:['bg-cyan']  
+                                } 
+                            ]
                         });
                         console.timeEnd('initDB');
                     }

@@ -12,8 +12,24 @@
     border: outset gold;
     padding:0.5rem;
 }
+.ico {
+    transform: translateY(8px);
+}
 li {
     list-style:disc;
+}
+fieldset {
+    padding: 0 3rem;
+    margin: 1rem;
+}
+legend {
+    padding: 0 3rem;
+}
+.clear-data {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    cursor:pointer;
 }
 @media (max-width: 950px) and (orientation: landscape), (max-width: 630px) and (orientation:portrait) {
     .anchor {
@@ -28,14 +44,18 @@ li {
             <h1>¡Bienvenido a WikiDiffs!</h1>
         </div>
         <div class="ml4">
-            <h3 class="mt2 anchor">Esta web muestra las diferencias hechas en páginas de wikipedia por los criminales
-                que tienen hackeado mi teléfono y conexiones. Se puede apreciar qué cambian, cuándo y en qué o quién se interesan.
+            <h3 class="mt2 anchor">Esta web muestra diferencias hechas en Wikipedia por los criminales
+                que tienen hackeado mi teléfono y conexiones.
+                Se puede apreciar qué cambian, cuándo y en qué o quién se interesan.
+                
             </h3>
-            
+            <h3 class="mt2 anchor">
+                Hay ediciones legítimas, reediciones de la historia, muchos deshechos y a veces mensajes para otros usuarios.
+            </h3>
             <h4 class="anchor">
                 En el
-                <a href="https://www.youtube.com/" target="_blank">vídeo</a>
-                explico mi problema y la motivación para hacer esta web con humor,
+                <a href="https://www.youtu.be/hUnuTa-YdNg" target="_blank">vídeo</a>
+                explico en detalle la motivación para hacer esta web con humor,
                 porque mejor reir que llorar ¿no?
             </h4>
         
@@ -43,58 +63,89 @@ li {
                 <label class="border"><i>Si ves a jesucristo que no para de bailar, ¡actualiza!</i></label>
             </h4>
 
-            <div id="video" class="dflex justify-center"></div>
-                
+            <div id="video" class="dflex justify-center mr4"></div>
         </div>
         <div class="mt2">
-            <ul>
-                <li>
-                    <p class="anchor">
-                    En <a href="#notes">Notas</a> se pueden guardar notas y diferencias concretas. Hay más de 25000 diferencias cuando
-                    carga la base de datos completa.
-                    
-                    </p>
-                </li>
-                <li>
-                    <p class="anchor">
-                    <a href="#users">Usuarios</a> son los <label class="bg-reddiff">Usuarios</label> que han realizado
-                    la edición anterior al  <label class="bg-greendiff">rango IP malicioso</label>, a veces el mismo rango IP.
-                    </p>
-                </li>
-                <li>
-                    <p class="anchor">
-                    Las <a href="#categories">categorías</a> y información del enlace
-                    <label class="bg-cyan info bold fixed-corner">?</label>
-                    costó hacerlas con chatGPT, no seguía las instrucciones muchas veces.
-                    </p>
-                </li>
-                <li>
-                    <p class="anchor mb3">
-                    Con una pequeña modificación del <a href="wikiDiffsBot" target="_blank">bot</a> 
-                    se puede crear otra base de datos de cualquier usuario o rango de ip y usarla en esta web. 
-                    </p>
-                </li>
-            </ul>
+            <fieldset id="fieldset">
+                <legend class=""><h3>FAQ</h3></legend>
+                <ul>
+                    <li>
+                        <p class="anchor">
+                        El icono
+                        <a id="external-url-data">
+                            <img class="ico-extern-url ico" src="resources/svg/extern-link2.svg" alt="" title="Link externo">
+                        </a>
+                        abre un enlace externo a la fuente de wikipedia. Los demás enlaces cargan contenido desde la base de datos.
+                        </p>
+                    </li>
+                    <li>
+                        <p class="anchor">
+                        En <a href="#notes">Notas</a> se pueden guardar notas y diferencias. Hay más de 25000 diferencias cuando
+                        carga la base de datos completa.
+                        
+                        </p>
+                    </li>
+                    <li>
+                        <p class="anchor">
+                        <a href="#users">Usuarios</a> son los <label class="bg-reddiff">Usuarios</label> que han realizado
+                        la edición anterior al  <label class="bg-greendiff">rango IP malicioso</label>, a veces el mismo rango IP.
+                        </p>
+                    </li>
+                    <li>
+                        <p class="anchor">
+                        Las <a href="#categories">categorías</a> y información del enlace
+                        <label class="bg-cyan info bold fixed-corner">?</label>
+                        costó hacerlas con chatGPT, no seguía las instrucciones muchas veces.
+                        </p>
+                    </li>
+                    <li>
+                        <p class="anchor">
+                        Con una pequeña modificación del <a href="wikiDiffsBot" target="_blank">bot</a> 
+                        se puede crear otra base de datos de cualquier usuario o rango de ip y usarla en esta web. 
+                        </p>
+                    </li>
+                    <li>
+                        <p class="anchor pb3">
+                        Pulsa el botón rojo para borrar la base de datos del navegador y notas guardas.
+                        </p>
+                    </li>
+                </ul>
+            </fieldset>
         </div>
     </div>
 </div>
                   
 <script>
-loadVideo();
+
+init();
+
+function init() {
+    loadVideo();
+    var pos = document.getElementById('fieldset').getBoundingClientRect();
+    var btnClearData = `<img id="clearData"
+        class="clear-data" src="resources/svg/cleardata-btn.svg"
+        title="borrar base de datos y notas"></img>`
+    let element = document.createElement('template');
+    element.innerHTML = btnClearData;
+    document.getElementById('fieldset').insertAdjacentHTML('beforeend',element.innerHTML);
+    var btn = document.getElementById('clearData')
+    btn.style.top = pos.bottom-60+'px';
+    btn.style.left = pos.right-60+'px';
+    btn.addEventListener('click',deleteData);
+}    
 
 function loadVideo() {
     var divVideo = document.getElementById('video');
     video = `
         <iframe
             class="video"
-            src="https://www.youtube.com/embed/7Ybw4KZFQfA?si=yTM0NPU3xQTLhvak"
+            src="https://www.youtube.com/embed/hUnuTa-YdNg?si=yExxrxAWunqgVQCx"
             title="YouTube video player"
             frameborder="0"
             referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen
             >
         </iframe>`;
-    // allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 
     if (navigator.onLine) {
         let element = document.createElement('template');
@@ -102,4 +153,5 @@ function loadVideo() {
         divVideo.insertAdjacentHTML('beforeend',element.innerHTML);
     }
 }
+
 </script>

@@ -60,7 +60,7 @@ async function fetchSharedData() {
 
 async function init() {
     document.querySelectorAll('script[src]').forEach(e => {
-        if (e.src.includes('indexedDB'))
+        if (e.src.includes('indexedDB')) 
             DBTYPE = "indexedDB";
     });
     DBTYPE = DBTYPE == ""? "sqlite" : DBTYPE;
@@ -118,9 +118,9 @@ window.addEventListener('hashchange', () => {
     route();
 });
 
-async function info(event,ms=5000,...args) {
+async function info(event,ms=5000,...args) { //  refactorizar
     var toast = document.getElementById('toast');
-    let left = 0, top = 0, defaultBg = 'bg-yellow',
+    let left = 0, top = 0, defaultBg = 'bg-yellow';
     elem = '', url = '', page=window.location.hash, data=null;
 
     if (event != null) {
@@ -141,21 +141,28 @@ async function info(event,ms=5000,...args) {
             left = window.screen.availWidth/2 - toast.offsetWidth/2;
         top = event.target.getBoundingClientRect().top+10;
 
-    } else { 
+    } else {
         elem = typeof args[0].elem == "string"? document.getElementById(args[0].elem) : args[0].elem;
         toast.innerText = args[0].text;
-
+        
         left = elem.getBoundingClientRect().left + toast.offsetWidth/2;
         top = elem.getBoundingClientRect().top+elem.offsetHeight/4;
+        
         if (page.startsWith('#index')) {
             left = window.screen.width/2 - 150; 
-            top = window.screen.height/4;
+            top = window.screen.height/4;   
+        }
+        if (args[0].elem == 'scrollBtn') {
+                let delta = {x:250,y:50};
+                if (screen.width > 999)
+                    delta.x = 500;
+                left =  elem.getBoundingClientRect().left - delta.x;
+                top = elem.getBoundingClientRect().top -  delta.y;
         }
         if (args[0].hasOwnProperty('classes')) 
             if (args[0].classes.length > 0) 
                 defaultBg = args[0].classes[0];
     }
-
     if (toast.classList.contains(defaultBg))
         toast.classList.remove(defaultBg);
     toast.classList.add(defaultBg);
@@ -164,11 +171,12 @@ async function info(event,ms=5000,...args) {
     toast.style.left = (left + window.scrollX)+'px';
     clearTimeout(idTimeout);
     idTimeout = setTimeout(() => {
-        toast.style.opacity = 0
+        toast.style.opacity = 0;
         toast.style.top = 0;
         toast.style.left = 0;
         toast.innerText = "";
         toast.classList.remove(defaultBg);
+        idTimeout = null;
     },ms);
 }
 
@@ -177,22 +185,42 @@ function freezeGUI(msg) {
         document.getElementById('overlay').hidden = false;
         document.getElementById('overlay-msg').innerText = msg;
     } else
-        overlay.hidden = true; 
+        overlay.hidden = true;
 }
 
-async function clearData(local = true, session = true, db1 = true, db2 = true) {
+async function deleteData(local = true, session = true) {
+    info(null,6000,{elem:"scrollBtn",text: `Borrando datos...`,classes:['bg-red'] } );
+    var dbs = null, ndbs = 0, cont = 0;
     if (local)
         localStorage.clear();
     if (session)
         sessionStorage.clear();
-    if (db1) {
+    if (db != null)
+        await db.close();
+    dbs = await indexedDB.databases();
+    ndbs = dbs.length;
+    if (dbs.filter(idb => idb.name.includes('lite')) ) {
         var req1 = indexedDB.deleteDatabase('wikidiffs_lite');
-        req1.onsuccess = () => console.log('indexedDB::wikidiffs_lite borrada');
+        req1.onsuccess = () => {
+            console.log('indexedDB::wikidiffs_lite borrada');
+            cont++;
+            if (cont == ndbs) {
+                alert('Datos borrados')
+                window.location.href = 'about:blank'
+            }
+        }
         req1.onerror = () => console.log('error al borrar indexedDB::wikidiffs_lite');
     }
-    if (db2) {
+    if (dbs.filter(idb => idb.name.includes('full')) ) {
         var req2 = indexedDB.deleteDatabase('wikidiffs_full');
-        req2.onsuccess = () => console.log('indexedDB::wikidiffs_full borrada');
+        req2.onsuccess = () => {
+            console.log('indexedDB::wikidiffs_full borrada');
+            cont++;
+            if (cont == ndbs) {
+                alert('Datos borrados')
+                window.location.href = 'about:blank'
+            }
+        }
         req2.onerror = () => console.log('error al borrar indexedDB::wikidiffs_full');
     }
 }

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="113.48511"
+   height="111.17743"
+   viewBox="0 0 113.48511 111.17743"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="cleardata-btn.svg"
+   inkscape:version="1.4.2 (ebf0e94, 2025-05-08)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.8708833"
+     inkscape:cx="43.027803"
+     inkscape:cy="125.60911"
+     inkscape:window-width="1076"
+     inkscape:window-height="773"
+     inkscape:window-x="2591"
+     inkscape:window-y="569"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="translate(-61.334365,-99.795897)">
+    <g
+       id="layer2">
+      <ellipse
+         style="fill:#28220b;stroke:#000000;stroke-width:0.478885"
+         id="path6"
+         ry="55.34927"
+         rx="56.503113"
+         cy="155.38461"
+         cx="118.07692" />
+    </g>
+    <circle
+       style="fill:#ff0000;stroke:#000000;stroke-width:0.283339"
+       id="path1"
+       cx="118.84616"
+       cy="153.46155"
+       r="50.447041" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.7433px;font-family:Monospace;-inkscape-font-specification:Monospace;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke:#000000;stroke-width:0.369807"
+       x="78.627327"
+       y="151.84387"
+       id="text2"
+       transform="scale(1.0324751,0.96854636)"><tspan
+         x="78.627327"
+         y="151.84387"
+         id="tspan3"
+         style="stroke-width:0.369807">Borrar</tspan><tspan
+         x="78.627327"
+         y="179.0229"
+         id="tspan5"
+         style="stroke-width:0.369807"> </tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.4988px;font-family:Monospace;-inkscape-font-specification:Monospace;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#28220b;stroke:#000000;stroke-width:0.382655"
+       x="83.801552"
+       y="181.84636"
+       id="text7"
+       transform="scale(1.0348104,0.96636058)"><tspan
+         id="tspan7"
+         x="83.801552"
+         y="181.84636"
+         style="stroke-width:0.382655">datos</tspan></text>
+  </g>
+</svg>

@@ -23,17 +23,29 @@
     .xaxisl30 {
         transform: translateX(-30%);
     }
-
+    .diffselect {
+        width: 30%
+    }
+@media (max-width: 630px) and (orientation:portrait) {
+    .diffselect {
+        width: 100%
+    }
+}
+@media (max-width: 950px) and (orientation: landscape) {
+    .diffselect {
+        width: 50%
+    }
+}
 </style>
 
 <div id="notes">
-    <div class="drow-mcol justify-evenly m-align-center pt2 pb3">
-        <div class="m-w-100 w30">
+    <div class="drow-mcol justify-evenly m-align-center pt2 pb10">
+        <div class="diffselect">
             <div class="">
                 <div class="dflex justify-center">
                     <h3 class="xaxisl30">Diferencias</h3>
                 </div>
-                <div>
+                <div class="">
                     <select id="diffSelect" class="w80 m-ml1">
                         <option value="nodata">No hay Diffs guardadas</option>
                     </select>

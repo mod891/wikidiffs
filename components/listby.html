@@ -35,7 +35,7 @@
     transition: 0.3s;
 }
 input:checked + .slider {
-    background-color: #4CAF50;
+    background-color: cyan;
 }
 input:checked + .slider:before {
     transform: translateX(25px);
@@ -45,9 +45,15 @@ input:checked + .slider:before {
 #title {
     padding-left:10vw;
 }
+
 #filter-inputs {
     display: flex;
     flex-direction: row;
+}
+#close-modal {
+    cursor: all-scroll; 
+    margin: 0rem 0.5rem 0rem 0rem;
+    padding: 0.2rem 0.5rem 0rem 0rem;
 }
 #filter-inputs > div {
     width: 24%;
@@ -87,19 +93,15 @@ input:checked + .slider:before {
     align-items: center;
     justify-content: center;
 }
-.modal > div {
-    background-color: rgb(255, 210, 132);
-}
 .modal-header {
-    border: solid 1px black;
+    /* border: solid 1px black; */
     display: flex;
     align-items: flex-start;
-    justify-content:end;
-    width: 350px;
-    background-color: rgb(46, 130, 255);
+    justify-content:space-between;
+    width: 200px;
+    background-color: red;
 }
 @media (max-width: 1400px) and (orientation: landscape), (max-width: 1400px) and (orientation:portrait) {
-/* @media (max-width: 950px) and (orientation: landscape), (max-width: 630px) and (orientation:portrait) { */
     .filter-icon {
         padding-top: 20px;
         width:40px;
@@ -227,13 +229,16 @@ input:checked + .slider:before {
     </div>
     </div>
     <div id="filters-modal" class="modal">
-        <div class="">
+        <div class="bg-bluez">
             <div id="" class="modal-header">
-                <span  id="close-modal" class="font20px cursor pr1">&times;</span>
+               
+                    <span class=" ml1 m05"><b>Filtrar</b></span>
+                
+                    <span  id="close-modal" class="font20px"><b>x</b></span>
             </div>
             <div class="dflex mt05">
                 <div class="w50 pl1">
-                    <b>Filtrar por artículo</b>
+                    <b>Artículo</b>
                 </div>
 
                 <div class="w50 jc-end">
@@ -245,7 +250,7 @@ input:checked + .slider:before {
             </div>
             <div class="dflex mtb05">
                 <div class="w50 pl1">
-                    <b>Texto en diferencia</b>
+                    <b>Texto</b>
                 </div>
                 <div class="w50 jc-end">
                     <label class="switch">
@@ -256,7 +261,7 @@ input:checked + .slider:before {
             </div>
             <div class="dflex mtb05">
                 <div class="w50 pl1">
-                    <b>Por fecha </b>
+                    <b>Fecha </b>
                 </div>
                 <div class="w50 jc-end">
                     <label class="switch">
@@ -265,9 +270,9 @@ input:checked + .slider:before {
                     </label>
                 </div>
             </div>
-            <div id="category-filter-div" class="dflex mt05">
+            <div id="category-filter-div" class="dflex mtb05">
                 <div class="w50 pl1">
-                    <b>Por categoría</b>
+                    <b>Categoría</b>
                 </div>
                 <div class="w50 jc-end">
                     <label class="switch">
@@ -287,7 +292,7 @@ var urlIds = new Map();
 var title = document.getElementById('title'), titleText = "";
 var categories = null, category = null;
 var pagerInput = document.getElementById('currentPageInput');
-var currentPage = 0, perPage = 5, totalPages = 0;
+var currentPage = 0, perPage = 55, totalPages = 0;
 var btns = document.getElementById('pager').querySelectorAll('button');
 var prevBtn = btns[0], nextBtn = btns[1];
 
@@ -328,7 +333,6 @@ async function init() {
             if (Object.keys(storageObj.char[i])[0] == getVal) {
                 storage = true;
                 urlData = storageObj.char[i];
-                // filteredUrlData = [...urlData];
             }
         }
     }
@@ -346,7 +350,7 @@ async function init() {
 
 function liLinks() {
     var div = document.getElementById('listby-content');
-    var urls = [];
+    var urls = [], text="", diff="";
     if (category == null) {
         urls = Object.values(urlData[getVal]);
         titleText = `  que empiezan por ${getVal}`;
@@ -369,11 +373,10 @@ function liLinks() {
             categoryTitle = categoryTitles[categoryTitle]
       
         titleText = ` páginas con categoría: ${categoryTitle}`;
-
-       
     }
-    if (filteredUrlData != null) 
+    if (filteredUrlData != null) {
         urls = Object.values(filteredUrlData);
+    }
     title.innerText = `${urls.length} ${titleText}`;
 
     pagerInput.value = currentPage;
@@ -393,26 +396,28 @@ function liLinks() {
         let endFor = currentPage == totalPages? urls.length : storageObj.pager.page*perPage+perPage;
         for (let i=storageObj.pager.page*perPage; i<endFor; i++) {
             text = decodeURIComponent(urls[i].articleUrl.split('/').at(-1)).replaceAll('_',' ');
+            diff = `#diffs?diff=${urls[i].articleUrl}`
+            if (urls[i].articleUrlDiffs.length > 0)
+                diff += '&'+urls[i].articleUrlDiffs.join('&');
+
             var li = `<li 
                         data-articleurl="${decodeURIComponent(urls[i].articleUrl.split('/').at(-1))}"
                         data-text="${text}"
                         data-neditions=${urls[i].nedits}
-                        data-dates=${JSON.stringify(urls[i].dates)}
                         data-category="${urls[i].category}" >
                             <div class="link d-mr-2">
-                                <a id="${urls[i].articleUrl}" href="#diffs?diff=${urls[i].articleUrl}">${text}</a>
+                                <a id="${urls[i].articleUrl}" href="${diff}">${text}</a>
                                 <label class="n-editions">${urls[i].nedits}</label>
                                 <label class="bg-cyan info d-mr2 bold" onclick="info(event)">?</label>
                             </div>
                         </li>`;
             ul.insertAdjacentHTML('beforeend',li);
-        }
+        } 
     }
     div.appendChild(document.createElement('div'))
     if (div.querySelector('ul') != null)
         div.querySelector('ul').remove()
     div.lastChild.appendChild(ul)
-// byId('articleurl') lineno404 + ids
     nextBtn.disabled = currentPage == totalPages? true : false;
     prevBtn.disabled = currentPage == 1? true : false;
 }
@@ -428,25 +433,10 @@ async function fetchUrls() {
     else
         urls = await query('urlsStartsWith',getVal);
 
-    var ini = new Date('2-2-2222')
-    var end = new Date('1-1-1111')
-  
-    for (let i=0; i<urls.length; i++) {
-        dates = JSON.parse(urls[i].dates);
-        urls[i].dates = dates;
-        for (let j=0; j<dates.length; j++) {
-            let minMaxDate = new Date(dates[j].split('/')[2]+'-'+dates[j].split('/')[1]+'-'+dates[j].split('/')[0]);
-            if (minMaxDate < ini) 
-                ini = minMaxDate;
-            if (minMaxDate > end) 
-                end = minMaxDate;
-        }
-    }
     storageObj = JSON.parse(sessionStorage.getItem('listby'));
-    var config = { minmaxdate: { ini: ini.toISOString().split('T')[0], end: end.toISOString().split('T')[0] } }
     var computed = category == null? getVal : category;
     if (storageObj == null) { 
-        storageObj = { char:[ {[computed]: urls, config: config } ], pager: { page:0,perPage:perPage } };
+        storageObj = { char:[ {[computed]: urls } ], pager: { page:0,perPage:perPage } };
         currentPage = storageObj.pager.page+1;
         sessionStorage.setItem('listby',JSON.stringify(storageObj));
     }
@@ -456,12 +446,11 @@ async function fetchUrls() {
             if (Object.keys(storageObj.char[i]).includes(computed))
                 ind = i;
         if (ind != -1)
-            storageObj.char[ind] = { [computed]: urls, config: config };
-        else
-            storageObj.char.push({ [computed]: urls, config: config });
+            storageObj.char[ind] = { [computed]: urls };
+            storageObj.char.push({ [computed]: urls });
         sessionStorage.setItem('listby',JSON.stringify(storageObj));
     }
-    urlData = { [computed]: urls, config: config };
+    urlData = { [computed]: urls };
 }
 
 function showHideInputFilter(input) {
@@ -484,12 +473,11 @@ function showHideInputFilter(input) {
                     <label class="">Fin</label>
                     <input  id="end" type="date" class="mr05 ml05" >
                 </div>`;
-                // min="${urlData.config.minmaxdate.ini}" max="${urlData.config.minmaxdate.end}"
                         
     } else if (id == "3") { // category
         elem = `<div id="filter-switch-3" class="bg-gold">
                     <label class="">Categoría</label>
-                    <select id="category" class="w50" ><option>Seleccionar</option>`
+                    <select id="category" class="w50 text-center" ><option>Seleccionar</option>`
                 for (i in categories)
                     if (urlData[key].some(obj => obj.category == categories[i]) )
                         elem += `<option value="${categories[i]}">${categories[i]}</option>`;
@@ -531,22 +519,21 @@ function showHideInputFilter(input) {
 }
 
 async function filterData(e) {
-
     let iniT = performance.now();
-    
     filteredUrlData = [];
-    urlIds = new Map();
-    let inds = [];
-    let text = '',articleUrl='', key=Object.keys(urlData)[0];
+    var urlDiffs = new Map(), urlIds = new Map(), ids = new Set(); 
+    var inds = [], aux = null, diffs = null, obj=null, badJSON = false;
+    var beginDate= "", endDate = "", date = null, d,m,y;
+    var text = "", articleUrl = "", key=Object.keys(urlData)[0];
+    var searchUrlInput = document.getElementById('searchUrl');
+    var searchTextInput = document.getElementById('searchText');
+    var begin = document.getElementById('begin');
+    var end = document.getElementById('end');
+    var categorySelect = document.getElementById('category');
     var applySearchUrlFilter = false;
     var applySearchTextFilter = false;
     var applyDateFilter = false;
     var applyCategoryFilter = false;
-    var searchUrlInput = document.getElementById('searchUrl')
-    var searchTextInput = document.getElementById('searchText')
-    var begin = document.getElementById('begin')
-    var end = document.getElementById('end')
-    var categorySelect = document.getElementById('category')
 
     if (searchUrlInput != null)
         if (searchUrlInput.value != '')
@@ -554,106 +541,128 @@ async function filterData(e) {
     if (searchTextInput != null)
         if (searchTextInput.value != '')
             applySearchTextFilter = true;
-    if (begin != null)//| end!=null ???
-        if (begin.value != '' || end.value != '')
+    if (begin != null)
+        if (begin.value != '' || end.value != '') {
             applyDateFilter = true;
-    if (categorySelect != null)
-        if (categorySelect.value != 'Seleccionar')
-            applyCategoryFilter = true;
-    for (let i=0; i<urlData[key].length; i++)
-        inds.push(i);
-
-    urlData[key].forEach( (obj,i) => {
-        if (applySearchUrlFilter) {
-            text = decodeURIComponent(obj.articleUrl.split('/').at(-1)).replaceAll('_',' ');
-            if (!text.toUpperCase().includes(searchUrlInput.value.toUpperCase()) )
-                inds[i] = -1;
-        }
-        if (applyDateFilter) {
-            let dates = obj.dates;
-            let allDatesOutOfRange = false; // ind[i][ndates] = [ i:0[d1,d2], i:1[d3], ... ,i:n[d1,...,dn] ] 
-            // NOW: if found !invalid url.date range, discard all others dates for the same url
-            // [TODO] : check all dates, if (1 date==1 diff) show only diffs in bounds + adapt diffs
-            let beginDate= "", endDate = "", d,m,y;
+            if (begin.value != "") {
+                    [y,m,d] = begin.value.split('-');
+                    beginDate = new Date(y, (Number.parseInt(m)-1), d);
+            }
             if (end.value != "") {
                 [y,m,d] = end.value.split('-');
                 endDate = new Date(y, (Number.parseInt(m)-1), d);
             }
-            if (begin.value != "") {
-                [y,m,d] = begin.value.split('-');
-                beginDate = new Date(y, (Number.parseInt(m)-1), d);
-            }
-            for (let j=0; j<dates.length; j++) {
-                [d,m,y] = dates[j].split('/');
-                let date = new Date(y, (Number.parseInt(m)-1), d);
-                if (beginDate != "" && endDate == "" && inds[i] != -1)    // [begin,inf)
-                    if (date < beginDate) 
-                        inds[i] = -1; 
-                else if (beginDate == "" && endDate != "" && inds[i] != -1)  // (-inf,end] 
-                    if (date > endDate) 
-                        inds[i] = -1;
-                else if (beginDate != "" && endDate != ""  && inds[i] != -1) // [begin,end]
-                    if (date < beginDate || date > endDate)
-                        inds[i] = -1;
-            }
+        }
+    if (categorySelect != null)
+        if (categorySelect.value != 'Seleccionar')
+            applyCategoryFilter = true;
+    for (let i=0; i<urlData[key].length; i++) {
+        inds.push(i);
+        urlData[key][i].articleUrlDiffs = [];
+    }
+
+    for (let i=0; i<urlData[key].length;i++) {
+        let li = urlData[key][i];
+        if (applySearchUrlFilter) {
+            text = decodeURIComponent(li.articleUrl.split('/').at(-1)).replaceAll('_',' ');
+            if (!text.toUpperCase().includes(searchUrlInput.value.toUpperCase()) )
+                inds[i] = -1;
         }
         if (applyCategoryFilter)
-            if ( !obj.category.includes(categorySelect.value) ) 
-                    inds[i] = -1;       
-    });
-    if (applySearchTextFilter) {
-        for (let i=0; i<urlData[key].length; i++) {
+            if ( !li.category.includes(categorySelect.value) ) 
+                inds[i] = -1;
+           
+        if (applySearchTextFilter) {
+            text = searchTextInput.value.toUpperCase();
+            
             if (inds[i] != -1) {
-                let ids = await searchText(urlData[key][i],searchTextInput.value.toUpperCase());
-                if (ids.length > 0) 
-                    urlIds.set(urlData[key][i].articleUrl,ids);
+                if (urlDiffs.get(li.articleUrl) == null) {
+                    diffs = await query('diffsFromUrl',li.articleUrl,null);
+                    urlDiffs.set(li.articleUrl,diffs);
+                }
+                diffs = urlDiffs.get(li.articleUrl);
+                ids = new Set();
+                for (let j=0; j<diffs.length; j++) {
+                    badJSON = false;
+                    try {
+                        obj = JSON.parse(diffs[j].changes);
+                    } catch (e) {
+                        badJSON = true;
+                        console.log('error en json en la diferencia',diffs[j].id,' del artículo ',diffs[j].articleUrl )
+                    }
+                    if (!badJSON) {
+                        for (let k=0; k<obj.length; k++) {
+                            for (let l=0; l<obj[k].change.length; l++) {
+                                aux = obj[k].change[l].add;
+                                if ( (typeof(aux) =='object' && Object.keys(aux).length > 0 ) || (typeof(aux) =='string' && aux.length > 0 ) ) {
+                                    aux = typeof(aux) =='object'? aux.text.toUpperCase() : aux.toUpperCase();
+                                    if (aux.replaceAll('$$+BEGIN+$$','').replaceAll('$$+END+$$','').includes(text))
+                                        ids.add(diffs[j].id);
+                                }
+                                aux = obj[k].change[l].del;
+                                if ( (typeof(aux) =='object' && Object.keys(aux).length > 0 ) || (typeof(aux) =='string' && aux.length > 0 ) ) {
+                                    aux = typeof(aux) =='object'? aux.text.toUpperCase() : aux.toUpperCase();
+                                    if (aux.replaceAll('$$-BEGIN-$$','').replaceAll('$$-END-$$','').includes(text))
+                                        ids.add(diffs[j].id);
+                                }
+                            }
+                        }
+                    }
+                }
+                if (ids.size > 0) {
+                    urlIds.set(li.articleUrl,Array.from(ids));
+                }
+                else
+                    inds[i] = -1;
+            }
+        }
+        if (applyDateFilter) {
+            if (inds[i] != -1) {
+                ids = new Set();
+                for (let j=0; j<li.dates.length; j++) {
+                    [d,m,y] = li.dates[j].date.split('/');
+                    date = new Date(y,(Number.parseInt(m)-1),d);
+                    if (beginDate != "" && endDate == "")       // [begin,inf)
+                        if (date >= beginDate)
+                            ids.add(li.dates[j].id); 
+                    else if (beginDate == "" && endDate != "")  // (-inf,end] 
+                        if (date <= endDate) 
+                            ids.add(li.dates[j].id); 
+                    else if (beginDate != "" && endDate != "")  // [begin,end]
+                        if (date >= beginDate && date <= endDate)
+                            ids.add(li.dates[j].id); 
+                    
+                }
+                if (ids.size > 0) {
+                    if (urlIds.get(li.articleUrl) == null)
+                        urlIds.set(li.articleUrl,Array.from(ids));
+                    else 
+                        urlIds.get(li.articleUrl) = urlIds.get(li.articleUrl)
+                            .filter(id => Array.from(ids).includes(id));
+                }
                 else
                     inds[i] = -1;
             }
         }
     }
-    console.log('urlids:',urlIds,urlIds.size,'inds:',inds);
-
-    for (let i=0; i<urlData[key].length; i++)
-        if (inds[i] != -1)
-            filteredUrlData.push(urlData[key][i]);
     if (inds.includes(-1)) {
         storageObj.pager.page = 0;
         currentPage = 1;
-    }
-    title.innerText= filteredUrlData.length + titleText;
-    liLinks();
-    if (urlIds.size > 0) 
-        for (let entry of urlIds.entries()) 
-            document.getElementById(entry[0]).href += '&'+entry[1].join('&');     
-    
-    let endT = performance.now();
-    // console.log('filtered in',(endT-iniT)/1000,'sec')
-}
-
-async function searchText(liObj,text) {
-    var ids = new Set(), aux = null;
-    diffs = await query('diffsFromUrl',liObj.articleUrl,null);
-    for (let j=0; j<diffs.length; j++) {
-        let obj = JSON.parse(diffs[j].changes);
-        for (let k=0; k<obj.length; k++) {
-            for (let l=0; l<obj[k].change.length; l++) {
-                aux = obj[k].change[l].add;
-                if ( (typeof(aux) =='object' && Object.keys(aux).length > 0 ) || (typeof(aux) =='string' && aux.length > 0 ) ) {
-                    aux = typeof(aux) =='object'? aux.text.toUpperCase() : aux.toUpperCase();
-                    if (aux.replaceAll('$$+BEGIN+$$','').replaceAll('$$+END+$$','').includes(text))
-                        ids.add(diffs[j].id);
+        for (let i=0; i<urlData[key].length; i++) {
+            if (inds[i] != -1) {
+                if (urlIds.get(urlData[key][i].articleUrl) != null) {
+                    urlData[key][i].articleUrlDiffs = urlIds.get(urlData[key][i].articleUrl);
                 }
-                aux = obj[k].change[l].del;
-                if ( (typeof(aux) =='object' && Object.keys(aux).length > 0 ) || (typeof(aux) =='string' && aux.length > 0 ) ) {
-                    aux = typeof(aux) =='object'? aux.text.toUpperCase() : aux.toUpperCase();
-                    if (aux.replaceAll('$$-BEGIN-$$','').replaceAll('$$-END-$$','').includes(text))
-                        ids.add(diffs[j].id);
-                }
+                filteredUrlData.push(urlData[key][i]);
             }
         }
     }
-    return Array.from(ids);
+    else 
+        filteredUrlData = urlData[key];
+    title.innerText= filteredUrlData.length + titleText;
+    liLinks();
+
+    let endT = performance.now();
 }
 
 function pager(evt) {

@@ -37,6 +37,10 @@ li {
     margin: 0.1rem;
 
 }
+.ico-extern-url {
+    width: 30px;
+    height: 30px;
+}
 #container {
     padding-left: 10%;
     width: 80%; 
@@ -90,6 +94,10 @@ li {
     opacity: 0;
     transition: opacity 0.5s;  
     z-index: 1000;
+    text-align: center;
+    border: outset black 1px;
+    box-shadow: 2px 2px 5px var(--black);
+
 }
 #overlay {
     position:fixed;
@@ -150,10 +158,9 @@ li {
         padding-left: 1rem;
     }
     #container {
-        position: relative;
         padding-left: 0%;
         width: 100%;
-        height: 100%;
+        min-height: 100dvh;
     }
     #content {
         margin-top:2rem;

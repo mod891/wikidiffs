@@ -20,7 +20,6 @@ async function query(option,...args) {
         case 'urlsStartsWith':
         case 'urlsByCategory':
             IDBdata = urlsQueriesIDB(option,args[0],pager);
-
         break;
         case 'randUrl':
             IDBdata = await randUrlIDB();            
@@ -88,7 +87,7 @@ function randUrlIDB() {
     var ts = db.transaction(['historycontribs'],'readonly');
     var store = ts.objectStore('historycontribs');
     var index = store.index('articleUrl');
-    var UNIQUEURLS = db.name.includes('lite')? 100: 100;//11839; // numerología? :O
+    var UNIQUEURLS = db.name.includes('lite')? 100: 12000;
     let pos = Math.trunc(UNIQUEURLS*Math.random());
     return new Promise((resolve, reject) => {
         var request = index.openKeyCursor(null, "nextunique");
@@ -153,8 +152,6 @@ async function descriptionUrlIDB(url) {
 }
 
 async function diffsQueriesIDB(filterBy, arg, pager=null) {
-    // console.log('diffsQueriesIDB::arg',arg)
-    
     var ts = db.transaction(['historycontribs','diffs'],'readonly');
     var hcStore = ts.objectStore('historycontribs');
     var diffsStore = ts.objectStore('diffs');
@@ -306,18 +303,16 @@ async function urlsQueriesIDB(filterBy, arg, pager=null) {
                         vect1 = vect1.filter(item => !item.articleUrl.includes(strNot));
                     }
                     vect1.forEach( it => {
-                        console.log('vect1 url:date',it.articleUrl,it.date)
-                        
                         if (urlsMap.get(it.articleUrl) == null) {
                             urlsMap.set(it.articleUrl,{
                                 articleUrl: it.articleUrl,
                                 category: it.category,
-                                dates: [it.date],
+                                dates: [{id:it.id,date:it.date}],
                                 nedits: 1,
                             });
                         }
                         else {
-                            urlsMap.get(it.articleUrl).dates.push(it.date);
+                            urlsMap.get(it.articleUrl).dates.push({id:it.id,date:it.date});
                             urlsMap.get(it.articleUrl).nedits += 1;
                         }
                     });
@@ -326,8 +321,9 @@ async function urlsQueriesIDB(filterBy, arg, pager=null) {
                         if (results.filter(obj => obj.articleUrl == it.articleUrl).length == 0) {
                             results.push({
                                 articleUrl: it.articleUrl,
+                                articleUrlDiffs:[],
                                 category: it.category,
-                                dates: JSON.stringify(it.dates),
+                                dates: it.dates,
                                 nedits: it.nedits,
                                 totalUrls:urlsMap.size
                             });

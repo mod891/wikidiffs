@@ -22,7 +22,7 @@
 .icon {
     display:none;
 }
-/* mobile */
+
 @media (max-width: 1400px) and (orientation: landscape), (max-width: 1400px) and (orientation:portrait) {   
     #svgdiv {
         padding:0.7rem;
@@ -33,7 +33,6 @@
         z-index: 3000;
     }
     .item {
-        /* padding: 0rem 0rem 0.5rem 0rem;  */
         clip-path: polygon(8% 0%, 100% 0%, 90% 100%, 0% 90%);   
         background-color: red;
         margin: 0rem 0.9rem 0.9rem 0rem;
@@ -69,11 +68,15 @@
     .rota {
         transform: rotate(-90deg)
     }
-     /* #ISSUE1 class */
     .display-none {
         display: none;
     }
 }
+@media (max-height: 450px) and (orientation: landscape) {
+    .item { 
+        margin: 0;
+    }
+} 
 </style>
 
 <div id="menu">            
@@ -95,13 +98,10 @@
 <script>
     var img = document.getElementById('menu-icon');
     var items = document.getElementById('items');
-    // #ISSUE1 : elements under menu overlapping area can't be clicked
-    // #SOL1 : change to display:none, break open animation
     items.classList.add('display-none') // #ISSUE1
     img.addEventListener('click', () => {
         img.classList.toggle('rota')
         items.classList.toggle('openmenu')
-// #ISSUE1 begin block
         if (items.classList.contains('display-none')) 
             items.classList.remove('display-none')
     })
@@ -110,11 +110,8 @@
             items.classList.add('display-none')
         }
     })
-// #ISSUE1 end block
-
     menuLinks = document.querySelectorAll('a');
     menuLinks.forEach(element => {
-        // if (!element.href.includes('random')) {}
         element.addEventListener('click', () => {
             img.click()
         })   
