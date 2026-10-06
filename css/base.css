@@ -35,7 +35,6 @@ li {
     background-color: rgb(99,190,0);
     font-weight: bold;
     margin: 0.1rem;
-
 }
 .ico-extern-url {
     width: 30px;
@@ -55,10 +54,6 @@ li {
 #weblogo {
     padding-left:2rem;
     padding-right:2rem;
-}
-.video {
-    width: 560px;
-    height: 315px;
 }
 #content {
     margin-top:0rem;
@@ -184,9 +179,5 @@ li {
         height: 90px;
         margin-bottom: 0rem;
         transform: translateX(0);
-    }
-    .video {
-        width: 350px;
-        height: 250px;
     }
 }

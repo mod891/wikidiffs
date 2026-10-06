@@ -21,6 +21,7 @@ li {
 fieldset {
     padding: 0 3rem;
     margin: 1rem;
+    position: relative;
 }
 legend {
     padding: 0 3rem;
@@ -29,7 +30,15 @@ legend {
     position: absolute;
     width: 50px;
     height: 50px;
+    right: 5px;
+    bottom: 5px;
     cursor:pointer;
+}
+.video {
+    display: flex;
+    width: auto;
+    height: auto;
+    justify-content: center;
 }
 @media (max-width: 950px) and (orientation: landscape), (max-width: 630px) and (orientation:portrait) {
     .anchor {
@@ -54,7 +63,7 @@ legend {
             </h3>
             <h4 class="anchor">
                 En el
-                <a href="https://www.youtu.be/hUnuTa-YdNg" target="_blank">vídeo</a>
+                <a href="https://www.youtu.be.com/Y2df_LuUAX0" target="_blank">vídeo</a>
                 explico en detalle la motivación para hacer esta web con humor,
                 porque mejor reir que llorar ¿no?
             </h4>
@@ -63,7 +72,7 @@ legend {
                 <label class="border"><i>Si ves a jesucristo que no para de bailar, ¡actualiza!</i></label>
             </h4>
 
-            <div id="video" class="dflex justify-center mr4"></div>
+            <div id="video" class="video"></div>
         </div>
         <div class="mt2">
             <fieldset id="fieldset">
@@ -110,6 +119,10 @@ legend {
                         </p>
                     </li>
                 </ul>
+                <img id="clearData" class="clear-data" 
+                    src="resources/svg/cleardata-btn.svg"
+                    title="borrar base de datos y notas">
+                </img>
             </fieldset>
         </div>
     </div>
@@ -121,25 +134,16 @@ init();
 
 function init() {
     loadVideo();
-    var pos = document.getElementById('fieldset').getBoundingClientRect();
-    var btnClearData = `<img id="clearData"
-        class="clear-data" src="resources/svg/cleardata-btn.svg"
-        title="borrar base de datos y notas"></img>`
-    let element = document.createElement('template');
-    element.innerHTML = btnClearData;
-    document.getElementById('fieldset').insertAdjacentHTML('beforeend',element.innerHTML);
-    var btn = document.getElementById('clearData')
-    btn.style.top = pos.bottom-60+'px';
-    btn.style.left = pos.right-60+'px';
+    var btn = document.getElementById('clearData');
     btn.addEventListener('click',deleteData);
-}    
+}
 
 function loadVideo() {
     var divVideo = document.getElementById('video');
     video = `
         <iframe
-            class="video"
-            src="https://www.youtube.com/embed/hUnuTa-YdNg?si=yExxrxAWunqgVQCx"
+            class=""
+            src="https://www.youtube.com/embed/Y2df_LuUAX0
             title="YouTube video player"
             frameborder="0"
             referrerpolicy="strict-origin-when-cross-origin"
@@ -153,5 +157,4 @@ function loadVideo() {
         divVideo.insertAdjacentHTML('beforeend',element.innerHTML);
     }
 }
-
 </script>

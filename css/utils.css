@@ -14,6 +14,9 @@ h1 {
 .text-center {
     text-align: center;
 }
+.font15px {
+    font-size:15px;
+}
 .font20px {
     font-size:20px;
 }
@@ -172,7 +175,6 @@ h1 {
 .d-mr2 {
     margin-right: 2rem;
 }
-
 .info {
     border-radius: 50%;
     padding:0 0.5rem 0 0.5rem;
@@ -180,9 +182,6 @@ h1 {
     box-shadow: 1px 1px 3px #111111;
     cursor:zoom-in;
 }
-
-
-/* d-esktop styles */
 .d-dflex {
     display: flex;
 }
@@ -231,6 +230,5 @@ h1 {
     }
     .m-w-100 {
     width: 100%;
-}
-
+    }
 }

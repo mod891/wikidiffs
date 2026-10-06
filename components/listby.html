@@ -300,7 +300,7 @@ if (getVal.split('category:').length > 1) {
     category = getVal.split('category:')[1];
     document.getElementById('category-filter-div').remove()
 }
-init()
+init();
 
 async function init() {
     freezeGUI('Cargando...');
@@ -692,8 +692,10 @@ function pager(evt) {
             updateRegs = true;
         }
     }
-    if (updateRegs)
+    if (updateRegs) {
+        sessionStorage.setItem('listby',JSON.stringify(storageObj));
         liLinks();
+    }
    nextBtn.disabled = currentPage == totalPages? true : false;
    prevBtn.disabled = currentPage == 1? true : false;
 }

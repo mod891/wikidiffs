@@ -109,7 +109,6 @@ var btns = document.querySelectorAll('button');
 var prevBtn = btns[0], nextBtn = btns[1];
 
 init()
-
 async function init() {
     document.getElementById('search').addEventListener('input',filterData)
 
@@ -133,14 +132,13 @@ function liLinks() {
     if (filteredUserData != null) 
         users = filteredUserData;
     nUsers.innerText =`${users.length} Usuarios`;
-
-    pagerInput.value = currentPage;
+    pagerInput.value = storageObj.pager.page+1;
     totalPages = Number.parseInt((users.length/perPage));
     if (String(users.length/perPage).includes('.'))
         totalPages++;
     document.querySelector('.totalPages').textContent = totalPages;
-    nextBtn.disabled = currentPage == totalPages? true : false;
-    prevBtn.disabled = currentPage == 1? true : false;
+    nextBtn.disabled = storageObj.pager.page+1 == totalPages? true : false;
+    prevBtn.disabled = storageObj.pager.page+1 == 1? true : false;
     var ul = document.createElement('ul');
     ul.classList = 'grid-content';
 
@@ -150,14 +148,14 @@ function liLinks() {
         document.querySelector('.pager').style.display = 'flex';
 
     if (users.length > 0) {
-        let endFor = currentPage == totalPages? users.length : (currentPage-1)*perPage+perPage;
-        for (let i=(currentPage-1)*perPage; i<endFor; i++) {
+        let endFor = storageObj.pager.page+1 == totalPages? users.length : (storageObj.pager.page)*perPage+perPage;
+        for (let i=(storageObj.pager.page)*perPage; i<endFor; i++) {
             var li = `<li data-prevuser="${users[i].user}">
                         <div class="link">
                             <a href="#diffs?diff=user::${users[i].user}">${users[i].user}</a>
                             <label title="nº de ediciones" class="n-editions">${users[i].nedits}</label>
                         </div>
-                    </li>`;        
+                    </li>`;    
             ul.insertAdjacentHTML('beforeend',li);
         }
     }
@@ -208,7 +206,7 @@ function filterData(e) {
         if (inds[i] != -1)
             filteredUserData.push(userData[i]);
     if (inds.includes(-1)) 
-        currentPage = 1;
+        storageObj.pager.page = 1;
     nUsers.innerText= filteredUserData.length + " usuarios";
     liLinks();  
 }
@@ -217,26 +215,26 @@ function pager(evt) {
     let updateRegs = false;
     if (evt.type == 'click') {
         if (evt.target.classList.contains('prevPage')) 
-            currentPage -= 1; 
+            storageObj.pager.page -= 1; 
         else
-            currentPage += 1;
-
-        pagerInput.value = currentPage;
+            storageObj.pager.page += 1;
+        pagerInput.value = storageObj.pager.page+1;
         updateRegs = true;
     } else {
         let val = Number.parseInt(pagerInput.value);
         if (isNaN(val) || val < 1 || val > totalPages || val == (storageObj.pager.page)) {
-            pagerInput.value = storageObj.pager.page;
+            pagerInput.value = storageObj.pager.page+1;
         } else {
             pagerInput.value = val;
-            currentPage = val;
+            storageObj.pager.page = val-1;
             updateRegs = true;
         }
     }
-    if (updateRegs)
-        liLinks()
-
-   nextBtn.disabled = currentPage == totalPages? true : false;
-   prevBtn.disabled = currentPage == 1? true : false;
+    if (updateRegs) {
+        sessionStorage.setItem('users',JSON.stringify(storageObj));
+        liLinks();
+    }
+   nextBtn.disabled = storageObj.pager.page+1 == totalPages? true : false;
+   prevBtn.disabled = storageObj.pager.page+1 == 1? true : false;
 }
 </script>                     

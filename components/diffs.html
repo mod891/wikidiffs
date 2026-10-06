@@ -5,7 +5,7 @@
     z-index: 10;
 }
 .diff-header {
-    background-color: rgb(127, 234, 255); /**/
+    background-color: rgb(127, 234, 255);
     display: grid;
     grid-template-areas: 
     "A B C D E";
@@ -21,7 +21,7 @@
     margin-left: 3rem;
 }
 #prev-user { grid-area: B; }
-#user { 
+#user {
     grid-area: C;
     margin-left: 1rem;
 }
@@ -48,7 +48,6 @@
     position: absolute;
     top: 5px;
     right: 40px;
-    
 }
 .tl {
     display: flex;
@@ -68,6 +67,7 @@
     align-items: start;
 }
 .addel-content > div {
+    min-width: 0;
     margin-right:0.5rem;
     min-width:0;
 }
@@ -126,7 +126,6 @@
         margin-left: 0rem; 
         margin: 0.1rem 0 0.7rem 1rem;
     }
-
     #article-url {
         all:unset; 
         margin-left: 1rem;
@@ -223,7 +222,7 @@ async function init() {
 
 async function loadDiffs() {
     var articleUrl = getVal;
-    var data = null, ids=[];
+    var data = null, ids=[], badJSON = false;
     var pagerObj = {page:currentPage-1, perPage:perPage};
     dbquery = 'diffsFromUrl';
      try {
@@ -279,7 +278,7 @@ async function loadDiffs() {
         let notes = JSON.parse(localStorage.getItem('notes'));
         for (let d=0; d<data.length; d++) {
             currentDiff = data[d];
-            articleTitle = decodeURIComponent(currentDiff.articleUrl.split('/').at(-1).replaceAll('_',' '))
+            articleTitle = decodeURIComponent(currentDiff.articleUrl.split('/').at(-1).replaceAll('_',' '));
             articleUrl = currentDiff.articleUrl.split('&diff')[0];
             if (notes != null) {
                 if (notes.diffs.filter(i => i.id == currentDiff.id).length > 0)
@@ -319,38 +318,48 @@ async function loadDiffs() {
                     </div>
                 </div>
                 <div class="lines"></div>
-            </div>`
+            </div>`;
 
             fragment = document.createElement('template');
             fragment.innerHTML = diffHeader;
-            changes = JSON.parse(currentDiff.changes);
-            for (let i=0; i<changes.length; i++) {
-                change = changes[i];
-                lineno = `<div class="lineno">
-                            <div class="lineno-data">
-                                <label class="ml05r">linea <b>${change.lineno}</b></label>
-                            </div><div class="addel-content"></div>`
-                
-                fragment.content.querySelectorAll('.lines')[fragment.content.querySelectorAll('.lines').length-1].innerHTML += lineno
-                
-                for (let j=0; j<change.change.length; j++) {
-                    addels = change.change[j]
-                    addelDiv = fragment.content.querySelectorAll('.addel-content')[fragment.content.querySelectorAll('.addel-content').length-1]
-                    let collapsables = collapsableDiv();
+            try {
+                changes = JSON.parse(currentDiff.changes);
+            } catch (e) {
+                badJSON = true;
+                console.log('error en JSON de la diferencia',currentDiff.id,' del artículo ',currentDiff.articleUrl )
+            }
+            if (badJSON == false) {
+                for (let i=0; i<changes.length; i++) {
+                    change = changes[i];
+                    lineno = `<div class="lineno">
+                                <div class="lineno-data">
+                                    <label class="ml05r">linea <b>${change.lineno}</b></label>
+                                </div><div class="addel-content"></div>`;
+                    
+                    fragment.content.querySelectorAll('.lines')[fragment.content.querySelectorAll('.lines').length-1].innerHTML += lineno;
+                    
+                    for (let j=0; j<change.change.length; j++) {
+                        addels = change.change[j];
+                        addelDiv = fragment.content.querySelectorAll('.addel-content')[fragment.content.querySelectorAll('.addel-content').length-1];
+                        let collapsables = collapsableDiv();
 
-                    if (addelDiv.childNodes.length >= 2) {
-                        let last1 = addelDiv.childNodes[addelDiv.childNodes.length-1];
-                        let last2 = addelDiv.childNodes[addelDiv.childNodes.length-2];
-                        if ( last1.classList.contains('add') && last2.classList.contains('blank') ) 
-                            addelDiv.childNodes[addelDiv.childNodes.length-1].className = 'add blank';
-                        else if ( last1.classList.contains('add') && last1.classList.contains('blank') 
-                        && last2.classList.contains('del') && !last2.classList.contains('blank') )
-                            addelDiv.childNodes[addelDiv.childNodes.length-2].className = 'del blank';
+                        if (addelDiv.childNodes.length >= 2) {
+                            let last1 = addelDiv.childNodes[addelDiv.childNodes.length-1];
+                            let last2 = addelDiv.childNodes[addelDiv.childNodes.length-2];
+                            if ( last1.classList.contains('add') && last2.classList.contains('blank') ) 
+                                addelDiv.childNodes[addelDiv.childNodes.length-1].className = 'add blank';
+                            else if ( last1.classList.contains('add') && last1.classList.contains('blank') 
+                            && last2.classList.contains('del') && !last2.classList.contains('blank') )
+                                addelDiv.childNodes[addelDiv.childNodes.length-2].className = 'del blank';
+                        }
+                        collapsables.forEach(item => diffTexts.push(item));
                     }
-                    collapsables.forEach(item => diffTexts.push(item));
                 }
             }
-            document.getElementById('diffs-content').insertAdjacentHTML('beforeend',fragment.innerHTML)
+            else 
+                fragment.innerHTML += '<div>ERROR CARGANDO DIFF</div>';
+            
+            document.getElementById('diffs-content').insertAdjacentHTML('beforeend',fragment.innerHTML);
         }
         document.head.appendChild(script);
     } else {
@@ -417,12 +426,12 @@ function changeText(event,obj) {
     if (obj.textContent == '{menos}') {
         diffTexts.map( (it) =>  {
             if (it.id == div.id) 
-                div.children[0].innerHTML = it.shortText            
+                div.children[0].innerHTML = it.shortText;            
         });
     } else {
         diffTexts.map( (it) =>  {
             if (it.id == div.id) 
-                div.children[0].innerHTML = it.fullText
+                div.children[0].innerHTML = it.fullText;
         });
     }
 }
