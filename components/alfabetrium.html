@@ -93,7 +93,7 @@
         top:0;
         background-color: var(--bluez);
         width: 100%;
-    }   
+    }
 }
 </style>
 <div id="alfabetrium">
@@ -256,9 +256,11 @@ function li(obj) {
 }
 
 async function pager(evt) {
+    
     let div = evt.target.closest('.pager').parentElement;
     let btns = evt.target.closest('div').querySelectorAll('button');
     let prevBtn = btns[0], nextBtn = btns[1];
+    let input = div.querySelector('input');
     let char = div.id;
     let pos = char.charCodeAt(0)-65;
     if (char.length > 1 ) {
@@ -269,11 +271,11 @@ async function pager(evt) {
         else if (char == '1-9')
             pos = 28;
     }
-    let currentPage = Number.parseInt(div.querySelector('input').value);
+    let currentPage = Number.parseInt(input.value);
     let lastPage = Number.parseInt(div.querySelector('.totalPages').textContent);
     let sessionObj = JSON.parse(sessionStorage.getItem('alfabetrium'));
     let updateRegs = false;
-    
+
     if (sessionObj != null) {
         if (evt.type == 'click') {
             if (evt.target.classList.contains('prevPage')) {
@@ -283,13 +285,15 @@ async function pager(evt) {
                 currentPage += 1;
                 sessionObj.char[pos][char].pager.page += 1;
             }
-            div.querySelector('input').value = currentPage;
+            input.value = currentPage;
             updateRegs = true;
         } else {
-            let val = Number.parseInt(div.querySelector('input').value);
-            if (isNaN(val) || val < 1 || val > lastPage 
-            || val == (sessionObj.char[pos][char].pager.page+1)) {
-                div.querySelector('input').value = sessionObj.char[pos][char].pager.page+1;
+            await wait(1100);
+            let val = Number.parseInt(input.value);
+            if (val == (sessionObj.char[pos][char].pager.page+1) ||
+                isNaN(val) || val < 1 || val > lastPage ) {
+                input.value = sessionObj.char[pos][char].pager.page+1;
+                
             } else {
                 currentPage = val;
                 sessionObj.char[pos][char].pager.page = currentPage-1; 
@@ -306,11 +310,14 @@ async function pager(evt) {
                 sessionObj.char[pos][char].urls.push(urls[i]);
                 html = li(urls[i]);
                 ul.insertAdjacentHTML('beforeend',html);
-            }
+            } 
             sessionStorage.setItem('alfabetrium', JSON.stringify(sessionObj));
         }
     }
     nextBtn.disabled = currentPage == lastPage? true : false;
     prevBtn.disabled = currentPage == 1? true : false;
+}
+async function wait(ms) {
+    return new Promise(resolve => { setTimeout(resolve,ms)});
 }
 </script>

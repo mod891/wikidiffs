@@ -250,17 +250,6 @@ input:checked + .slider:before {
             </div>
             <div class="dflex mtb05">
                 <div class="w50 pl1">
-                    <b>Texto</b>
-                </div>
-                <div class="w50 jc-end">
-                    <label class="switch">
-                        <input id="switch-4" type="checkbox">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-            </div>
-            <div class="dflex mtb05">
-                <div class="w50 pl1">
                     <b>Fecha </b>
                 </div>
                 <div class="w50 jc-end">
@@ -269,7 +258,7 @@ input:checked + .slider:before {
                     <span class="slider"></span>
                     </label>
                 </div>
-            </div>
+            </div>            
             <div id="category-filter-div" class="dflex mtb05">
                 <div class="w50 pl1">
                     <b>Categoría</b>
@@ -277,6 +266,17 @@ input:checked + .slider:before {
                 <div class="w50 jc-end">
                     <label class="switch">
                         <input id="switch-3" type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="dflex mtb05">
+                <div class="w50 pl1">
+                    <b>Texto</b>
+                </div>
+                <div class="w50 jc-end">
+                    <label class="switch">
+                        <input id="switch-4" type="checkbox">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -295,6 +295,7 @@ var pagerInput = document.getElementById('currentPageInput');
 var currentPage = 0, perPage = 55, totalPages = 0;
 var btns = document.getElementById('pager').querySelectorAll('button');
 var prevBtn = btns[0], nextBtn = btns[1];
+var debounce = null;
 
 if (getVal.split('category:').length > 1) {
     category = getVal.split('category:')[1];
@@ -310,7 +311,10 @@ async function init() {
     var closeFiltersModal = document.getElementById('close-modal');
     var switchs = document.querySelectorAll('input[type="checkbox"]');
     var buttonsPager = document.querySelectorAll('button');
-    var inputPager =  document.getElementById('currentPageInput')
+    var inputPager =  document.getElementById('currentPageInput');
+
+    
+
     switchs.forEach(e => {
         e.addEventListener('click',() => {showHideInputFilter(e)});
     });
@@ -423,6 +427,8 @@ function liLinks() {
 }
 
 async function fetchUrls() {
+    // let char = document.URL.split('c=')[1];
+    // char = char.includes(':') ? char.split(':')[1] : char;
     var urls = [];
     if (getVal == 'discusion') 
         urls = await query('urlsStartsWith','discusion');
@@ -466,7 +472,7 @@ function showHideInputFilter(input) {
                     <input id="searchUrl" type="text" class="mr05 ml05 w70" placeholder="text">
                 </div>`;
 
-    } else if (id == "2") { // date
+    } else if (id == "2") { // date 
         elem = `<div id="filter-switch-2" class="bg-green2">
                     <label class="ml05 pl03">Inicio</label>
                     <input  id="begin" type="date" class="mr05 ml05" >
@@ -497,9 +503,20 @@ function showHideInputFilter(input) {
         inputs.forEach(elem => {
             if (elem.type == 'date' || elem.type == 'select-one')
                 elem.addEventListener('change',filterData);
-            else
-                elem.addEventListener('input',filterData);
-        })
+            else {
+                if (elem.id == 'searchText') {
+                    elem.addEventListener('input',async (e) => {
+                        clearTimeout(debounce);
+                        debounce = setTimeout(() => {
+                            filterData();
+                        }, 500);
+                    });
+                }
+                else 
+                    elem.addEventListener('input',filterData);
+            }
+        });
+
         if (rect.classList.contains('slide-down'))
             rect.classList.remove('slide-down');
         rect.classList.add('slide-up');
@@ -538,9 +555,11 @@ async function filterData(e) {
     if (searchUrlInput != null)
         if (searchUrlInput.value != '')
             applySearchUrlFilter = true;
-    if (searchTextInput != null)
+    if (searchTextInput != null) {
         if (searchTextInput.value != '')
             applySearchTextFilter = true;
+        searchTextInput.disabled = true;
+    }
     if (begin != null)
         if (begin.value != '' || end.value != '') {
             applyDateFilter = true;
@@ -571,14 +590,13 @@ async function filterData(e) {
         if (applyCategoryFilter)
             if ( !li.category.includes(categorySelect.value) ) 
                 inds[i] = -1;
-           
         if (applySearchTextFilter) {
             text = searchTextInput.value.toUpperCase();
             
             if (inds[i] != -1) {
                 if (urlDiffs.get(li.articleUrl) == null) {
-                    diffs = await query('diffsFromUrl',li.articleUrl,null);
-                    urlDiffs.set(li.articleUrl,diffs);
+                    adiffs = await query('diffsFromUrl',li.articleUrl,null);
+                    urlDiffs.set(li.articleUrl,adiffs);
                 }
                 diffs = urlDiffs.get(li.articleUrl);
                 ids = new Set();
@@ -628,10 +646,9 @@ async function filterData(e) {
                     else if (beginDate == "" && endDate != "")  // (-inf,end] 
                         if (date <= endDate) 
                             ids.add(li.dates[j].id); 
-                    else if (beginDate != "" && endDate != "")  // [begin,end]
+                    else if (beginDate != "" && endDate != "")  // [begin,end] 
                         if (date >= beginDate && date <= endDate)
                             ids.add(li.dates[j].id); 
-                    
                 }
                 if (ids.size > 0) {
                     if (urlIds.get(li.articleUrl) == null)
@@ -657,18 +674,23 @@ async function filterData(e) {
             }
         }
     }
-    else 
+    else
         filteredUrlData = urlData[key];
     title.innerText= filteredUrlData.length + titleText;
+    
+
+    if (searchTextInput != null)
+        if (searchTextInput.disabled == true)
+            searchTextInput.disabled = false;
+
     liLinks();
 
     let endT = performance.now();
+    console.log('filtrado en: ',(endT-iniT)/1000);
 }
 
 function pager(evt) {
 
-    let char = document.URL.split('c=')[1];
-    char = char.includes(':') ? char.split(':')[1] : char;
     let updateRegs = false;
 
     if (evt.type == 'click') {
@@ -680,17 +702,22 @@ function pager(evt) {
             storageObj.pager.page += 1;
         }
         pagerInput.value = currentPage;
-        updateRegs = true;
+        sessionStorage.setItem('listby',JSON.stringify(storageObj));
+        liLinks();
     } else {
-        let val = Number.parseInt(pagerInput.value);
-        if (isNaN(val) || val < 1 || val > totalPages || val == (storageObj.pager.page)) {
-            pagerInput.value = storageObj.pager.page;
-        } else {
-            pagerInput.value = val;
-            currentPage = val;
-            storageObj.pager.page = currentPage-1; 
-            updateRegs = true;
-        }
+        debounce = setTimeout(() => {
+            let val = Number.parseInt(pagerInput.value);
+            if (isNaN(val) || val < 1 || val > totalPages || val == (storageObj.pager.page+1)) {
+                pagerInput.value = storageObj.pager.page+1;
+            } else {
+                
+                pagerInput.value = val;
+                currentPage = val;
+                storageObj.pager.page = currentPage-1; 
+                sessionStorage.setItem('listby',JSON.stringify(storageObj));
+                liLinks();
+            }
+        },500);
     }
     if (updateRegs) {
         sessionStorage.setItem('listby',JSON.stringify(storageObj));

@@ -1,10 +1,11 @@
 var getVal = "";
-var idTimeout = null;
+var popInfo = null, debounce= null;
 var categories = null;
 var DBTYPE = "";
 var ww = null;
 var idbs = [];
-init()
+
+init();
 
 async function loadFragment(what) {
     what = what.replace('#','').replace(/\?.*/,'');
@@ -46,15 +47,6 @@ async function loadFragment(what) {
         }
     } else {
         console.log('ERR: choose wisely')
-    }
-}
-
-async function fetchSharedData() {
-    categories = JSON.parse(sessionStorage.getItem('categories'));
-    if (categories == null) {
-        let querydata = await query('categories');
-        categories = querydata.map(i => i.category);                
-        sessionStorage.setItem('categories',JSON.stringify(categories));
     }
 }
 
@@ -133,7 +125,7 @@ async function info(event,ms=5000,...args) { //  refactorizar
             url = event.target.parentNode.children[0].href.split('diff=')[1];
         data = await query('descriptionUrl',url);
         toast.innerText = data[0].description;
-
+        console.log('info',event,url)
         left = event.target.getBoundingClientRect().left-300 < 0?
             0: event.target.getBoundingClientRect().left-300;
         if (window.screen.availWidth<=1400 && 
@@ -169,14 +161,14 @@ async function info(event,ms=5000,...args) { //  refactorizar
     toast.style.opacity = 1
     toast.style.top = (top + window.scrollY)+'px';
     toast.style.left = (left + window.scrollX)+'px';
-    clearTimeout(idTimeout);
-    idTimeout = setTimeout(() => {
+    clearTimeout(popInfo);
+    popInfo = setTimeout(() => {
         toast.style.opacity = 0;
         toast.style.top = 0;
         toast.style.left = 0;
         toast.innerText = "";
         toast.classList.remove(defaultBg);
-        idTimeout = null;
+        popInfo = null;
     },ms);
 }
 
@@ -186,6 +178,15 @@ function freezeGUI(msg) {
         document.getElementById('overlay-msg').innerText = msg;
     } else
         overlay.hidden = true;
+}
+
+async function fetchSharedData() {
+    categories = JSON.parse(sessionStorage.getItem('categories'));
+    if (categories == null) {
+        let querydata = await query('categories');
+        categories = querydata.map(i => i.category);                
+        sessionStorage.setItem('categories',JSON.stringify(categories));
+    }
 }
 
 async function deleteData(local = true, session = true) {

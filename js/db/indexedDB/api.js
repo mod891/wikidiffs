@@ -1,5 +1,6 @@
 
 var db = null;
+var idsUrl = [];
 
 async function query(option,...args) {
     var  pager = null;
@@ -138,6 +139,9 @@ async function prevUsersIDB() {
 }
 
 async function descriptionUrlIDB(url) {
+    if (url.split('&').length > 1)
+        url = url.split('&')[0];
+    console.log('descriptionUrlIDB',url)
     var ts = db.transaction(['historycontribs'],'readonly');
     var hcStore = ts.objectStore('historycontribs');
     var index = Number.isNaN(Number(url))? hcStore.index('articleUrl') : hcStore.index('id');
@@ -152,19 +156,27 @@ async function descriptionUrlIDB(url) {
 }
 
 async function diffsQueriesIDB(filterBy, arg, pager=null) {
+
     var ts = db.transaction(['historycontribs','diffs'],'readonly');
     var hcStore = ts.objectStore('historycontribs');
     var diffsStore = ts.objectStore('diffs');
     var index = null;
     var request1Data, request2, hcData, dfData, ids = [], objs = [], totalDiffs = 0;
 
-    if (filterBy == 'diffsFromUrl')
+    if (filterBy.includes('diffsFromUrl')) {
         index = hcStore.index('articleUrl');
+        idsUrl = arg.split('&');
+        if (idsUrl.length > 1) {
+            pager = null;
+            arg = idsUrl[0];
+            idsUrl = idsUrl.filter(it => !it.includes('https'));
+            idsUrl = idsUrl.map(id => Number.parseInt(id));
+        } else
+            idsUrl = [];
+    }
     else if (filterBy == 'diffsFromUser')
         index = hcStore.index('user');
     else if (filterBy == 'diffsFromPreviousUser')
-        index = diffsStore.index('prevUser');
-    else if (filterBy == 'diffIncludeText')
         index = diffsStore.index('prevUser');
 
     return new Promise((resolve, reject) => {
@@ -226,6 +238,11 @@ function join(hcData, dfData) {
             changes: JSON.stringify(dfData[i].changes),
         });
     }
+    if (idsUrl.length > 0) {
+        for (let i=0; i<dfData.length; i++)
+            result[i].totalDiffs = idsUrl.length;
+        result = result.filter(it => idsUrl.includes(it.id));
+    }
     return result;
 }
 
@@ -256,7 +273,6 @@ async function urlsQueriesIDB(filterBy, arg, pager=null) {
     }
 
     return new Promise((resolve, reject) => {
-
         var vect1 = [], results = [], urlsMap = new Map();
         var range = null, request = null;
         

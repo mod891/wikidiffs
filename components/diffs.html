@@ -239,12 +239,8 @@ async function loadDiffs() {
             else
                 dbquery = 'diffsFromPreviousUser';
         }
-        ids = articleUrl.split('&');
-        if (ids.length > 1)
-            articleUrl = ids[0];
         data = await query(dbquery,articleUrl,pagerObj);
-        if (ids.length > 1) 
-            data = data.filter(obj => ids.includes(String(obj.id)));
+
     } catch (err) {
         console.log(`loadDiffs::data retrieving Error:`,err);
     }
@@ -464,7 +460,7 @@ function marker(event,elem) {
     }
 }
 
-function pager(evt) {
+async function pager(evt) {
     let updateRegs = false;
     if (evt.type == 'click') {
         if (evt.target.classList.contains('prevPage')) {
@@ -473,16 +469,23 @@ function pager(evt) {
             currentPage += 1;
         }
         inputs.forEach(i => i.value = currentPage);
-        updateRegs = true;
+        document.getElementById('diffs-content').innerHTML = "";
+        diffTexts = [];
+        loadDiffs();
     } else {
-        let val = Number.parseInt(evt.target.value);
-        if (isNaN(val) || val < 1 || val > totalPages || val == currentPage) {
-            inputs.forEach(i => i.value = currentPage);
-        } else {
-            inputs.forEach(i => i.value = val);
-            currentPage = val;
-            updateRegs = true;
-        }
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
+            let val = Number.parseInt(evt.target.value);
+            if (isNaN(val) || val < 1 || val > totalPages || val == currentPage) {
+                inputs.forEach(i => i.value = currentPage);
+            } else {
+                inputs.forEach(i => i.value = val);
+                currentPage = val;
+                document.getElementById('diffs-content').innerHTML = "";
+                diffTexts = [];
+                loadDiffs();
+            }
+        }, 500);
     }
     btns.forEach(btn => {
         if (btn.classList.contains('prevPage')) 
@@ -490,10 +493,5 @@ function pager(evt) {
         else
             btn.disabled = currentPage == totalPages? true : false;
     });
-    if (updateRegs) {
-        document.getElementById('diffs-content').innerHTML = "";
-        diffTexts = [];
-        loadDiffs();
-    }
 }
 </script>

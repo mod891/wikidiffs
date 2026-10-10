@@ -211,7 +211,7 @@ function filterData(e) {
     liLinks();  
 }
 
-function pager(evt) {
+async function pager(evt) {
     let updateRegs = false;
     if (evt.type == 'click') {
         if (evt.target.classList.contains('prevPage')) 
@@ -219,22 +219,28 @@ function pager(evt) {
         else
             storageObj.pager.page += 1;
         pagerInput.value = storageObj.pager.page+1;
-        updateRegs = true;
-    } else {
-        let val = Number.parseInt(pagerInput.value);
-        if (isNaN(val) || val < 1 || val > totalPages || val == (storageObj.pager.page)) {
-            pagerInput.value = storageObj.pager.page+1;
-        } else {
-            pagerInput.value = val;
-            storageObj.pager.page = val-1;
-            updateRegs = true;
-        }
-    }
-    if (updateRegs) {
         sessionStorage.setItem('users',JSON.stringify(storageObj));
         liLinks();
+    } else {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
+            let val = Number.parseInt(pagerInput.value);
+            if (isNaN(val) || val < 1 || val > totalPages || val == (storageObj.pager.page+1)) {
+                pagerInput.value = storageObj.pager.page+1;
+            } else {
+                pagerInput.value = val;
+                storageObj.pager.page = val-1;
+                sessionStorage.setItem('users',JSON.stringify(storageObj));
+                liLinks();
+            }
+            console.log(updateRegs)
+            if (updateRegs) {
+            sessionStorage.setItem('users',JSON.stringify(storageObj));
+            liLinks();
+            }
+        },500);
     }
-   nextBtn.disabled = storageObj.pager.page+1 == totalPages? true : false;
-   prevBtn.disabled = storageObj.pager.page+1 == 1? true : false;
+    nextBtn.disabled = storageObj.pager.page+1 == totalPages? true : false;
+    prevBtn.disabled = storageObj.pager.page+1 == 1? true : false;
 }
-</script>                     
+</script>
