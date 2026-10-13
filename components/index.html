@@ -56,14 +56,13 @@ legend {
             <h3 class="mt2 anchor">Esta web muestra diferencias hechas en Wikipedia por los criminales
                 que tienen hackeado mi teléfono y conexiones.
                 Se puede apreciar qué cambian, cuándo y en qué o quién se interesan.
-                
             </h3>
             <h3 class="mt2 anchor">
                 Hay ediciones legítimas, reediciones de la historia, muchos deshechos y a veces mensajes para otros usuarios.
             </h3>
             <h4 class="anchor">
                 En el
-                <a href="https://www.youtu.be.com/Y2df_LuUAX0" target="_blank">vídeo</a>
+                <a href="https://www.youtube.com/watch?v=Y2df_LuUAX0" target="_blank" rel="noreferrer">vídeo</a>
                 explico en detalle la motivación para hacer esta web con humor,
                 porque mejor reir que llorar ¿no?
             </h4>
@@ -71,8 +70,6 @@ legend {
             <h4 class="dflex justify-center mr3">
                 <label class="border"><i>Si ves a jesucristo que no para de bailar, ¡actualiza!</i></label>
             </h4>
-
-            <div id="video" class="video"></div>
         </div>
         <div class="mt2">
             <fieldset id="fieldset">
@@ -129,32 +126,9 @@ legend {
 </div>
                   
 <script>
-
 init();
-
 function init() {
-    loadVideo();
     var btn = document.getElementById('clearData');
     btn.addEventListener('click',deleteData);
-}
-
-function loadVideo() {
-    var divVideo = document.getElementById('video');
-    video = `
-        <iframe
-            class=""
-            src="https://www.youtube.com/embed/Y2df_LuUAX0
-            title="YouTube video player"
-            frameborder="0"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen
-            >
-        </iframe>`;
-
-    if (navigator.onLine) {
-        let element = document.createElement('template');
-        element.innerHTML = video;
-        divVideo.insertAdjacentHTML('beforeend',element.innerHTML);
-    }
 }
 </script>
