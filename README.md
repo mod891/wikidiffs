@@ -10,7 +10,7 @@ Yo expongo su rastro público de wikipedia de manera legal.
 ## Introducción
 
 La web puede usarse sin conexión, sólo necesita ser servidor web que la sirva al cliente.
-Al no tener backend los datos se cargar y guardan en el navegador.
+Al no tener backend los datos se cargan y guardan en el navegador.
 
 La web ordena por categorías, alfabéticamente las diferencias hechas en artículos de Wikipedia y los usuarios colaboradores de esos artículos. Hay una sección para guardar diferencias y tomar notas en el navegador si lo crees conveniente.
 
@@ -28,6 +28,7 @@ python3 -m http.server 8080
 ```
 En windows si no tienes python puedes descargar un servidor web estilo WAMP, apache, etc... y servir la web desde el directorio del servidor web instalado.
 
+En android instala termux desde una consola e instala python y git ```pkg install git python -y``` y igual que para linux.
 
 ## Creación de base de datos
 
