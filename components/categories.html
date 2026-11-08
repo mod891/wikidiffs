@@ -52,9 +52,11 @@
 init()
 
 async function init() {
+    freezeGUI('Cargando categorías...');
     if (categories == null) 
         await fetchSharedData();     
     loadCategories();
+    freezeGUI(false);
 }
 
 function loadCategories() {

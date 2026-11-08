@@ -20,7 +20,7 @@ li {
 }
 fieldset {
     padding: 0 3rem;
-    margin: 1rem;
+    margin: 0rem 1rem 1rem 1rem;
     position: relative;
 }
 legend {
@@ -34,11 +34,9 @@ legend {
     bottom: 5px;
     cursor:pointer;
 }
-.video {
-    display: flex;
-    width: auto;
-    height: auto;
-    justify-content: center;
+.img {
+    width: 200px;
+    height: 140px;
 }
 @media (max-width: 950px) and (orientation: landscape), (max-width: 630px) and (orientation:portrait) {
     .anchor {
@@ -49,31 +47,32 @@ legend {
 
 <div id="index">
     <div class="mainframe">
-        <div class="ml4">
-            <h1>¡Bienvenido a WikiDiffs!</h1>
+        <div class="ml2">
+            <h2>¡Bienvenido a WikiDiffs!</h2>
         </div>
         <div class="ml4">
-            <h3 class="mt2 anchor">Esta web muestra diferencias hechas en Wikipedia por los criminales
-                que tienen hackeado mi teléfono y conexiones.
+            <h4 class="mt2 anchor">Esta web muestra diferencias hechas en Wikipedia
+                por los criminales que tienen hackeado mi teléfono y conexiones.
                 Se puede apreciar qué cambian, cuándo y en qué o quién se interesan.
-            </h3>
-            <h3 class="mt2 anchor">
+            </h4>
+            <h4 class="anchor">
                 Hay ediciones legítimas, reediciones de la historia, muchos deshechos y a veces mensajes para otros usuarios.
-            </h3>
+            </h4>
             <h4 class="anchor">
                 En el
-                <a href="https://www.youtube.com/watch?v=Y2df_LuUAX0" target="_blank" rel="noreferrer">vídeo</a>
+                <a href="https://www.youtube.com/playlist?list=PLHLfhYbnUfaU" target="_blank" rel="noreferrer">vídeo</a>
                 explico en detalle la motivación para hacer esta web con humor,
                 porque mejor reir que llorar ¿no?
             </h4>
         
             <h4 class="dflex justify-center mr3">
-                <label class="border"><i>Si ves a jesucristo que no para de bailar, ¡actualiza!</i></label>
+                <div id="saved-diff">
+                </div>
             </h4>
         </div>
-        <div class="mt2">
+        <div class="">
             <fieldset id="fieldset">
-                <legend class=""><h3>FAQ</h3></legend>
+                <legend id='legend' class=""><h3>FAQ</h3></legend>
                 <ul>
                     <li>
                         <p class="anchor">
@@ -100,7 +99,15 @@ legend {
                     <li>
                         <p class="anchor">
                         Las <a href="#categories">categorías</a> y información del enlace
-                        <label class="bg-cyan info bold fixed-corner">?</label>
+                        <label id='lblIndex' class="bg-cyan info bold fixed-corner" onclick="freezeGUI(''),info(
+                            null,
+                            5000,
+                            {
+                                elem:'legend',
+                                text: `El 21/10/26 vulnerabilidades en PHP desconectaron Wikipedia y otras muchas webs para poder esconder rastros, o puede que no, porque, ¿quién verifica a la verdad?`,
+                                classes:['bg-red']  
+                            } 
+                        ),setTimeout(() => freezeGUI(false),5000)">?</label>
                         costó hacerlas con chatGPT, no seguía las instrucciones muchas veces.
                         </p>
                     </li>
@@ -112,7 +119,7 @@ legend {
                     </li>
                     <li>
                         <p class="anchor pb3">
-                        Pulsa el botón rojo para borrar la base de datos del navegador y notas guardas.
+                        Pulsa el botón rojo para borrar la base de datos del navegador y notas guardadas.
                         </p>
                     </li>
                 </ul>
@@ -128,7 +135,15 @@ legend {
 <script>
 init();
 function init() {
-    var btn = document.getElementById('clearData');
+    var btn = document.getElementById('clearData'), i = 0;
     btn.addEventListener('click',deleteData);
+    var notes = JSON.parse(localStorage.getItem('notes'));
+    var divImg = document.getElementById('saved-diff');
+    if ( notes != null) 
+        if (notes.diffs.length > 0) {
+            i = Math.trunc(3*Math.random())+1;
+            divImg.innerHTML = `<img class="img " src="resources/png/${i}.png"/>`;
+
+        }
 }
 </script>

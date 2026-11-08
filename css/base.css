@@ -35,6 +35,9 @@ li {
     background-color: rgb(99,190,0);
     font-weight: bold;
     margin: 0.1rem;
+    padding: 0.1rem;
+    white-space: nowrap;
+    border-radius: 15%;
 }
 .ico-extern-url {
     width: 30px;

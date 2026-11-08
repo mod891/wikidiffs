@@ -133,7 +133,8 @@
 
 <script>
 var perPage = 10;
-init()
+init();
+
 async function init() {
     sessionStorage.getItem('alfabetrium') == null? await fetchLiLinks() : await storageLiLinks()
     document.querySelectorAll('input').forEach(e => e.addEventListener('input',pager));
@@ -141,20 +142,20 @@ async function init() {
 }
 
 function storageLiLinks() {
-    freezeGUI('Cargando...');
-    obj = JSON.parse(sessionStorage.getItem('alfabetrium'))
+    freezeGUI('Cargando ...');
+    obj = JSON.parse(sessionStorage.getItem('alfabetrium'));
     let values = Object.values(obj.char);
     for (let i=0; i<values.length; i++) { 
         let char = Object.keys(values[i]);
-        div = document.getElementById(char)
-        a = div.childNodes[0]
-        ul = div.childNodes[1]
-        urls = Object.values(values[i][char].urls)
+        div = document.getElementById(char);
+        a = div.childNodes[0];
+        ul = div.childNodes[1];
+        urls = Object.values(values[i][char].urls);
         if (urls.length > 0)
-            a.href="#listby?c="+char
+            a.href="#listby?c="+char;
 
         for (let j=0; j<urls.length; j++) 
-            ul.insertAdjacentHTML('beforeend',li(urls[j]))
+            ul.insertAdjacentHTML('beforeend',li(urls[j]));
 
         if ((urls[0]?.totalUrls ?? 0) > perPage)
             addPager(ul,urls[0].totalUrls);
@@ -163,11 +164,11 @@ function storageLiLinks() {
 }
 
 async function fetchLiLinks() {
-    sessionStorageObj = { char : [] }
+    sessionStorageObj = { char : [] };
     let c = 65;
-    ini = performance.now()
+    ini = performance.now();
     for (let i=c; i<94; i++) { 
-        let char = String.fromCharCode(i)
+        let char = String.fromCharCode(i);
         freezeGUI(`Cargando ${char}...`);
         if (i == 91) {
             char = 'anexo';
@@ -181,39 +182,37 @@ async function fetchLiLinks() {
             char = '1-9';
             freezeGUI(`Cargando ${char}...`);
         }
-        charObj = { [char]: { urls:[], pager:{ page:0, perPage: perPage } } }
+        charObj = { [char]: { urls:[], pager:{ page:0, perPage: perPage } } };
 
         var urls = await query('urlsStartsWith',char,charObj[char].pager);
-
-        div = document.getElementById(char)
-        a = div.childNodes[0]
+        div = document.getElementById(char);
+        a = div.childNodes[0];
         if (urls.length > 0)
-            a.href="#listby?c="+char
-        ul = div.childNodes[1]
+            a.href="#listby?c="+char;
+        ul = div.childNodes[1];
 
         for (let j=0; j<urls.length; j++) {       
             html = li(urls[j]);
-            ul.insertAdjacentHTML('beforeend',html)
+            ul.insertAdjacentHTML('beforeend',html);
             charObj[char].urls.push(urls[j]);
         }
         if ((urls[0]?.totalUrls ?? 0) > perPage) 
             addPager(ul,urls[0].totalUrls);
-
         sessionStorageObj.char.push(charObj);
     }
-    end = performance.now()
-    console.log('tiempo de carga: ',(end-ini)/1000)
+    end = performance.now();
+    console.log('tiempo de carga: ',(end-ini)/1000);
     sessionStorage.setItem('alfabetrium', JSON.stringify(sessionStorageObj));
     freezeGUI(false);
 }
 
 function addPager(ul,total) {
-    var nPages = Number.parseInt((total/perPage));
+    var nPages = Number.parseInt((total/perPage)), html = '';
     if (!Number.isInteger(total/perPage))
         nPages++;
     let char = ul.closest('div').id;
     let currentPage=1;
-    var sessionObj = JSON.parse(sessionStorage.getItem('alfabetrium'))
+    var sessionObj = JSON.parse(sessionStorage.getItem('alfabetrium'));
 
     if (sessionObj != null) {
         let pos = char.charCodeAt(0)-65;
@@ -225,10 +224,9 @@ function addPager(ul,total) {
             else if (char == '1-9')
                 pos = 28;
         }
-        currentPage = sessionObj.char[pos][char].pager.page+1
+        currentPage = sessionObj.char[pos][char].pager.page+1;
     }
-
-    var html=`
+    html=`
     <div class="dflex pager mb1">
         <div class="dflex">
             <button class="prevPage"><label class="prevPage"> < </label></button>
@@ -237,13 +235,13 @@ function addPager(ul,total) {
             <label class="totalPages">${nPages} </label>
             <button class="nextPage"><label class="nextPage"> > </label></button>
         </div>
-    </div>`
-    ul.parentElement.insertAdjacentHTML('beforeend',html)
-    pager( {target: ul.nextElementSibling.querySelector('input')} );
+    </div>`;
+    ul.parentElement.insertAdjacentHTML('beforeend',html);
+    pager( {target: ul.nextElementSibling.querySelector('input'), noWait:true} );
 }
 
 function li(obj) {
-    text = decodeURIComponent(obj.articleUrl.split('/').at(-1)).replaceAll('_',' ').replace('Anexo:','')
+    text = decodeURIComponent(obj.articleUrl.split('/').at(-1)).replaceAll('_',' ').replace('Anexo:','');
     html = `
     <li class="d-mr1-5">
         <div class="link">
@@ -251,12 +249,11 @@ function li(obj) {
             <label title="nº de ediciones" class="n-editions">${obj.nedits}</label>
             <label class="bg-cyan bold info" onclick="info(event)">?</label>
         </div>
-    </li>`
+    </li>`;
     return html;
 }
 
 async function pager(evt) {
-    
     let div = evt.target.closest('.pager').parentElement;
     let btns = evt.target.closest('div').querySelectorAll('button');
     let prevBtn = btns[0], nextBtn = btns[1];
@@ -288,7 +285,8 @@ async function pager(evt) {
             input.value = currentPage;
             updateRegs = true;
         } else {
-            await wait(1100);
+            if (!evt.hasOwnProperty('noWait'))
+                await wait(1100);
             let val = Number.parseInt(input.value);
             if (val == (sessionObj.char[pos][char].pager.page+1) ||
                 isNaN(val) || val < 1 || val > lastPage ) {

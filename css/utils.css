@@ -5,6 +5,9 @@ h1 {
 .bold {
     font-weight: bold;
 }
+.bshadow {
+    box-shadow: 2px 2px 5px var(--black);
+}
 .hauto {
     height: auto;
 }
@@ -99,6 +102,9 @@ h1 {
 }
 .ml1 {
     margin-left: 1rem;
+}
+.ml2 {
+    margin-left: 2rem;
 }
 .ml3 {
     margin-left: 3rem;

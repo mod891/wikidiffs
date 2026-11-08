@@ -52,10 +52,6 @@ async function openDB() {
         db = opendb.result;
         if (version == 'lite')
             ww.postMessage({initDB:'full'});
-        else if (version == 'full') {
-            sessionStorage.clear();
-            
-        }
     }
     opendb.onerror = () => {
         console.log(opendb.error);
@@ -141,7 +137,6 @@ async function prevUsersIDB() {
 async function descriptionUrlIDB(url) {
     if (url.split('&').length > 1)
         url = url.split('&')[0];
-    console.log('descriptionUrlIDB',url)
     var ts = db.transaction(['historycontribs'],'readonly');
     var hcStore = ts.objectStore('historycontribs');
     var index = Number.isNaN(Number(url))? hcStore.index('articleUrl') : hcStore.index('id');

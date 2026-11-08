@@ -12,6 +12,7 @@
     width: 0;
     height: 0;
 }
+
 .slider {
     position: absolute;
     cursor: pointer;
@@ -41,7 +42,10 @@ input:checked + .slider:before {
     transform: translateX(25px);
 }
 /* END:SWITCH by CHATGPT */
-
+input {
+    text-align: center;
+    width: 100%;
+}
 #title {
     padding-left:10vw;
 }
@@ -49,9 +53,10 @@ input:checked + .slider:before {
 #filter-inputs {
     display: flex;
     flex-direction: row;
+
 }
 #close-modal {
-    cursor: all-scroll; 
+    cursor: pointer; 
     margin: 0rem 0.5rem 0rem 0rem;
     padding: 0.2rem 0.5rem 0rem 0rem;
 }
@@ -61,6 +66,8 @@ input:checked + .slider:before {
     padding: 0.2rem;
     margin-right: 0.5rem;
     display: flex;
+    box-shadow: 2px 2px 5px var(--black);
+
 }
 #links {
     display: grid;
@@ -74,6 +81,7 @@ input:checked + .slider:before {
     padding-top: 10px;
     width:50px;
     height:50px;
+    cursor: pointer;
 }
 .slide-up {
     transition: transform 0.5s ease;
@@ -229,18 +237,15 @@ input:checked + .slider:before {
     </div>
     </div>
     <div id="filters-modal" class="modal">
-        <div class="bg-bluez">
+        <div class="bg-bluez bshadow">
             <div id="" class="modal-header">
-               
                     <span class=" ml1 m05"><b>Filtrar</b></span>
-                
                     <span  id="close-modal" class="font20px"><b>x</b></span>
             </div>
             <div class="dflex mt05">
                 <div class="w50 pl1">
                     <b>Artículo</b>
                 </div>
-
                 <div class="w50 jc-end">
                     <label class="switch">
                         <input id="switch-1" type="checkbox">
@@ -285,27 +290,36 @@ input:checked + .slider:before {
     </div>
 </div>  
 <script>
-var urlData = null;
-var filteredUrlData = null;
+var urlData = null, filteredUrlData = null;
 var storageObj = null;
 var urlIds = new Map();
 var title = document.getElementById('title'), titleText = "";
-var categories = null, category = null;
+var categories = null, listby = null, char = '';
 var pagerInput = document.getElementById('currentPageInput');
 var currentPage = 0, perPage = 55, totalPages = 0;
 var btns = document.getElementById('pager').querySelectorAll('button');
 var prevBtn = btns[0], nextBtn = btns[1];
 var debounce = null;
-
+var categoryTitles = {
+    "politica":"política",
+    "deportes":"fútbol/deportes",
+    "religion":"religión",
+    "hechos_historicos":"hechos históricos",
+    "filosofia/ideas":"filosofía/ideas",
+    "musica/arte/literatura":"música/arte/literatura"
+};
 if (getVal.split('category:').length > 1) {
-    category = getVal.split('category:')[1];
-    document.getElementById('category-filter-div').remove()
-}
+    listby = { 'category': getVal.split('category:')[1] };
+    document.getElementById('category-filter-div').remove();
+} else 
+    listby = getVal;
+char = listby?.category != undefined? listby.category : listby;
+
 init();
 
 async function init() {
     freezeGUI('Cargando...');
-    var storage = false;
+    var storage = false, urls = [], id = '';
     var filtersIcon = document.getElementById('filter-icon');
     var filtersModal = document.getElementById('filters-modal');
     var closeFiltersModal = document.getElementById('close-modal');
@@ -313,8 +327,11 @@ async function init() {
     var buttonsPager = document.querySelectorAll('button');
     var inputPager =  document.getElementById('currentPageInput');
 
-    
-
+    categories = JSON.parse(sessionStorage.getItem('categories'));
+    if (categories == null) {
+        fetchSharedData();
+        categories = JSON.parse(sessionStorage.getItem('categories'));
+    }
     switchs.forEach(e => {
         e.addEventListener('click',() => {showHideInputFilter(e)});
     });
@@ -329,24 +346,68 @@ async function init() {
     });
     buttonsPager.forEach( e => e.addEventListener('click',pager));
     inputPager.addEventListener('input',pager);
-
-    storageObj = JSON.parse(sessionStorage.getItem('listby'))
+    storageObj = JSON.parse(sessionStorage.getItem('listby'));
     if (storageObj != null) {
-        currentPage = storageObj.pager.page+1;
-        for (let i=0; i<storageObj.char.length; i++) {
-            if (Object.keys(storageObj.char[i])[0] == getVal) {
-                storage = true;
-                urlData = storageObj.char[i];
+        if (storageObj[[char]] != undefined) {
+            storage = true;
+            urlData = storageObj[[char]];
+            currentPage = storageObj.pager.page+1;
+            if (storageObj.filters.actives.length > 0) {
+                for (let i=0; i<storageObj.filters.actives.length; i++) {
+                    id = storageObj.filters.actives[i];
+                    document.getElementById('switch-'+id).click();
+                    if (storageObj.filters[id].ids.length > 1) {
+                        if (storageObj.filters[id].ids[0].value.length != '')
+                            document.getElementById(storageObj.filters[id].ids[0].id).value = storageObj.filters[id].ids[0].value;
+                        if (storageObj.filters[id].ids[1].value.length != '')
+                            document.getElementById(storageObj.filters[id].ids[1].id).value = storageObj.filters[id].ids[1].value;
+                    }
+                    else 
+                        document.getElementById(storageObj.filters[id].ids[0].id).value = storageObj.filters[id].ids[0].value;
+                }
+                filterData();
             }
         }
     }
-    if (storage == false)
-        await fetchUrls();
-
-    categories = JSON.parse(sessionStorage.getItem('categories'));
-    if (categories == null) {
-        fetchSharedData();
-        categories = JSON.parse(sessionStorage.getItem('categories'));
+    if (storage == false) {
+        if (listby?.category != undefined)
+            urls = await query('urlsByCategory',listby.category);
+        else
+            urls = await query('urlsStartsWith',listby);
+        storageObj = {
+            [char]: urls ,
+            pager: { 
+                page:0,
+                perPage:perPage 
+            },
+            filters:{
+                1: { 
+                    ids: [
+                        { id:'searchUrl', value:'' }
+                    ],    
+                },
+                2: { 
+                    ids: [
+                        { id:'begin', value:'' },
+                        { id:'end', value:'' }
+                    ],
+                },
+                3: {
+                    ids: [
+                        { id: 'category', value:'' }
+                    ]
+                },
+                4: {
+                    ids: [
+                        { id: 'searchText', value: '' }
+                    ]
+                },
+                actives: [],
+            }
+        };
+        currentPage = storageObj.pager.page+1;
+        sessionStorage.setItem('listby',JSON.stringify(storageObj));
+        urlData = urls;
     }
     liLinks();
     freezeGUI(false);
@@ -354,35 +415,20 @@ async function init() {
 
 function liLinks() {
     var div = document.getElementById('listby-content');
-    var urls = [], text="", diff="";
-    if (category == null) {
-        urls = Object.values(urlData[getVal]);
-        titleText = `  que empiezan por ${getVal}`;
-        if (getVal == 'discusion')
+    var urls = [], text="", diff="", nedits=0, li = "";
+    if ( listby?.category == undefined ) {
+        titleText = `  que empiezan por ${listby}`;
+        if (listby == 'discusion')
             titleText = ' Discusiones';
-        else if (getVal == 'anexo') 
+        else if (listby == 'anexo') 
             titleText = ' Anexos';
     } else {
-        urls = Object.values(urlData[category]);
-        categoryTitle = category;
-        categoryTitles = {
-            "politica":"política",
-            "deportes":"fútbol/deportes",
-            "religion":"religión",
-            "hechos_historicos":"hechos históricos",
-            "filosofia/ideas":"filosofía/ideas",
-            "musica/arte/literatura":"música/arte/literatura"
-        }
-        if (Object.keys(categoryTitles).filter(c => c == categoryTitle).length > 0)
-            categoryTitle = categoryTitles[categoryTitle]
-      
+        categoryTitle = char;
+        categoryTitle = categoryTitles[categoryTitle] != undefined? categoryTitles[categoryTitle] : categoryTitle;
         titleText = ` páginas con categoría: ${categoryTitle}`;
     }
-    if (filteredUrlData != null) {
-        urls = Object.values(filteredUrlData);
-    }
+    urls = filteredUrlData != null ? filteredUrlData : urlData; 
     title.innerText = `${urls.length} ${titleText}`;
-
     pagerInput.value = currentPage;
     totalPages = Number.parseInt((urls.length/perPage));
     if (String(urls.length/perPage).includes('.'))
@@ -393,30 +439,35 @@ function liLinks() {
     ul.id = 'links';
     if (urls.length <= perPage)
         document.getElementById('pager').style.display = 'none';
-    else 
+    else
         document.getElementById('pager').style.display = 'flex';
 
     if (urls.length > 0) {
         let endFor = currentPage == totalPages? urls.length : storageObj.pager.page*perPage+perPage;
         for (let i=storageObj.pager.page*perPage; i<endFor; i++) {
             text = decodeURIComponent(urls[i].articleUrl.split('/').at(-1)).replaceAll('_',' ');
-            diff = `#diffs?diff=${urls[i].articleUrl}`
-            if (urls[i].articleUrlDiffs.length > 0)
+            diff = `#diffs?diff=${urls[i].articleUrl}`;
+            nedits = urls[i].nedits;
+            if (urls[i].articleUrlDiffs.length > 0) {
                 diff += '&'+urls[i].articleUrlDiffs.join('&');
-
-            var li = `<li 
-                        data-articleurl="${decodeURIComponent(urls[i].articleUrl.split('/').at(-1))}"
-                        data-text="${text}"
-                        data-neditions=${urls[i].nedits}
-                        data-category="${urls[i].category}" >
-                            <div class="link d-mr-2">
-                                <a id="${urls[i].articleUrl}" href="${diff}">${text}</a>
-                                <label class="n-editions">${urls[i].nedits}</label>
-                                <label class="bg-cyan info d-mr2 bold" onclick="info(event)">?</label>
-                            </div>
-                        </li>`;
+                if ( urls[i].articleUrlDiffs[urls[i].articleUrlDiffs.length-1].includes('search:'))
+                    nedits = urls[i].articleUrlDiffs.length-1;
+                else
+                    nedits = urls[i].articleUrlDiffs.length;
+            } 
+            li = `<li
+                    data-articleurl="${decodeURIComponent(urls[i].articleUrl.split('/').at(-1))}"
+                    data-text="${text}"
+                    data-neditions=${urls[i].nedits}
+                    data-category="${urls[i].category}" >
+                        <div class="link d-mr-2">
+                            <a id="${urls[i].articleUrl}" href="${diff}">${text}</a>
+                            <label class="n-editions">${nedits}</label>
+                            <label class="bg-cyan info d-mr2 bold" onclick="info(event)">?</label>
+                        </div>
+                    </li>`;
             ul.insertAdjacentHTML('beforeend',li);
-        } 
+        }
     }
     div.appendChild(document.createElement('div'))
     if (div.querySelector('ul') != null)
@@ -426,77 +477,44 @@ function liLinks() {
     prevBtn.disabled = currentPage == 1? true : false;
 }
 
-async function fetchUrls() {
-    // let char = document.URL.split('c=')[1];
-    // char = char.includes(':') ? char.split(':')[1] : char;
-    var urls = [];
-    if (getVal == 'discusion') 
-        urls = await query('urlsStartsWith','discusion');
-    else if (getVal == 'anexo')
-        urls = await query('urlsStartsWith','anexo');
-    else if (category != null) 
-        urls = await query('urlsByCategory',category);
-    else
-        urls = await query('urlsStartsWith',getVal);
-
-    storageObj = JSON.parse(sessionStorage.getItem('listby'));
-    var computed = category == null? getVal : category;
-    if (storageObj == null) { 
-        storageObj = { char:[ {[computed]: urls } ], pager: { page:0,perPage:perPage } };
-        currentPage = storageObj.pager.page+1;
-        sessionStorage.setItem('listby',JSON.stringify(storageObj));
-    }
-    else {
-        let ind = -1;
-        for (let i=0; i<storageObj.char.length; i++) 
-            if (Object.keys(storageObj.char[i]).includes(computed))
-                ind = i;
-        if (ind != -1)
-            storageObj.char[ind] = { [computed]: urls };
-            storageObj.char.push({ [computed]: urls });
-        sessionStorage.setItem('listby',JSON.stringify(storageObj));
-    }
-    urlData = { [computed]: urls };
-}
-
 function showHideInputFilter(input) {
-
+    var elem = '', textOption='', value='';
     var div = document.getElementById('filter-inputs');
     var id = input.id.split('-')[1];
     var rect = document.getElementById(`filter-${id}`);
     let key=Object.keys(urlData)[0];
 
-    if (id == "1") { // url
-        elem = `<div id="filter-switch-1" class="bg-cyan">
-                    <label class="ml05">Artículo:</label>
-                    <input id="searchUrl" type="text" class="mr05 ml05 w70" placeholder="text">
+    if (id == "1") {
+        elem = `<div id="filter-switch-1" class="bg-cyan ">
+                    <label class="ml05"><b>Artículo</b></label>
+                    <input id="searchUrl" type="text" class="mr05 ml05 w70" placeholder="text" value="">
                 </div>`;
 
-    } else if (id == "2") { // date 
-        elem = `<div id="filter-switch-2" class="bg-green2">
-                    <label class="ml05 pl03">Inicio</label>
-                    <input  id="begin" type="date" class="mr05 ml05" >
-                    <label class="">Fin</label>
-                    <input  id="end" type="date" class="mr05 ml05" >
+    } else if (id == "2") {
+        elem = `<div id="filter-switch-2" class="bg-yellow ">
+                        <label class="ml05 pl03"><b>Ini</b></label>
+                        <input  id="begin" type="date" class="mr05 ml05" value="">
+                        <label class=""><b>Fin</b></label>
+                        <input  id="end" type="date" class="mr05 ml05" value="">
                 </div>`;
                         
-    } else if (id == "3") { // category
-        elem = `<div id="filter-switch-3" class="bg-gold">
-                    <label class="">Categoría</label>
-                    <select id="category" class="w50 text-center" ><option>Seleccionar</option>`
+    } else if (id == "3") {
+        elem = `<div id="filter-switch-3" class="bg-red ">
+                    <label class="mr05"><b>Categoría</b></label>
+                    <select id="category" class="w70 text-center" ><option>Seleccionar</option>`
                 for (i in categories)
-                    if (urlData[key].some(obj => obj.category == categories[i]) )
-                        elem += `<option value="${categories[i]}">${categories[i]}</option>`;
+                    if (urlData.some(obj => obj.category == categories[i]) ) {
+                        textOption = categoryTitles[categories[i]] != undefined? categoryTitles[categories[i]]: categories[i];
+                        elem += `<option value="${categories[i]}">${textOption}</option>`;
+                    }
             elem += `</select></div>`;
-        
-    } else { // search text in diff
+    } else {
         elem = `
-        <div id="filter-switch-4" class="bg-yellow">
-            <label class="ml05">Texto:</label>
-            <input id="searchText" type="text" class="mr05 ml05 w70" placeholder="text">
+        <div id="filter-switch-4" class="bg-footer ">
+            <label class="ml05"><b>Texto</b></label>
+            <input id="searchText" type="text" class="mr05 ml05 w70" placeholder="text" value="">
         </div>`;
     }
-
     if (input.checked) {
         div.insertAdjacentHTML('beforeend',elem);
         let inputs = div.querySelector(`#filter-switch-${id}`).querySelectorAll('input,select');
@@ -508,15 +526,14 @@ function showHideInputFilter(input) {
                     elem.addEventListener('input',async (e) => {
                         clearTimeout(debounce);
                         debounce = setTimeout(() => {
-                            filterData();
-                        }, 500);
+                            filterData(e);
+                        }, 999);
                     });
                 }
-                else 
+                else
                     elem.addEventListener('input',filterData);
             }
         });
-
         if (rect.classList.contains('slide-down'))
             rect.classList.remove('slide-down');
         rect.classList.add('slide-up');
@@ -528,20 +545,22 @@ function showHideInputFilter(input) {
             if (elem.type == 'date' || elem.type == 'select-one')
                 elem.removeEventListener('change',filterData);
             else
-                elem.removeEventListener('input',filterData);// add timeout? 1s wait end write
-        })
+                elem.removeEventListener('input',filterData);
+        });
+        storageObj.filters[id].ids.forEach( val => {
+            val.value = '';
+        });
         document.getElementById(`filter-switch-${id}`).remove();
         filterData();
     }
 }
 
 async function filterData(e) {
-    let iniT = performance.now();
     filteredUrlData = [];
     var urlDiffs = new Map(), urlIds = new Map(), ids = new Set(); 
     var inds = [], aux = null, diffs = null, obj=null, badJSON = false;
-    var beginDate= "", endDate = "", date = null, d,m,y;
-    var text = "", articleUrl = "", key=Object.keys(urlData)[0];
+    var beginDate= "", endDate = "", lidates = [], date = null, d,m,y;
+    var text = "", textUrl = "", articleUrl = ""; 
     var searchUrlInput = document.getElementById('searchUrl');
     var searchTextInput = document.getElementById('searchText');
     var begin = document.getElementById('begin');
@@ -551,40 +570,80 @@ async function filterData(e) {
     var applySearchTextFilter = false;
     var applyDateFilter = false;
     var applyCategoryFilter = false;
+    var filtersState = storageObj.filters;
 
-    if (searchUrlInput != null)
-        if (searchUrlInput.value != '')
+    if (searchUrlInput != null) {
+        if (searchUrlInput.value != '') {
             applySearchUrlFilter = true;
-    if (searchTextInput != null) {
-        if (searchTextInput.value != '')
-            applySearchTextFilter = true;
-        searchTextInput.disabled = true;
+            storageObj.filters['1'].ids[0].value = searchUrlInput.value;
+            storageObj.filters.actives.push('1');
+        }
+        else {
+            storageObj.filters['1'].ids[0].value = '';
+            storageObj.filters.actives = storageObj.filters.actives.filter( active => active != '1');
+        }
     }
-    if (begin != null)
+    if (begin != null) {
         if (begin.value != '' || end.value != '') {
             applyDateFilter = true;
+            storageObj.filters.actives.push('2');
             if (begin.value != "") {
                     [y,m,d] = begin.value.split('-');
                     beginDate = new Date(y, (Number.parseInt(m)-1), d);
+                    storageObj.filters['2'].ids[0].value = begin.value;
             }
+            else
+                storageObj.filters['2'].ids[0].value = '';
+
             if (end.value != "") {
                 [y,m,d] = end.value.split('-');
                 endDate = new Date(y, (Number.parseInt(m)-1), d);
+                storageObj.filters['2'].ids[1].value = end.value;
             }
+            else
+                storageObj.filters['2'].ids[1].value = '';
         }
-    if (categorySelect != null)
-        if (categorySelect.value != 'Seleccionar')
-            applyCategoryFilter = true;
-    for (let i=0; i<urlData[key].length; i++) {
-        inds.push(i);
-        urlData[key][i].articleUrlDiffs = [];
+        else {
+            storageObj.filters.actives = storageObj.filters.actives.filter( active => active != '2');
+        }
     }
+    if (categorySelect != null) {
+        if (categorySelect.value != 'Seleccionar') {
+            applyCategoryFilter = true;
+            storageObj.filters.actives.push('3');
+            storageObj.filters['3'].ids[0].value = categorySelect.value;
+        } 
+        else {
+            storageObj.filters['3'].ids[0].value = '';
+            storageObj.filters.actives = storageObj.filters.actives.filter( active => active != '3');
+        }
+    }
+    if (searchTextInput != null) {
+        if (searchTextInput.value != '') {
+            applySearchTextFilter = true;
+            storageObj.filters.actives.push('4');
+            storageObj.filters['4'].ids[0].value = searchTextInput.value;
+        }
+        else {
+            storageObj.filters['4'].ids[0].value = '';
+            storageObj.filters.actives = storageObj.filters.actives.filter( active => active != '4');
+        }
+        searchTextInput.disabled = true;
+    }
+    storageObj.filters.actives = [...new Set(storageObj.filters.actives)];
+    sessionStorage.setItem('listby',JSON.stringify(storageObj));
 
-    for (let i=0; i<urlData[key].length;i++) {
-        let li = urlData[key][i];
+    for (let i=0; i<urlData.length; i++) {
+        inds.push(i);
+        urlData[i].articleUrlDiffs = [];
+    }
+    for (let i=0; i<urlData.length;i++) {
+        let li = urlData[i];
+        ids = new Set();
+
         if (applySearchUrlFilter) {
-            text = decodeURIComponent(li.articleUrl.split('/').at(-1)).replaceAll('_',' ');
-            if (!text.toUpperCase().includes(searchUrlInput.value.toUpperCase()) )
+            textUrl = decodeURIComponent(li.articleUrl.split('/').at(-1)).replaceAll('_',' ');
+            if (!textUrl.toUpperCase().includes(searchUrlInput.value.toUpperCase()) )
                 inds[i] = -1;
         }
         if (applyCategoryFilter)
@@ -592,14 +651,12 @@ async function filterData(e) {
                 inds[i] = -1;
         if (applySearchTextFilter) {
             text = searchTextInput.value.toUpperCase();
-            
             if (inds[i] != -1) {
                 if (urlDiffs.get(li.articleUrl) == null) {
                     adiffs = await query('diffsFromUrl',li.articleUrl,null);
                     urlDiffs.set(li.articleUrl,adiffs);
                 }
                 diffs = urlDiffs.get(li.articleUrl);
-                ids = new Set();
                 for (let j=0; j<diffs.length; j++) {
                     badJSON = false;
                     try {
@@ -615,84 +672,75 @@ async function filterData(e) {
                                 if ( (typeof(aux) =='object' && Object.keys(aux).length > 0 ) || (typeof(aux) =='string' && aux.length > 0 ) ) {
                                     aux = typeof(aux) =='object'? aux.text.toUpperCase() : aux.toUpperCase();
                                     if (aux.replaceAll('$$+BEGIN+$$','').replaceAll('$$+END+$$','').includes(text))
-                                        ids.add(diffs[j].id);
+                                        ids.add(diffs[j].id+"");
                                 }
                                 aux = obj[k].change[l].del;
                                 if ( (typeof(aux) =='object' && Object.keys(aux).length > 0 ) || (typeof(aux) =='string' && aux.length > 0 ) ) {
                                     aux = typeof(aux) =='object'? aux.text.toUpperCase() : aux.toUpperCase();
                                     if (aux.replaceAll('$$-BEGIN-$$','').replaceAll('$$-END-$$','').includes(text))
-                                        ids.add(diffs[j].id);
+                                        ids.add(diffs[j].id+"");
                                 }
                             }
                         }
                     }
                 }
-                if (ids.size > 0) {
+                if (ids.size > 0)
                     urlIds.set(li.articleUrl,Array.from(ids));
-                }
                 else
                     inds[i] = -1;
             }
         }
         if (applyDateFilter) {
             if (inds[i] != -1) {
-                ids = new Set();
-                for (let j=0; j<li.dates.length; j++) {
-                    [d,m,y] = li.dates[j].date.split('/');
+                lidates = li.dates;
+                if (urlIds.get(li.articleUrl) != undefined) 
+                    lidates = li.dates.filter(obj => urlIds.get(li.articleUrl).includes(obj.id));
+                for (let j=0; j<lidates.length; j++) {
+                    [d,m,y] = lidates[j].date.split('/');
                     date = new Date(y,(Number.parseInt(m)-1),d);
-                    if (beginDate != "" && endDate == "")       // [begin,inf)
-                        if (date >= beginDate)
-                            ids.add(li.dates[j].id); 
+                    if (beginDate != "" && endDate == "")  // [begin,inf)
+                        date >= beginDate? ids.add(lidates[j].id) : ids.delete(lidates[j].id);
                     else if (beginDate == "" && endDate != "")  // (-inf,end] 
-                        if (date <= endDate) 
-                            ids.add(li.dates[j].id); 
+                        date <= endDate? ids.add(lidates[j].id) : ids.delete(lidates[j].id);
                     else if (beginDate != "" && endDate != "")  // [begin,end] 
-                        if (date >= beginDate && date <= endDate)
-                            ids.add(li.dates[j].id); 
+                        date >= beginDate && date <= endDate? ids.add(lidates[j].id) : ids.delete(lidates[j].id);
                 }
-                if (ids.size > 0) {
-                    if (urlIds.get(li.articleUrl) == null)
-                        urlIds.set(li.articleUrl,Array.from(ids));
-                    else 
-                        urlIds.get(li.articleUrl) = urlIds.get(li.articleUrl)
-                            .filter(id => Array.from(ids).includes(id));
-                }
+                if (ids.size > 0) 
+                    urlIds.set(li.articleUrl,Array.from(ids));
                 else
                     inds[i] = -1;
             }
         }
     }
     if (inds.includes(-1)) {
-        storageObj.pager.page = 0;
-        currentPage = 1;
-        for (let i=0; i<urlData[key].length; i++) {
+        for (let i=0; i<urlData.length; i++) {
             if (inds[i] != -1) {
-                if (urlIds.get(urlData[key][i].articleUrl) != null) {
-                    urlData[key][i].articleUrlDiffs = urlIds.get(urlData[key][i].articleUrl);
+                if (urlIds.get(urlData[i].articleUrl) != null) {
+                    urlData[i].articleUrlDiffs = urlIds.get(urlData[i].articleUrl);
+                    if (applySearchTextFilter)
+                        urlData[i].articleUrlDiffs.push('search:'+text);
                 }
-                filteredUrlData.push(urlData[key][i]);
+                filteredUrlData.push(urlData[i]);
             }
         }
     }
     else
-        filteredUrlData = urlData[key];
+        filteredUrlData = urlData;
+
+    if (e != undefined) {
+        storageObj.pager.page = 0;
+        currentPage = 1;
+        sessionStorage.setItem('listby',JSON.stringify(storageObj));
+    }
     title.innerText= filteredUrlData.length + titleText;
-    
 
     if (searchTextInput != null)
         if (searchTextInput.disabled == true)
             searchTextInput.disabled = false;
-
     liLinks();
-
-    let endT = performance.now();
-    console.log('filtrado en: ',(endT-iniT)/1000);
 }
 
 function pager(evt) {
-
-    let updateRegs = false;
-
     if (evt.type == 'click') {
         if (evt.target.classList.contains('prevPage')) {
             currentPage -= 1; 
@@ -717,11 +765,7 @@ function pager(evt) {
                 sessionStorage.setItem('listby',JSON.stringify(storageObj));
                 liLinks();
             }
-        },500);
-    }
-    if (updateRegs) {
-        sessionStorage.setItem('listby',JSON.stringify(storageObj));
-        liLinks();
+        },700);
     }
    nextBtn.disabled = currentPage == totalPages? true : false;
    prevBtn.disabled = currentPage == 1? true : false;

@@ -24,16 +24,16 @@
         transform: translateX(-30%);
     }
     .diffselect {
-        width: 30%
+        width: 400px;
     }
-@media (max-width: 630px) and (orientation:portrait) {
+@media (max-width: 400px) and (orientation:portrait) {
     .diffselect {
-        width: 100%
+        width: 350px;
     }
 }
-@media (max-width: 950px) and (orientation: landscape) {
+@media (max-width: 320px) and (orientation:portrait) {
     .diffselect {
-        width: 50%
+        width: 290px;
     }
 }
 </style>
@@ -257,6 +257,7 @@
                 selectNotes.remove(selectNotes.selectedIndex);
                 selectNotes.selectedIndex = 0;
                 textarea.value = '';
+                removeNoteBtn.classList.add('disable');
             }
         } else {
             selectNotes.innerHTML='<option value="nodata">No hay notas guardadas</option>';

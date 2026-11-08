@@ -39,6 +39,7 @@
 }
 .filter input {    
     text-align: center;
+    box-shadow: 2px 2px 3px var(--black);
 }
 
 
@@ -61,6 +62,7 @@
         grid-column: 2;
         margin-bottom: 1rem;
         transform: translateY(-10px);
+
     }
     .link {
         margin-right: 1rem;
@@ -97,32 +99,42 @@
             </div>
         </div>
     </div>
-</div>  
-<script>
+</div>
 
+<script>
 var storageObj = null, userData = null;
-var filteredUserData = null;
+var filteredUserData = null, debounce = null;
 var nUsers = document.getElementById('title')
 var pagerInput = document.querySelector('.currentPageInput');
+var searchInput = document.getElementById('search');
 var currentPage = 1, perPage = 50, totalPages = 0;
 var btns = document.querySelectorAll('button');
 var prevBtn = btns[0], nextBtn = btns[1];
 
-init()
-async function init() {
-    document.getElementById('search').addEventListener('input',filterData)
+init();
 
-    var storage = false;
-    storageObj = JSON.parse(sessionStorage.getItem('users'))
-    if (storageObj != null) {
-        userData = storageObj['users'];
-        storage = true;
-    }
-    if (storage == false)
-        await fetchUsers();
-    liLinks();
+async function init() {
+    freezeGUI('Cargando usuarios...');
+    document.getElementById('search').addEventListener('input', async (e) => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => { filterData(e); }, 300);
+    });
     btns.forEach( btn => btn.addEventListener('click',pager));
     pagerInput.addEventListener('input',pager);
+    storageObj = JSON.parse(sessionStorage.getItem('users'));
+    if (storageObj != null) {
+        userData = storageObj['users'];
+        if (storageObj.filter.length > 0) 
+            searchInput.value = storageObj.filter;
+        if (storageObj.pager.page > 0) 
+            pagerInput.value = storageObj.pager.page+1;
+        if (storageObj.filter.length + storageObj.pager.page > 0)   
+            filterData();
+    } else {
+        await fetchUsers();
+    }
+    liLinks();
+    freezeGUI(false);
 }
 
 function liLinks() {
@@ -167,7 +179,6 @@ function liLinks() {
 }
 
 async function fetchUsers() {
-    freezeGUI('Cargando usuarios...');
     var rawData = await query('prevUsers');
     var users = [];
     for (i in rawData) {
@@ -179,10 +190,16 @@ async function fetchUsers() {
             nedits:rawData[i].nedits
         });
     }
-    storageObj = { users, pager: { page:0, perPage:perPage } };
+    storageObj = { 
+        users,
+        pager: {
+            page:0,
+            perPage:perPage
+        },
+        filter: ''
+    };
     sessionStorage.setItem('users',JSON.stringify(storageObj));
     userData = users;
-    freezeGUI(false);   
 }
 
 function filterData(e) {
@@ -190,32 +207,36 @@ function filterData(e) {
     let inds = [];
     let nVisibles = userData.length;
     var applySearchFilter = false;
-    var searchInput = document.getElementById('search');
-  
-    if (searchInput != null)
-        if (searchInput.value != '')
-            applySearchFilter = true;
 
+    if (searchInput != null) {
+        if (searchInput.value != '') {
+            applySearchFilter = true;
+            storageObj.filter = searchInput.value;
+        }
+        else
+            storageObj.filter = '';
+    }
     userData.forEach( (obj,i) => {
-        if (applySearchFilter)
+        if (applySearchFilter) {
             if (!obj.user.toUpperCase().includes(searchInput.value.toUpperCase()) ) 
                 inds[i] = -1;
+        }
     });
-
     for (let i=0; i<userData.length; i++)
         if (inds[i] != -1)
             filteredUserData.push(userData[i]);
-    if (inds.includes(-1)) 
-        storageObj.pager.page = 1;
+    if (e != undefined)
+        storageObj.pager.page = 0;
+
     nUsers.innerText= filteredUserData.length + " usuarios";
-    liLinks();  
+    sessionStorage.setItem('users',JSON.stringify(storageObj));
+    liLinks();
 }
 
 async function pager(evt) {
-    let updateRegs = false;
     if (evt.type == 'click') {
         if (evt.target.classList.contains('prevPage')) 
-            storageObj.pager.page -= 1; 
+            storageObj.pager.page -= 1;
         else
             storageObj.pager.page += 1;
         pagerInput.value = storageObj.pager.page+1;
@@ -233,12 +254,7 @@ async function pager(evt) {
                 sessionStorage.setItem('users',JSON.stringify(storageObj));
                 liLinks();
             }
-            console.log(updateRegs)
-            if (updateRegs) {
-            sessionStorage.setItem('users',JSON.stringify(storageObj));
-            liLinks();
-            }
-        },500);
+        },999);
     }
     nextBtn.disabled = storageObj.pager.page+1 == totalPages? true : false;
     prevBtn.disabled = storageObj.pager.page+1 == 1? true : false;

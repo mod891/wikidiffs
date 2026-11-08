@@ -63,7 +63,8 @@
         display:inline;
         width:40px;
         height:40px;
-        transition: transform 1s ease;           
+        transition: transform 1s ease;
+        cursor: pointer;
     }
     .rota {
         transform: rotate(-90deg)
@@ -85,8 +86,8 @@
             <img id="menu-icon" class="icon" src="resources/svg/vrt.svg" alt="" srcset="">
         </div>
         <div id="items" class="menu-links ">
-            <a href="#index"><div class="item"><b>Inicio</b></div></a>
-            <a href="#diffs?var=random" onclick="route()"><div class="item"><b>Página aleatoria</b></div></a>
+            <a href="#index" onclick="reroute()"><div class="item"><b>Inicio</b></div></a>
+            <a href="#diffs?var=random" onclick="reroute()"><div class="item"><b>Página aleatoria</b></div></a>
             <a href="#alfabetrium"><div class="item"><b>Alfabéticamente</b></div></a>
             <a href="#categories"><div class="item"><b>Categorías</b></div></a>
             <a href="#users"><div class="item"><b>Usuarios</b></div></a>
@@ -96,24 +97,28 @@
 </div>
 
 <script>
-    var img = document.getElementById('menu-icon');
-    var items = document.getElementById('items');
-    items.classList.add('display-none') // #ISSUE1
-    img.addEventListener('click', () => {
-        img.classList.toggle('rota')
-        items.classList.toggle('openmenu')
-        if (items.classList.contains('display-none')) 
-            items.classList.remove('display-none')
-    })
-    items.addEventListener('transitionend',() => {
-        if (!items.classList.contains('openmenu')) { 
-            items.classList.add('display-none')
-        }
-    })
-    menuLinks = document.querySelectorAll('a');
-    menuLinks.forEach(element => {
-        element.addEventListener('click', () => {
-            img.click()
-        })   
-    });
+var img = document.getElementById('menu-icon');
+var items = document.getElementById('items');
+items.classList.add('display-none');
+img.addEventListener('click', () => {
+    img.classList.toggle('rota')
+    items.classList.toggle('openmenu')
+    if (items.classList.contains('display-none')) 
+        items.classList.remove('display-none')
+});
+items.addEventListener('transitionend',() => {
+    if (!items.classList.contains('openmenu')) { 
+        items.classList.add('display-none');
+    }
+});
+menuLinks = document.querySelectorAll('.menu-links a');
+menuLinks.forEach(element => {
+    element.addEventListener('click', () => {
+        img.click();
+    });   
+});
+function reroute() {
+    if (window.location.hash.includes('random') || window.location.hash.includes('index'))
+        route();
+}
 </script>

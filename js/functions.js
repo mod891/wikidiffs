@@ -2,8 +2,7 @@ var getVal = "";
 var popInfo = null, debounce= null;
 var categories = null;
 var DBTYPE = "";
-var ww = null;
-var idbs = [];
+var ww = null, idbs = [];
 
 init();
 
@@ -23,19 +22,19 @@ async function loadFragment(what) {
             var css = template.content.querySelector('style');
             var js = template.content.querySelectorAll('script');
             js = js.length > 1? js[1] : js[0]; // issue live server svg support
-            var fragment = template.content.querySelector(`#${what}`)
+            var fragment = template.content.querySelector(`#${what}`);
             if (['menu','footer'].includes(what))
                 document.getElementById(`${what}-fragment`).innerHTML = fragment.outerHTML;
             else
                 document.getElementById(`app`).innerHTML = fragment.outerHTML;
             
-            oldCssJs = document.querySelectorAll('[id$="-css"],[id$="-js"]')
+            oldCssJs = document.querySelectorAll('[id$="-css"],[id$="-js"]');
             if (oldCssJs.length > 2) {
                 for (let i=2; i<oldCssJs.length; i++)
-                    oldCssJs[i].remove()
+                    oldCssJs[i].remove();
             }
             if (css) {
-                css.id = `${what}-css`
+                css.id = `${what}-css`;
                 document.head.appendChild(css);
             }
             if (js) {
@@ -45,9 +44,8 @@ async function loadFragment(what) {
                 document.head.appendChild(script);
             }
         }
-    } else {
-        console.log('ERR: choose wisely')
-    }
+    } else
+        console.log('ERR: choose wisely');
 }
 
 async function init() {
@@ -62,8 +60,8 @@ async function init() {
             let wwdata = e.data;
             if (wwdata.hasOwnProperty('fn')) {
                 if (wwdata.hasOwnProperty('arg')) 
-                    window[wwdata.fn](wwdata.arg);               
-                else if (wwdata.hasOwnProperty('args'))
+                    window[wwdata.fn](wwdata.arg);
+                else if (wwdata.hasOwnProperty('args')) 
                     window[wwdata.fn](wwdata.args[0],wwdata.args[1],wwdata.args[2]); 
             }
             if (wwdata.hasOwnProperty('var'))
@@ -95,7 +93,7 @@ async function init() {
 }
 
 async function route() {
-    getVal = ""
+    getVal = "";
     if (window.location.hash.length == 0)
         window.location.hash = "#index";
     if ( idbs.length > 0 && db == null)
@@ -125,9 +123,8 @@ async function info(event,ms=5000,...args) { //  refactorizar
             url = event.target.parentNode.children[0].href.split('diff=')[1];
         data = await query('descriptionUrl',url);
         toast.innerText = data[0].description;
-        console.log('info',event,url)
         left = event.target.getBoundingClientRect().left-300 < 0?
-            0: event.target.getBoundingClientRect().left-300;
+            0 : event.target.getBoundingClientRect().left-300;
         if (window.screen.availWidth<=1400 && 
             !(page.startsWith('#listby') || page.startsWith('#alfabetrium')) )
             left = window.screen.availWidth/2 - toast.offsetWidth/2;
@@ -158,7 +155,7 @@ async function info(event,ms=5000,...args) { //  refactorizar
     if (toast.classList.contains(defaultBg))
         toast.classList.remove(defaultBg);
     toast.classList.add(defaultBg);
-    toast.style.opacity = 1
+    toast.style.opacity = 1;
     toast.style.top = (top + window.scrollY)+'px';
     toast.style.left = (left + window.scrollX)+'px';
     clearTimeout(popInfo);
@@ -189,39 +186,41 @@ async function fetchSharedData() {
     }
 }
 
-async function deleteData(local = true, session = true) {
-    info(null,6000,{elem:"scrollBtn",text: `Borrando datos...`,classes:['bg-red'] } );
+async function deleteData(deleteDB = true, deleteLocal = true, deleteSession = true) {
     var dbs = null, ndbs = 0, cont = 0;
-    if (local)
+    if (deleteLocal)
         localStorage.clear();
-    if (session)
+    if (deleteSession)
         sessionStorage.clear();
-    if (db != null)
-        await db.close();
-    dbs = await indexedDB.databases();
-    ndbs = dbs.length;
-    if (dbs.filter(idb => idb.name.includes('lite')) ) {
-        var req1 = indexedDB.deleteDatabase('wikidiffs_lite');
-        req1.onsuccess = () => {
-            console.log('indexedDB::wikidiffs_lite borrada');
-            cont++;
-            if (cont == ndbs) {
-                alert('Datos borrados')
-                window.location.href = 'about:blank'
+    if (deleteDB) {
+        info(null, 3000, {elem:"scrollBtn",text: `Borrando datos...`,classes:['bg-red'] } );
+        if (db != null)
+            await db.close();
+        dbs = await indexedDB.databases();
+        ndbs = dbs.length;
+        if (dbs.filter(idb => idb.name.includes('lite')) ) {
+            var req1 = indexedDB.deleteDatabase('wikidiffs_lite');
+            req1.onsuccess = () => {
+                console.log('indexedDB::wikidiffs_lite borrada');
+                cont++;
+                if (cont == ndbs) {
+                    alert('Datos borrados');
+                    window.location.href = 'about:blank';
+                }
             }
+            req1.onerror = () => console.log('error al borrar indexedDB::wikidiffs_lite');
         }
-        req1.onerror = () => console.log('error al borrar indexedDB::wikidiffs_lite');
-    }
-    if (dbs.filter(idb => idb.name.includes('full')) ) {
-        var req2 = indexedDB.deleteDatabase('wikidiffs_full');
-        req2.onsuccess = () => {
-            console.log('indexedDB::wikidiffs_full borrada');
-            cont++;
-            if (cont == ndbs) {
-                alert('Datos borrados')
-                window.location.href = 'about:blank'
+        if (dbs.filter(idb => idb.name.includes('full')) ) {
+            var req2 = indexedDB.deleteDatabase('wikidiffs_full');
+            req2.onsuccess = () => {
+                console.log('indexedDB::wikidiffs_full borrada');
+                cont++;
+                if (cont == ndbs) {
+                    alert('Datos borrados');
+                    window.location.href = 'about:blank';
+                }
             }
+            req2.onerror = () => console.log('error al borrar indexedDB::wikidiffs_full');
         }
-        req2.onerror = () => console.log('error al borrar indexedDB::wikidiffs_full');
     }
 }

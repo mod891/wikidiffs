@@ -1,6 +1,4 @@
 /* Web Worker */
-const DEBUG = false;
-
 onmessage = async function(e) {
     const message = e.data;
     if (typeof(message) == "object") {
@@ -13,13 +11,7 @@ onmessage = async function(e) {
 }
 
 async function initDB(version) {
-    console.time('initDB');
-
-    if (DEBUG)
-        postMessage({log:`webworker.js::initDB ${version}`});
-
     var openDBrequest = indexedDB.open(`wikidiffs_${version}`,1);
-
     openDBrequest.onupgradeneeded = (e) => {
         postMessage({
             fn: 'info',
@@ -83,6 +75,7 @@ async function initDB(version) {
                         }
                     }
                     await transactionOnComplete(tsWrite);
+                    progress = progress > 100? 100 : progress;
                     postMessage({
                         fn:'info',
                         args: [
@@ -95,9 +88,6 @@ async function initDB(version) {
                             } 
                         ]
                     });
-                    if (DEBUG)
-                        postMessage({log:`historycontribs.json::transactionOnComplete ${i}, progreso: ${progress}%`});
-
                 }
                 tsRead = db.transaction("diffs", "readonly");
                 store = tsRead.objectStore("diffs");
@@ -120,7 +110,7 @@ async function initDB(version) {
                             tsWrite = db.transaction("diffs", "readwrite");
                             store = tsWrite.objectStore("diffs");
 
-                            for (let j = i; j< Math.min(i+chunkSize, json.length); j++) {
+                            for (let j = i; j < Math.min(i+chunkSize, json.length); j++) {
                                 try {
                                     store.put(json[j]);
                                 } catch (e) {
@@ -128,6 +118,7 @@ async function initDB(version) {
                                 }
                             }
                             await transactionOnComplete(tsWrite);
+                            progress = progress > 100? 100 : progress;
                             postMessage({
                                 fn:'info',
                                 args: [
@@ -140,18 +131,13 @@ async function initDB(version) {
                                     } 
                                 ]
                             });
-                            if (DEBUG)
-                                postMessage({log:`diffs.json::transactionOnComplete ${i}`});
                         }
-
                         postMessage({ fn: 'openDB', arg:[] });
-                        if (DEBUG)
-                            postMessage({log:`openDB: ${version}`});
                         postMessage({
                             fn:'info',
                             args: [
                                 null,
-                                6000,
+                                4000,
                                 {
                                     elem:"scrollBtn",
                                     text: `Se ha cargado la base de datos en el navegador`,
@@ -159,7 +145,9 @@ async function initDB(version) {
                                 } 
                             ]
                         });
-                        console.timeEnd('initDB');
+                        postMessage({ fn: 'openDB', arg:[] });
+                        if (version == 'full') 
+                            postMessage({ fn: 'deleteData', args:[false,false,true] });
                     }
                 }
             }

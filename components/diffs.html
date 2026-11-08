@@ -55,7 +55,6 @@
 .lineno {
     margin-top: 0.5rem;
     padding: 0.1rem 0rem 0.2rem 0.2rem;
-    border: solid 1px rgb(242, 242, 242);
     display:inherit;
 }
 .lineno-data {
@@ -156,7 +155,6 @@
     }
     .lineno {    
         padding: 0.1rem 0rem 0.2rem 0rem;
-        border: solid 1px rgb(242, 242, 242);
     }
     .addel-content {
         display: grid;
@@ -203,7 +201,7 @@
 
 <script>
 var idCont = 0;
-var diffTexts = [];
+var diffTexts = [], changes = {};
 var dbquery = "";
 var currentPage = 1, perPage = 10, totalPages = 0;
 var inputs = [], btns = [];
@@ -211,9 +209,12 @@ var delimiters = {
     'del':['$$-BEGIN-$$','$$-END-$$'],
     'add':['$$+BEGIN+$$','$$+END+$$']
 };
+var noLoads = new Map([
+    [130164381,'No se va a cargar 1.6MB de JSON'],
+    [130164410,'No se va a cargar 2.4MB de JSON']
+]);
 
-init();
-
+init();  
 async function init() {
     freezeGUI('Cargando página...');
     await loadDiffs();
@@ -224,14 +225,16 @@ async function loadDiffs() {
     var articleUrl = getVal;
     var data = null, ids=[], badJSON = false;
     var pagerObj = {page:currentPage-1, perPage:perPage};
-    dbquery = 'diffsFromUrl';
+    var fragment = null, diffHeader = "", dbquery = 'diffsFromUrl';
+    var notes = JSON.parse(localStorage.getItem('notes')), svgMarker = "marker.svg";
+
      try {
         if (articleUrl == "random") {
             articleUrl = (await query('randUrl'))[0].articleUrl;
             getVal = articleUrl;
         }
-        else if (articleUrl.match(/^[0-9]{9}$/) != null) 
-            dbquery = 'diffFromId';    
+        else if (articleUrl.match(/^[0-9]{9}$/) != null)
+            dbquery = 'diffFromId';
         else if (articleUrl.split('user::').length > 1) {
             articleUrl = articleUrl.split('user::')[1];
             if (articleUrl.match('90.167.*') != null)
@@ -269,9 +272,6 @@ async function loadDiffs() {
             document.querySelectorAll('.pager').forEach(e => e.classList.remove('dnone') );
         }
 
-        var fragment = null;
-        let svgMarker = "marker.svg";
-        let notes = JSON.parse(localStorage.getItem('notes'));
         for (let d=0; d<data.length; d++) {
             currentDiff = data[d];
             articleTitle = decodeURIComponent(currentDiff.articleUrl.split('/').at(-1).replaceAll('_',' '));
@@ -319,10 +319,12 @@ async function loadDiffs() {
             fragment = document.createElement('template');
             fragment.innerHTML = diffHeader;
             try {
+                if (Array.from(noLoads.keys()).includes(currentDiff.id))
+                    throw new Error(noLoads.get(currentDiff.id));
                 changes = JSON.parse(currentDiff.changes);
             } catch (e) {
                 badJSON = true;
-                console.log('error en JSON de la diferencia',currentDiff.id,' del artículo ',currentDiff.articleUrl )
+                console.log('error en JSON de la diferencia',currentDiff.id,' del artículo ',currentDiff.articleUrl, e.message );
             }
             if (badJSON == false) {
                 for (let i=0; i<changes.length; i++) {
@@ -331,9 +333,8 @@ async function loadDiffs() {
                                 <div class="lineno-data">
                                     <label class="ml05r">linea <b>${change.lineno}</b></label>
                                 </div><div class="addel-content"></div>`;
-                    
                     fragment.content.querySelectorAll('.lines')[fragment.content.querySelectorAll('.lines').length-1].innerHTML += lineno;
-                    
+                            
                     for (let j=0; j<change.change.length; j++) {
                         addels = change.change[j];
                         addelDiv = fragment.content.querySelectorAll('.addel-content')[fragment.content.querySelectorAll('.addel-content').length-1];
@@ -352,12 +353,12 @@ async function loadDiffs() {
                     }
                 }
             }
-            else 
+            else {
                 fragment.innerHTML += '<div>ERROR CARGANDO DIFF</div>';
-            
+                badJSON = false;
+            }
             document.getElementById('diffs-content').insertAdjacentHTML('beforeend',fragment.innerHTML);
         }
-        document.head.appendChild(script);
     } else {
         document.getElementById('diffs-content').innerHTML = '<center><h3>Error, no se han cargado datos</h3></center>';
     }
@@ -370,7 +371,7 @@ function collapsableDiv() {
     var keys = Object.keys(addels);
 
     for (i in keys) {
-        let len = 300, text = '';
+        let len = 300, text = '', searched = '';
         if (Object.keys(addels[keys[i]]).length > 0) {
             let obj = { ...objStruct};
             idCont++;
@@ -380,17 +381,29 @@ function collapsableDiv() {
             cass = text.includes(delimiters[keys[i]][0]) ? keys[i]+' blank' : keys[i];
             text = escapeBeginEnd(text, keys[i]);
 
+            if (getVal.split('search:').length > 1) {
+                    searched = decodeURIComponent(getVal.split('search:')[1]);
+                    if ( text.toUpperCase().includes((searched.toUpperCase() ) ) )
+                        text = escapeSearchedText(text,searched);
+            }
             if (text.length > len) {
                 if ( cass.includes('blank') ) {
                     let cls = keys[i] == 'add'?  'wadd' : 'wdel';
                     posIni = text.lastIndexOf( `<b class=${cls}>`, len );
                     posEnd = text.lastIndexOf( '</b>', len );
-                    if (posEnd < posIni) 
+                    if (posEnd < posIni)
                         len = text.indexOf( '</b>', len ) + '</b>'.length;
+
+                    if (searched.length > 0) {
+                        posIni = text.lastIndexOf( '<b class="bg-marker">', len );
+                        posEnd = text.lastIndexOf( '</b>', len );
+                        if (posEnd < posIni) 
+                            len = text.indexOf( '</b>', len ) + '</b>'.length;
+                    }
                 }
                 obj.shortText = text.substr(0, len) + "... <a href='#' onClick='changeText(event,this)'><b>{más}</b></a>";
                 obj.fullText = text+" <a href='#' onClick='changeText(event,this)'><b>{menos}</b></a>";
-            } 
+            }
             else {
                 obj.shortText = text;
                 obj.fullText = null;
@@ -414,6 +427,26 @@ function escapeBeginEnd(str,addel) {
      return str
          .replaceAll(delimiters[addel][0], `<b class=${cls}>`)
          .replaceAll(delimiters[addel][1], `</b>`);
+}
+
+function escapeSearchedText(str,searched) {
+    let positions = [], pos = 0, ini=0, buff = '';
+    do {
+        pos = str.toUpperCase().indexOf(searched.toUpperCase(),pos);
+        if (pos != -1) {
+            positions.push({ini:pos, end:pos+searched.length});
+            pos += searched.length;
+        }
+    } while (pos != -1);
+    for (position of positions) {
+        buff += str.substr(ini,position.ini);
+        buff += '<b class="bg-marker">';
+        buff += str.substr(position.ini,searched.length);
+        buff += '</b>';
+        ini = buff.length;
+    }
+    buff += str.substr(positions[positions.length-1].end, str.length);
+    return buff;
 }
 
 function changeText(event,obj) {
